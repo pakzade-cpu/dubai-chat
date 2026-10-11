@@ -33,8 +33,11 @@ app.post("/chat", async (req, res) => {
     }),
   });
 
-  const data = await r.json();
-  if (!r.ok) return res.status(502).json({ error: "Model request failed" });
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) {
+    const detail = data.error?.message || data.error || "Model request failed";
+    return res.status(502).json({ error: String(detail) });
+  }
   const text = data.choices?.[0]?.message?.content || "";
   res.json({ text });
 });
