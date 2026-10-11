@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Dubai" />
+  <title>Dubai</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0; background: #0e1a24; color: #f4f1ea; }
+    header { padding: 16px 20px; font-weight: 700; letter-spacing: .04em; }
+    main { max-width: 720px; margin: 0 auto; padding: 0 16px 96px; }
+    .msg { white-space: pre-wrap; padding: 12px 14px; border-radius: 14px; margin: 10px 0; }
+    .user { background: #1f6f5b; margin-left: 18%; }
+    .bot { background: #182833; margin-right: 18%; }
+    form { position: fixed; left: 0; right: 0; bottom: 0; display: flex; gap: 8px; padding: 12px; background: #0e1a24; }
+    input { flex: 1; border: 0; border-radius: 12px; padding: 14px; font-size: 16px; }
+    button { border: 0; border-radius: 12px; padding: 0 16px; background: #d4a017; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <header>Dubai</header>
+  <main id="log"></main>
+  <form id="f">
+    <input id="q" placeholder="Ask Dubai" autocomplete="off" />
+    <button>Send</button>
+  </form>
+  <script>
+    const log = document.getElementById("log");
+    const history = [];
+    function add(cls, text) {
+      const d = document.createElement("div");
+      d.className = "msg " + cls;
+      d.textContent = text;
+      log.appendChild(d);
+      window.scrollTo(0, document.body.scrollHeight);
+    }
+    document.getElementById("f").onsubmit = async (e) => {
+      e.preventDefault();
+      const text = document.getElementById("q").value.trim();
+      if (!text) return;
+      document.getElementById("q").value = "";
+      history.push({ role: "user", content: text });
+      add("user", text);
+      add("bot", "…");
+      const pending = log.lastChild;
+      const r = await fetch("/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: history }),
+      });
+      const data = await r.json();
+      const reply = data.text || data.error || "No reply";
+      pending.textContent = reply;
+      if (data.text) history.push({ role: "assistant", content: reply });
+    };
+  </script>
+</body>
+</html>
