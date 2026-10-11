@@ -6,47 +6,61 @@
   <title>Dubai</title>
   <style>
     * { box-sizing: border-box; }
-    body { margin: 0; font-family: system-ui, sans-serif; background: #07141c; color: #f6f1e7; }
-    header { padding: 12px 16px 8px; background: #0c1c27; border-bottom: 1px solid #24404f; }
-    .top { display: grid; grid-template-columns: 1fr auto 1fr; gap: 12px; align-items: center; max-width: 980px; margin: 0 auto; }
-    .card { height: 92px; border-radius: 12px; border: 1px solid #35586a; background: #132833; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 12px; color: #d7c39a; padding: 8px; }
-    .flag { width: 92px; height: 56px; display: grid; grid-template-columns: 23px 1fr; border-radius: 4px; overflow: hidden; margin: 0 auto; }
-    .flag i { display: block; height: 18.66px; }
-    .red { background: #ef3340; grid-row: 1 / 4; }
-    .green { background: #009739; } .white { background: #fff; } .black { background: #000; }
-    h1 { text-align: center; font-size: 13px; letter-spacing: .12em; margin: 8px 0 0; }
-    .note { text-align: center; color: #9fb0ba; font-size: 12px; margin: 4px 0 0; }
-    main { max-width: 760px; margin: 0 auto; padding: 12px 16px 150px; }
-    .msg { white-space: pre-wrap; padding: 12px 14px; border-radius: 16px; margin: 10px 0; line-height: 1.45; }
-    .user { background: #1f6f5b; margin-left: 12%; } .bot { background: #132833; margin-right: 8%; }
-    form { position: fixed; left: 0; right: 0; bottom: 0; background: #07141cf2; border-top: 1px solid #24404f; padding: 10px 12px 14px; }
-    .wrap { max-width: 760px; margin: 0 auto; position: relative; }
-    #menu { display: none; position: absolute; left: 0; right: 72px; bottom: 58px; background: #102430; border: 1px solid #35586a; border-radius: 12px; max-height: 240px; overflow: auto; }
-    #menu button { display: block; width: 100%; text-align: left; background: transparent; color: #f6f1e7; border: 0; border-radius: 0; padding: 10px 12px; font-weight: 500; }
-    #menu button small { display: block; color: #9fb0ba; }
+    body { margin: 0; font-family: "Segoe UI", system-ui, sans-serif; background: #f4f0e8; color: #17232b; }
+    header { background: #0e1c27; color: #f6f1e7; padding: 18px 20px 16px; }
+    .bar { max-width: 920px; margin: 0 auto; display: flex; gap: 16px; align-items: center; }
+    .flag { width: 54px; height: 34px; display: grid; grid-template-columns: 14px 1fr; border-radius: 3px; overflow: hidden; flex: none; }
+    .flag b { background: #ef3340; grid-row: 1 / 4; }
+    .flag i { display: block; height: 11.33px; }
+    .g { background: #009739; } .w { background: #fff; } .k { background: #111; }
+    h1 { margin: 0; font-size: 22px; letter-spacing: .14em; }
+    header p { margin: 4px 0 0; color: #c9d5dc; font-size: 14px; }
+    main { max-width: 920px; margin: 0 auto; padding: 18px 16px 150px; }
+    .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .card { background: white; border-radius: 14px; padding: 14px; border: 1px solid #e4dccb; }
+    .card strong { display: block; margin-bottom: 4px; }
+    .card span { color: #52616b; font-size: 14px; }
+    h2 { font-size: 15px; margin: 18px 0 8px; }
+    .services { display: flex; flex-wrap: wrap; gap: 8px; }
+    .services button, #menu button { border: 1px solid #d9d0c0; background: white; border-radius: 999px; padding: 8px 12px; cursor: pointer; }
+    #log { margin-top: 14px; }
+    .msg { white-space: pre-wrap; padding: 12px 14px; border-radius: 16px; margin: 10px 0; line-height: 1.5; }
+    .user { background: #0e6b57; color: white; margin-left: 18%; }
+    .bot { background: white; border: 1px solid #e4dccb; margin-right: 8%; }
+    form { position: fixed; left: 0; right: 0; bottom: 0; background: #fffdf8; border-top: 1px solid #e4dccb; padding: 10px 12px 14px; }
+    .wrap { max-width: 920px; margin: 0 auto; position: relative; }
+    #menu { display: none; position: absolute; left: 0; right: 78px; bottom: 54px; background: white; border: 1px solid #e4dccb; border-radius: 12px; padding: 8px; max-height: 220px; overflow: auto; }
     .row { display: flex; gap: 8px; }
-    input { flex: 1; border: 0; border-radius: 12px; padding: 14px; font-size: 16px; }
-    .send { border: 0; border-radius: 12px; padding: 0 16px; background: #d4a017; font-weight: 700; }
+    input { flex: 1; border: 1px solid #d9d0c0; border-radius: 12px; padding: 14px; font-size: 16px; }
+    .send { border: 0; border-radius: 12px; background: #b8860b; color: white; font-weight: 700; padding: 0 16px; }
+    @media (max-width: 700px) { .cards { grid-template-columns: 1fr; } .user { margin-left: 8%; } }
   </style>
 </head>
 <body>
   <header>
-    <div class="top">
-      <div class="card">Dubai<br>past and present</div>
+    <div class="bar">
+      <div class="flag" aria-label="UAE flag"><b></b><i class="g"></i><i class="w"></i><i class="k"></i></div>
       <div>
-        <div class="flag" aria-label="Flag of the United Arab Emirates"><b class="red"></b><i class="green"></i><i class="white"></i><i class="black"></i></div>
         <h1>DUBAI</h1>
+        <p>A plain-language guide for visitors and residents. Not a government website.</p>
       </div>
-      <div class="card">Al Maktoum<br>public record</div>
     </div>
-    <p class="note">Independent assistant. Not a government website. Type / to choose a public service.</p>
   </header>
-  <main id="log"></main>
+  <main>
+    <section class="cards">
+      <div class="card"><strong>Arriving</strong><span>Dubai is one emirate in the UAE. Abu Dhabi is the federal capital. Rules for entry sit with federal and Dubai authorities, not with this chat.</span></div>
+      <div class="card"><strong>Daily life</strong><span>Power and water, roads, health, police, and phones are run by named authorities. Use the buttons to see who does what.</span></div>
+      <div class="card"><strong>Getting help</strong><span>This assistant explains public information. Accounts, payments, visas, and bookings stay on the official site.</span></div>
+    </section>
+    <h2>Public services</h2>
+    <div class="services" id="services"></div>
+    <div id="log"></div>
+  </main>
   <form id="f">
     <div class="wrap">
       <div id="menu"></div>
       <div class="row">
-        <input id="q" placeholder="Ask Dubai, or type /" autocomplete="off" />
+        <input id="q" placeholder="Ask about Dubai, or type /" autocomplete="off" />
         <button class="send">Send</button>
       </div>
     </div>
@@ -54,41 +68,50 @@
   <script>
     const sectors = [
       ["DEWA", "https://www.dewa.gov.ae", "Electricity and water"],
-      ["RTA", "https://www.rta.ae", "Roads and transport"],
-      ["Dubai Municipality", "https://www.dm.gov.ae", "Municipality"],
+      ["RTA", "https://www.rta.ae", "Roads, metro, taxis, Salik"],
+      ["Dubai Municipality", "https://www.dm.gov.ae", "City services"],
       ["Dubai Police", "https://www.dubaipolice.gov.ae", "Police"],
       ["DHA", "https://www.dha.gov.ae", "Health"],
-      ["GDRFA Dubai", "https://www.gdrfad.gov.ae", "Residency"],
-      ["Economy and Tourism", "https://www.dubaidet.gov.ae", "Economy and tourism"],
+      ["GDRFA", "https://www.gdrfad.gov.ae", "Residence"],
+      ["Economy and Tourism", "https://www.dubaidet.gov.ae", "Visit and business"],
       ["Dubai Courts", "https://www.dc.gov.ae", "Courts"],
-      ["Land Department", "https://www.dubailand.gov.ae", "Land and property"],
+      ["Land Department", "https://www.dubailand.gov.ae", "Property"],
       ["Emirates", "https://www.emirates.com", "Airline"],
       ["flydubai", "https://www.flydubai.com", "Airline"],
       ["Dubai Airports", "https://www.dubaiairports.ae", "Airports"],
-      ["e& Etisalat", "https://www.etisalat.ae", "Telecom"],
-      ["Du", "https://www.du.ae", "Telecom"],
-      ["Dubai Government", "https://www.dubai.ae", "Government portal"]
+      ["e&", "https://www.etisalat.ae", "Phone and internet"],
+      ["du", "https://www.du.ae", "Phone and internet"],
+      ["Dubai.ae", "https://www.dubai.ae", "Government portal"]
     ];
     const log = document.getElementById("log"), q = document.getElementById("q"), menu = document.getElementById("menu");
     const history = [];
     function add(cls, text) {
       const d = document.createElement("div");
-      d.className = "msg " + cls; d.textContent = text; log.appendChild(d);
-      window.scrollTo(0, document.body.scrollHeight); return d;
+      d.className = "msg " + cls; d.textContent = text; log.appendChild(d); return d;
     }
-    function show(filter) {
+    function ask(name, url, about) {
+      q.value = "Explain " + name + " for someone new to Dubai. What does it do (" + about + "), what can a visitor do on the public website, and what must be done only on the official site " + url + "? Keep it practical and do not refuse the explanation.";
+      q.focus();
+    }
+    const box = document.getElementById("services");
+    for (const s of sectors) {
+      const b = document.createElement("button");
+      b.type = "button"; b.textContent = s[0];
+      b.onclick = () => ask(s[0], s[1], s[2]);
+      box.appendChild(b);
+    }
+    q.oninput = () => {
+      if (!q.value.startsWith("/")) { menu.style.display = "none"; return; }
+      const f = q.value.slice(1).toLowerCase();
       menu.innerHTML = "";
-      const rows = sectors.filter(s => s[0].toLowerCase().includes(filter));
-      menu.style.display = rows.length ? "block" : "none";
-      for (const s of rows) {
+      menu.style.display = "block";
+      for (const s of sectors.filter(x => x[0].toLowerCase().includes(f))) {
         const b = document.createElement("button");
-        b.type = "button";
-        b.innerHTML = s[0] + "<small>" + s[2] + "</small>";
-        b.onclick = () => { q.value = "I need help with " + s[0] + ". Use public information from " + s[1] + " and say this is not an official login. "; menu.style.display = "none"; q.focus(); };
+        b.type = "button"; b.textContent = s[0] + " — " + s[2];
+        b.onclick = () => { menu.style.display = "none"; ask(s[0], s[1], s[2]); };
         menu.appendChild(b);
       }
-    }
-    q.oninput = () => q.value.startsWith("/") ? show(q.value.slice(1).toLowerCase()) : menu.style.display = "none";
+    };
     document.getElementById("f").onsubmit = async (e) => {
       e.preventDefault();
       const text = q.value.trim();
@@ -99,9 +122,8 @@
       const pending = add("bot", "…");
       const r = await fetch("/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ messages: history, search: true }) });
       const data = await r.json();
-      const reply = data.text || data.error || "No reply";
-      pending.textContent = reply;
-      if (data.text) history.push({ role: "assistant", content: reply });
+      pending.textContent = data.text || data.error || "No reply";
+      if (data.text) history.push({ role: "assistant", content: data.text });
     };
   </script>
 </body>
