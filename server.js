@@ -12,8 +12,7 @@ Answer the question first, in plain language, then give the useful detail.
 If they name a service, explain what it does, who it is for, the usual public steps, and the official website. Do not refuse a general explanation.
 You cannot log in, pay, book, or change an account. Mention that only if they ask you to do one of those things.
 Do not invent fees, laws, dates, or phone numbers. If a rule changes often, say to confirm it on the official page.
-Keep a short, direct tone. No lecture. No "as an AI" line.
-
+Keep a short, direct tone. No lecture. No "as an AI" line.`;
 
 app.post("/chat", async (req, res) => {
   const key = process.env.XAI_API_KEY;
