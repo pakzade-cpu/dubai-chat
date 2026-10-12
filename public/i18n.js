@@ -22,9 +22,11 @@ const I18N = {
     offline: "The assistant is temporarily unavailable. Please try again in a moment.",
     reach: "Could not reach the assistant. Try again.",
     lang: "Language",
+
     voice: "Voice",
     listening: "Listening…",
     noVoice: "Voice is not available in this browser. Try Chrome or Safari on this page.",
+
     map: "Map",
     here: "My location",
     locating: "Finding you…",
@@ -34,6 +36,12 @@ const I18N = {
     shareMap: "Share",
     copied: "Copied",
     hereAsk: "I shared my location. What is nearby, and how do I get to the main places from here?",
+    botCta: "Get the Dubai Bot",
+    botBlurb: "A free personal Dubai guide that answers in your language.",
+    privacy: "Questions are logged anonymously to improve the service.",
+    up: "Helpful",
+    down: "Not helpful",
+
     topics: {
       itinerary: { name: "Trip itinerary", ask: "Plan a 4-day Dubai trip for me" },
       visa: { name: "Visa and government", ask: "Do I need a visa for Dubai?" },
@@ -61,9 +69,11 @@ const I18N = {
     offline: "المساعد غير متاح مؤقتاً. حاول مرة أخرى بعد قليل.",
     reach: "تعذر الوصول إلى المساعد. حاول مرة أخرى.",
     lang: "اللغة",
+
     voice: "صوت",
     listening: "جارٍ الاستماع…",
     noVoice: "الصوت غير متاح في هذا المتصفح. جرّب Chrome أو Safari.",
+
     map: "خريطة",
     here: "موقعي",
     locating: "جارٍ تحديد موقعك…",
@@ -73,6 +83,12 @@ const I18N = {
     shareMap: "مشاركة",
     copied: "تم النسخ",
     hereAsk: "شاركت موقعي. ما القريب مني، وكيف أصل إلى الأماكن الرئيسية من هنا؟",
+    botCta: "احصل على بوت دبي",
+    botBlurb: "دليل دبي شخصي مجاني يجيب بلغتك.",
+    privacy: "تُسجَّل الأسئلة دون اسم لتحسين الخدمة.",
+    up: "مفيد",
+    down: "غير مفيد",
+
     topics: {
       itinerary: { name: "برنامج الرحلة", ask: "خطط لي رحلة 4 أيام في دبي" },
       visa: { name: "التأشيرة والحكومة", ask: "هل أحتاج تأشيرة لدبي؟" },
@@ -100,9 +116,11 @@ const I18N = {
     offline: "सहायक अभी उपलब्ध नहीं है। थोड़ी देर बाद कोशिश करें।",
     reach: "सहायक से संपर्क नहीं हो सका। फिर कोशिश करें।",
     lang: "भाषा",
+
     voice: "आवाज़",
     listening: "सुन रहा है…",
     noVoice: "इस ब्राउज़र में आवाज़ उपलब्ध नहीं है। Chrome या Safari आज़माएँ।",
+
     map: "मैप",
     here: "मेरी लोकेशन",
     locating: "आपको ढूँढ रहा है…",
@@ -112,6 +130,12 @@ const I18N = {
     shareMap: "शेयर",
     copied: "कॉपी हो गया",
     hereAsk: "मैंने अपनी लोकेशन शेयर की है। आसपास क्या है, और मुख्य जगहों तक कैसे पहुँचूँ?",
+    botCta: "दुबई बोट पाएँ",
+    botBlurb: "मुफ़्त निजी दुबई गाइड, आपकी भाषा में जवाब देता है।",
+    privacy: "सेवा बेहतर बनाने के लिए सवाल बिना नाम के दर्ज होते हैं।",
+    up: "उपयोगी",
+    down: "अनुपयोगी",
+
     topics: {
       itinerary: { name: "यात्रा योजना", ask: "मेरे लिए 4 दिन की दुबई यात्रा बनाएँ" },
       visa: { name: "वीज़ा और सरकार", ask: "क्या मुझे दुबई के लिए वीज़ा चाहिए?" },
@@ -139,9 +163,11 @@ const I18N = {
     offline: "معاون عارضی طور پر دستیاب نہیں۔ تھوڑی دیر بعد کوشش کریں۔",
     reach: "معاون تک نہیں پہنچ سکا۔ دوبارہ کوشش کریں۔",
     lang: "زبان",
+
     voice: "آواز",
     listening: "سن رہا ہے…",
     noVoice: "اس براؤزر میں آواز دستیاب نہیں۔ Chrome یا Safari استعمال کریں۔",
+
     map: "نقشہ",
     here: "میری لوکیشن",
     locating: "آپ کو ڈھونڈ رہا ہے…",
@@ -151,6 +177,12 @@ const I18N = {
     shareMap: "شیئر",
     copied: "کاپی ہو گیا",
     hereAsk: "میں نے اپنی لوکیشن شیئر کی ہے۔ قریب کیا ہے، اور اہم جگہوں تک کیسے پہنچوں؟",
+    botCta: "دبئی بوٹ حاصل کریں",
+    botBlurb: "مفت ذاتی دبئی گائیڈ جو آپ کی زبان میں جواب دیتا ہے۔",
+    privacy: "سروس بہتر بنانے کے لیے سوالات بغیر نام کے محفوظ ہوتے ہیں۔",
+    up: "مفید",
+    down: "غیر مفید",
+
     topics: {
       itinerary: { name: "سفر کا پلان", ask: "میرے لیے دبئی کا 4 دن کا سفر بنائیں" },
       visa: { name: "ویزا اور حکومت", ask: "کیا مجھے دبئی کے لیے ویزا چاہیے؟" },
@@ -178,9 +210,11 @@ const I18N = {
     offline: "Помощник временно недоступен. Попробуйте через минуту.",
     reach: "Не удалось связаться с помощником. Попробуйте ещё раз.",
     lang: "Язык",
+
     voice: "Голос",
     listening: "Слушаю…",
     noVoice: "Голос недоступен в этом браузере. Попробуйте Chrome или Safari.",
+
     map: "Карта",
     here: "Моё место",
     locating: "Ищу вас…",
@@ -190,6 +224,12 @@ const I18N = {
     shareMap: "Поделиться",
     copied: "Скопировано",
     hereAsk: "Я поделился своим местоположением. Что рядом и как добраться до главных мест?",
+    botCta: "Дубай-бот",
+    botBlurb: "Бесплатный личный гид по Дубаю. Отвечает на вашем языке.",
+    privacy: "Вопросы записываются анонимно, чтобы улучшить сервис.",
+    up: "Полезно",
+    down: "Не полезно",
+
     topics: {
       itinerary: { name: "Маршрут поездки", ask: "Составь 4-дневную поездку в Дубай" },
       visa: { name: "Виза и госуслуги", ask: "Нужна ли мне виза в Дубай?" },
@@ -217,9 +257,11 @@ const I18N = {
     offline: "助手暂时不可用，请稍后再试。",
     reach: "无法连接助手，请重试。",
     lang: "语言",
+
     voice: "语音",
     listening: "正在听…",
     noVoice: "当前浏览器不支持语音。请使用 Chrome 或 Safari。",
+
     map: "地图",
     here: "我的位置",
     locating: "正在定位…",
@@ -229,6 +271,12 @@ const I18N = {
     shareMap: "分享",
     copied: "已复制",
     hereAsk: "我分享了当前位置。附近有什么，怎么去主要地点？",
+    botCta: "获取迪拜机器人",
+    botBlurb: "免费的个人迪拜向导，可用你的语言回答。",
+    privacy: "问题会匿名记录，用于改进服务。",
+    up: "有帮助",
+    down: "没帮助",
+
     topics: {
       itinerary: { name: "行程规划", ask: "帮我规划4天迪拜行程" },
       visa: { name: "签证与政务", ask: "去迪拜需要签证吗？" },
@@ -256,9 +304,11 @@ const I18N = {
     offline: "L'assistant est temporairement indisponible. Réessayez dans un moment.",
     reach: "Impossible de joindre l'assistant. Réessayez.",
     lang: "Langue",
+
     voice: "Voix",
     listening: "Écoute…",
     noVoice: "La voix n'est pas disponible dans ce navigateur. Essayez Chrome ou Safari.",
+
     map: "Carte",
     here: "Ma position",
     locating: "Recherche…",
@@ -268,6 +318,12 @@ const I18N = {
     shareMap: "Partager",
     copied: "Copié",
     hereAsk: "J'ai partagé ma position. Qu'y a-t-il autour, et comment aller aux lieux principaux ?",
+    botCta: "Obtenir le bot Dubaï",
+    botBlurb: "Un guide Dubaï personnel et gratuit, qui répond dans votre langue.",
+    privacy: "Les questions sont enregistrées anonymement pour améliorer le service.",
+    up: "Utile",
+    down: "Pas utile",
+
     topics: {
       itinerary: { name: "Itinéraire", ask: "Prépare-moi un voyage de 4 jours à Dubaï" },
       visa: { name: "Visa et administration", ask: "Ai-je besoin d'un visa pour Dubaï ?" },
@@ -295,9 +351,11 @@ const I18N = {
     offline: "Pansamantalang hindi available ang assistant. Subukan ulit later.",
     reach: "Hindi ma-contact ang assistant. Subukan ulit.",
     lang: "Wika",
+
     voice: "Boses",
     listening: "Nakikinig…",
     noVoice: "Hindi available ang voice sa browser na ito. Subukan ang Chrome o Safari.",
+
     map: "Mapa",
     here: "Aking location",
     locating: "Hinahanap ka…",
@@ -307,6 +365,12 @@ const I18N = {
     shareMap: "I-share",
     copied: "Nakopya",
     hereAsk: "Ibinahagi ko ang location ko. Ano ang malapit, at paano pumunta sa mga pangunahing lugar mula rito?",
+    botCta: "Kunin ang Dubai Bot",
+    botBlurb: "Libreng personal na Dubai guide na sumasagot sa iyong language.",
+    privacy: "Anonymous na nire-record ang mga tanong para mapabuti ang service.",
+    up: "Nakakatulong",
+    down: "Hindi nakakatulong",
+
     topics: {
       itinerary: { name: "Itinerary ng biyahe", ask: "Planuhan mo ako ng 4 na araw sa Dubai" },
       visa: { name: "Visa at gobyerno", ask: "Kailangan ko ba ng visa para sa Dubai?" },
