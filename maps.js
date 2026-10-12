@@ -151,8 +151,7 @@ async function nominatim(query, fetchImpl) {
   const lat = Number(hit.lat);
   const lng = Number(hit.lon);
   if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
-  const name = String(hit.display_name || query).split(",")[0].trim() || query;
-  return { name, query: q, lat, lng };
+  return { name: query, query: q, lat, lng };
 }
 
 export async function geocode(query, fetchImpl = fetch) {
