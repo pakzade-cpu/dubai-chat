@@ -2,6 +2,7 @@ import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
 import { SYSTEM, topics } from "./guides.js";
+import { MAP_OFFLINE, readHere, resolveMaps, roundCoord, stripMapTags } from "./maps.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -59,9 +60,8 @@ function pickModel(hasImage) {
 
 app.post("/chat", async (req, res) => {
   const key = process.env.XAI_API_KEY;
-  if (!key) return res.status(500).json({ error: "Server is missing XAI_API_KEY" });
-
   const lang = LANGS.has(req.body.language) ? req.body.language : "en";
+  const here = readHere(req.body);
   const messages = Array.isArray(req.body.messages) ? req.body.messages.slice(-12) : [];
   const lastImage = [...messages]
     .reverse()
@@ -79,6 +79,7 @@ app.post("/chat", async (req, res) => {
   }
   if (!clean.some((m) => m.role === "user")) return res.status(400).json({ error: "No message" });
   const last = [...clean].reverse().find((m) => m.role === "user");
+  const userText = last ? textOf(last.content) : "";
   if (last && Array.isArray(last.content) && !textOf(last.content)) {
     last.content.push({
       type: "text",
@@ -94,7 +95,31 @@ app.post("/chat", async (req, res) => {
     "." +
     (req.body.voice
       ? "\nThe user asked by voice. Keep the reply concise and easy to hear: short sentences, no long tables."
+      : "") +
+    (here
+      ? "\nThe user shared their approximate current location: " +
+        roundCoord(here.lat) +
+        ", " +
+        roundCoord(here.lng) +
+        ". Use it only as a starting point for nearby places and directions. Do not read the numbers back."
       : "");
+
+  async function withMaps(text) {
+    const maps = await resolveMaps({ assistantText: text || "", userText, here });
+    return { text: stripMapTags(text || ""), maps };
+  }
+
+  if (!key) {
+    const fallback = await withMaps("");
+    if (fallback.maps.length) {
+      return res.json({
+        text: MAP_OFFLINE[lang] || MAP_OFFLINE.en,
+        maps: fallback.maps,
+        offline: true,
+      });
+    }
+    return res.status(500).json({ error: "Server is missing XAI_API_KEY" });
+  }
 
   const r = await fetch("https://api.x.ai/v1/chat/completions", {
     method: "POST",
@@ -110,11 +135,20 @@ app.post("/chat", async (req, res) => {
 
   const data = await r.json().catch(() => ({}));
   if (!r.ok) {
+    const fallback = await withMaps("");
+    if (fallback.maps.length) {
+      return res.json({
+        text: MAP_OFFLINE[lang] || MAP_OFFLINE.en,
+        maps: fallback.maps,
+        offline: true,
+      });
+    }
     const detail = data.error?.message || data.error || "Model request failed";
     return res.status(502).json({ error: String(detail) });
   }
   const text = data.choices?.[0]?.message?.content || "";
-  res.json({ text });
+  const out = await withMaps(text);
+  res.json(out);
 });
 
 app.listen(process.env.PORT || 3000);

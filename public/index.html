@@ -199,10 +199,61 @@
     }
     #preview.on { display: block; }
     #preview img { width: 72px; height: 72px; object-fit: cover; border-radius: 12px; }
-    #preview button {
+    #preview button, #here-chip button {
       position: absolute; top: -6px; right: -6px;
       width: 20px; height: 20px; border: 0; border-radius: 50%;
       background: #111; color: #fff; cursor: pointer; font-size: 12px; line-height: 20px;
+    }
+    #here-chip {
+      display: none;
+      position: relative;
+      width: max-content;
+      margin: 6px 6px 0;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 8px 28px 8px 10px;
+      font-size: 13px;
+    }
+    #here-chip.on { display: flex; }
+    .place {
+      margin-top: 12px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      overflow: hidden;
+      background: var(--card);
+      max-width: 420px;
+    }
+    .place iframe {
+      display: block;
+      width: 100%;
+      height: 180px;
+      border: 0;
+      background: #e9eef2;
+    }
+    .place-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      padding: 8px 10px 10px;
+    }
+    .place-bar strong {
+      flex: 1 1 100%;
+      font-size: 14px;
+    }
+    .place-bar a, .place-bar button {
+      border: 1px solid var(--line);
+      background: var(--bg);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font: inherit;
+      font-size: 13px;
+      color: inherit;
+      text-decoration: none;
+      cursor: pointer;
     }
     .icon {
       height: 36px;
@@ -326,7 +377,7 @@
       <section id="welcome">
         <div class="flag-scene" id="flag-hero" aria-label="UAE flag"><canvas></canvas></div>
         <h1 id="headline">Ask about Dubai</h1>
-        <p class="lead" id="lead">Visas, trips, rent, schools, and daily life — tap a topic, type, add a photo, or use Voice. Not a government website.</p>
+        <p class="lead" id="lead">Visas, trips, rent, schools, and daily life — tap a topic, type, add a photo, use Voice, or ask where a place is to see a map. Not a government website.</p>
         <div class="starters" id="topics"></div>
         <details class="more">
           <summary id="official">Official websites</summary>
@@ -354,9 +405,14 @@
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" stroke="currentColor" stroke-width="1.7"/><path d="M6.5 11.5a5.5 5.5 0 0 0 11 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M12 17v3.5M9 20.5h6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
         <span id="voice-label">Voice</span>
       </button>
+      <button class="icon" id="here-btn" type="button" aria-label="Map" aria-pressed="false">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 21s7-5.4 7-11a7 7 0 1 0-14 0c0 5.6 7 11 7 11Z" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="10" r="2.3" stroke="currentColor" stroke-width="1.7"/></svg>
+        <span id="here-label">Map</span>
+      </button>
       <input id="file" type="file" accept="image/jpeg,image/png,image/webp" hidden />
       <div class="composer-main">
         <div id="preview"><img id="preview-img" alt="" /><button type="button" id="clear-photo" aria-label="Remove photo">×</button></div>
+        <div id="here-chip"><span id="here-chip-label">My location</span><button type="button" id="clear-here" aria-label="Remove location">×</button></div>
         <textarea id="q" rows="1" placeholder="Ask anything about Dubai" autocomplete="off"></textarea>
       </div>
       <button class="send" id="go" aria-label="Send" disabled>
@@ -408,6 +464,8 @@
     let topics = fallbackTopics;
     let busy = false;
     let photo = "";
+    let here = null;
+    let locatingHere = false;
     let lang = "en";
     let listening = false;
     let voiceAsked = false;
@@ -415,6 +473,8 @@
     const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
     const voiceBtn = document.getElementById("voice-btn");
     const voiceLabel = document.getElementById("voice-label");
+    const hereBtn = document.getElementById("here-btn");
+    const hereLabel = document.getElementById("here-label");
 
     startFlag(document.getElementById("flag-hero"));
     startFlag(document.getElementById("flag-mini"));
@@ -448,6 +508,9 @@
       if (listening && recognition) {
         try { recognition.lang = speechLang(); } catch (_) {}
       }
+      hereBtn.setAttribute("aria-label", copy.map);
+      hereLabel.textContent = locatingHere ? copy.locating : copy.map;
+      document.getElementById("here-chip-label").textContent = copy.here;
       renderTopics();
     }
     function setLang(next) {
@@ -555,7 +618,137 @@
     function grow() {
       q.style.height = "auto";
       q.style.height = Math.min(q.scrollHeight, 160) + "px";
-      go.disabled = busy || (!q.value.trim() && !photo) || q.value.startsWith("/");
+      go.disabled = busy || (!q.value.trim() && !photo && !here) || q.value.startsWith("/");
+    }
+    function osmEmbed(lat, lng) {
+      lat = Math.round(Number(lat) * 1e6) / 1e6;
+      lng = Math.round(Number(lng) * 1e6) / 1e6;
+      const d = 0.02;
+      return "https://www.openstreetmap.org/export/embed.html?bbox=" +
+        (lng - d) + "," + (lat - d) + "," + (lng + d) + "," + (lat + d) +
+        "&layer=mapnik&marker=" + lat + "%2C" + lng;
+    }
+    function safeHttp(url, hosts) {
+      try {
+        const u = new URL(String(url || ""));
+        return u.protocol === "https:" && hosts.some((h) => u.hostname === h || u.hostname.endsWith("." + h)) ? u.href : "";
+      } catch {
+        return "";
+      }
+    }
+    function safeMap(raw) {
+      if (!raw || typeof raw !== "object") return null;
+      const lat = Number(raw.lat);
+      const lng = Number(raw.lng);
+      if (!Number.isFinite(lat) || !Number.isFinite(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180) return null;
+      const name = String(raw.name || raw.query || "").slice(0, 80);
+      const embed = safeHttp(raw.embed, ["www.openstreetmap.org"]);
+      const google = safeHttp(raw.google, ["www.google.com", "maps.google.com"]);
+      const directions = safeHttp(raw.directions, ["www.google.com", "maps.google.com"]);
+      if (!embed && !google) return null;
+      return { name: name || "Dubai", lat, lng, embed, google, directions };
+    }
+    function addMaps(el, maps, origin) {
+      if (!el || !Array.isArray(maps) || !maps.length) return;
+      const copy = t();
+      for (const raw of maps) {
+        const m = safeMap(raw);
+        if (!m) continue;
+        const card = document.createElement("div");
+        card.className = "place";
+        if (m.embed) {
+          const frame = document.createElement("iframe");
+          frame.src = m.embed;
+          frame.title = m.name;
+          frame.loading = "lazy";
+          frame.referrerPolicy = "no-referrer";
+          frame.setAttribute("sandbox", "allow-scripts allow-same-origin");
+          card.appendChild(frame);
+        }
+        const bar = document.createElement("div");
+        bar.className = "place-bar";
+        const title = document.createElement("strong");
+        title.textContent = m.name;
+        bar.appendChild(title);
+        if (m.google) {
+          const open = document.createElement("a");
+          open.href = m.google;
+          open.target = "_blank";
+          open.rel = "noopener noreferrer";
+          open.textContent = copy.openMap;
+          bar.appendChild(open);
+        }
+        if (m.directions || origin) {
+          const href = m.directions || (m.google && origin
+            ? "https://www.google.com/maps/dir/?api=1&origin=" + origin.lat + "," + origin.lng + "&destination=" + encodeURIComponent(m.name)
+            : "");
+          if (href) {
+            const dir = document.createElement("a");
+            dir.href = href;
+            dir.target = "_blank";
+            dir.rel = "noopener noreferrer";
+            dir.textContent = copy.directions;
+            bar.appendChild(dir);
+          }
+        }
+        if (m.google) {
+          const share = document.createElement("button");
+          share.type = "button";
+          share.textContent = copy.shareMap;
+          share.onclick = async () => {
+            try {
+              if (navigator.share) await navigator.share({ title: m.name, text: m.name, url: m.google });
+              else if (navigator.clipboard) {
+                await navigator.clipboard.writeText(m.google);
+                share.textContent = copy.copied;
+                setTimeout(() => { share.textContent = copy.shareMap; }, 1600);
+              }
+            } catch (_) {}
+          };
+          bar.appendChild(share);
+        }
+        card.appendChild(bar);
+        el.appendChild(card);
+      }
+    }
+    function clearHere() {
+      here = null;
+      locatingHere = false;
+      hereBtn.classList.remove("listening");
+      hereBtn.setAttribute("aria-pressed", "false");
+      hereLabel.textContent = t().map;
+      document.getElementById("here-chip").classList.remove("on");
+      grow();
+    }
+    function shareHere() {
+      const copy = t();
+      if (!navigator.geolocation) {
+        window.alert(copy.noHere);
+        return;
+      }
+      locatingHere = true;
+      hereBtn.classList.add("listening");
+      hereLabel.textContent = copy.locating;
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          locatingHere = false;
+          here = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+          hereBtn.classList.remove("listening");
+          hereBtn.setAttribute("aria-pressed", "true");
+          hereLabel.textContent = copy.map;
+          document.getElementById("here-chip-label").textContent = copy.here;
+          document.getElementById("here-chip").classList.add("on");
+          grow();
+        },
+        () => {
+          locatingHere = false;
+          hereBtn.classList.remove("listening");
+          hereBtn.setAttribute("aria-pressed", here ? "true" : "false");
+          hereLabel.textContent = copy.map;
+          window.alert(copy.noHere);
+        },
+        { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 }
+      );
     }
     function clearPhoto() {
       photo = "";
@@ -631,8 +824,8 @@
       const copy = t();
       text = (text || q.value || "").trim();
       image = image === undefined ? photo : image;
-      if ((!text && !image) || String(text).startsWith("/") || busy) return;
-      if (!text) text = copy.photoAsk;
+      if ((!text && !image && !here) || String(text).startsWith("/") || busy) return;
+      if (!text) text = image ? copy.photoAsk : copy.hereAsk;
       const fromVoice = voiceAsked;
       voiceAsked = false;
       stopListening();
@@ -641,7 +834,16 @@
       q.value = ""; menu.style.display = "none";
       const payload = userPayload(text, image);
       history.push({ role: "user", content: payload });
-      add("user", text, false, image);
+      const userEl = add("user", text, false, image);
+      if (here && text === copy.hereAsk) {
+        addMaps(userEl.parentNode, [{
+          name: copy.here,
+          lat: here.lat,
+          lng: here.lng,
+          embed: osmEmbed(here.lat, here.lng),
+          google: "https://www.google.com/maps/search/?api=1&query=" + here.lat + "," + here.lng
+        }]);
+      }
       if (image) clearPhoto(); else grow();
       const pending = add("bot", "", true);
       busy = true; go.disabled = true;
@@ -649,12 +851,19 @@
         const r = await fetch("/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ messages: history, language: lang, search: true, voice: fromVoice })
+          body: JSON.stringify({
+            messages: history,
+            language: lang,
+            search: true,
+            voice: fromVoice,
+            here: here || undefined
+          })
         });
         const data = await r.json().catch(() => ({}));
         const raw = data.text || data.error || "No reply";
         const reply = String(raw).includes("XAI_API_KEY") ? copy.offline : raw;
         pending.textContent = reply;
+        addMaps(pending, data.maps, here);
         if (data.text) history.push({ role: "assistant", content: data.text });
         if (fromVoice) speakReply(reply);
       } catch {
@@ -674,6 +883,7 @@
       stopListening();
       stopTalking();
       clearPhoto();
+      clearHere();
       q.focus();
     }
     function renderTopics() {
@@ -710,6 +920,8 @@
     }).catch(() => {});
     document.getElementById("photo-btn").onclick = () => document.getElementById("file").click();
     voiceBtn.onclick = () => startListening();
+    hereBtn.onclick = () => shareHere();
+    document.getElementById("clear-here").onclick = clearHere;
     if (window.speechSynthesis) speechSynthesis.onvoiceschanged = () => {};
     document.getElementById("file").onchange = async (e) => {
       const file = e.target.files && e.target.files[0];
