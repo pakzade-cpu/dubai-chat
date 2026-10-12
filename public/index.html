@@ -118,7 +118,7 @@
       background: var(--card);
       border: 1px solid var(--line);
       border-radius: 16px;
-      padding: 10px 12px;
+      padding: 8px 12px;
     }
     #topic p { margin: 2px 0 8px; color: var(--muted); font-size: 13px; }
     #topic .links { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -225,76 +225,12 @@
       font-size: 12px;
     }
     .flag-scene {
-      --h: 118px;
       position: relative;
-      height: var(--h);
-      display: flex;
-      align-items: flex-end;
-      perspective: 640px;
+      width: 220px;
+      height: 150px;
     }
-    .flag-scene::after {
-      content: "";
-      position: absolute;
-      left: 18px; right: -8px; bottom: -18px;
-      height: 18px;
-      background: radial-gradient(ellipse, rgba(0,0,0,.28), transparent 70%);
-      pointer-events: none;
-    }
-    .flag-scene.mini { --h: 30px; }
-    .flag-scene.mini::after { bottom: -8px; height: 10px; }
-    .pole {
-      width: 6px;
-      height: calc(var(--h) + 14px);
-      border-radius: 4px;
-      background: linear-gradient(90deg, #6c6c6c, #f7f7f7 42%, #9a9a9a 78%, #5c5c5c);
-      box-shadow: 3px 4px 8px rgba(0,0,0,.28);
-      position: relative;
-      z-index: 2;
-    }
-    .flag-scene.mini .pole { width: 3px; height: calc(var(--h) + 6px); }
-    .pole::before {
-      content: "";
-      position: absolute;
-      top: -7px; left: 50%;
-      width: 12px; height: 12px;
-      margin-left: -6px;
-      border-radius: 50%;
-      background: radial-gradient(circle at 32% 28%, #fff3c4, var(--gold) 52%, #7a5a14);
-      box-shadow: 0 2px 4px rgba(0,0,0,.25);
-    }
-    .flag-scene.mini .pole::before { width: 7px; height: 7px; margin-left: -3.5px; top: -4px; }
-    .flag-cloth {
-      display: flex;
-      height: var(--h);
-      transform: rotateX(22deg) rotateY(-32deg) rotateZ(-4deg);
-      transform-style: preserve-3d;
-      transform-origin: left center;
-      animation: turn 7s ease-in-out infinite;
-    }
-    .flag-cloth i {
-      width: 12px;
-      height: 100%;
-      display: block;
-      background: linear-gradient(180deg, #009739 0 33.34%, #ffffff 33.34% 66.66%, #111111 66.66%);
-      transform-origin: left center;
-      animation: wave 2.2s ease-in-out infinite;
-      animation-delay: calc(var(--i) * 90ms);
-      box-shadow: inset -2px 0 0 rgba(0,0,0,.18), inset 2px 0 0 rgba(255,255,255,.16);
-    }
-    .flag-cloth i.hoist {
-      width: 16px;
-      background: linear-gradient(90deg, #c41b28, #ef3340 55%, #b31420);
-    }
-    .flag-scene.mini .flag-cloth i { width: 5px; }
-    .flag-scene.mini .flag-cloth i.hoist { width: 7px; }
-    @keyframes wave {
-      0%, 100% { transform: rotateY(-18deg) translateZ(-6px); filter: brightness(.82); }
-      50% { transform: rotateY(16deg) translateZ(22px); filter: brightness(1.16); }
-    }
-    @keyframes turn {
-      0%, 100% { transform: rotateX(22deg) rotateY(-34deg) rotateZ(-4deg); }
-      50% { transform: rotateX(12deg) rotateY(-12deg) rotateZ(2deg); }
-    }
+    .flag-scene.mini { width: 56px; height: 36px; }
+    .flag-scene canvas { display: block; width: 100%; height: 100%; }
     @media (max-width: 760px) {
       h1 { font-size: 28px; }
       .starters { grid-template-columns: 1fr 1fr; }
@@ -311,7 +247,7 @@
 <body>
   <header>
     <button class="brand" id="home" type="button">
-      <span class="flag-scene mini" id="flag-mini" aria-hidden="true"><span class="pole"></span><span class="flag-cloth"></span></span>
+      <span class="flag-scene mini" id="flag-mini" aria-hidden="true"><canvas></canvas></span>
       <b>DUBAI</b>
     </button>
     <button class="new" id="reset" type="button">New chat</button>
@@ -319,7 +255,7 @@
   <main>
     <div class="stage">
       <section id="welcome">
-        <div class="flag-scene" id="flag-hero" aria-label="UAE flag"><span class="pole"></span><span class="flag-cloth"></span></div>
+        <div class="flag-scene" id="flag-hero" aria-label="UAE flag"><canvas></canvas></div>
         <h1>Ask about Dubai</h1>
         <p class="lead">Visas, trips, rent, schools, and daily life — tap a topic or type a question. Not a government website.</p>
         <div class="starters" id="topics"></div>
@@ -389,19 +325,74 @@
     let topics = fallbackTopics;
     let busy = false;
 
-    function buildFlag(root, slats) {
-      const cloth = root.querySelector(".flag-cloth");
-      cloth.innerHTML = "";
-      const hoist = Math.max(2, Math.round(slats * 0.25));
-      for (let i = 0; i < slats; i++) {
-        const s = document.createElement("i");
-        s.style.setProperty("--i", i);
-        if (i < hoist) s.className = "hoist";
-        cloth.appendChild(s);
+    function startFlag(root) {
+      const canvas = root.querySelector("canvas");
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      let w = 0, h = 0, t = 0, frame;
+      const art = document.createElement("canvas");
+      const a = art.getContext("2d");
+      function paintFlag(fw, fh) {
+        art.width = fw; art.height = fh;
+        a.fillStyle = "#ef3340"; a.fillRect(0, 0, fw * 0.28, fh);
+        a.fillStyle = "#009739"; a.fillRect(fw * 0.28, 0, fw, fh / 3);
+        a.fillStyle = "#ffffff"; a.fillRect(fw * 0.28, fh / 3, fw, fh / 3);
+        a.fillStyle = "#111111"; a.fillRect(fw * 0.28, (fh * 2) / 3, fw, fh / 3);
       }
+      function size() {
+        const box = root.getBoundingClientRect();
+        w = Math.max(40, box.width); h = Math.max(28, box.height);
+        canvas.width = w * dpr; canvas.height = h * dpr;
+        paintFlag(200, 120);
+      }
+      const ctx = canvas.getContext("2d");
+      function draw(now) {
+        t = reduce ? 0.6 : now / 420;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, w, h);
+        const poleW = Math.max(3, w * 0.035);
+        const ball = poleW * 1.7;
+        const clothW = w - poleW * 3;
+        const clothH = h * 0.62;
+        const top = h * 0.16;
+        ctx.fillStyle = "#00000022";
+        ctx.beginPath();
+        ctx.ellipse(w * 0.55, h * 0.92, clothW * 0.42, h * 0.07, 0, 0, Math.PI * 2);
+        ctx.fill();
+        const g = ctx.createLinearGradient(0, 0, poleW, 0);
+        g.addColorStop(0, "#6a6a6a"); g.addColorStop(0.45, "#f3f3f3"); g.addColorStop(1, "#6f6f6f");
+        ctx.fillStyle = g;
+        ctx.fillRect(poleW * 0.6, ball, poleW, h - ball - 4);
+        const shine = ctx.createRadialGradient(poleW, ball * 0.7, 1, poleW * 1.1, ball, ball);
+        shine.addColorStop(0, "#fff4c2"); shine.addColorStop(0.55, "#c4a056"); shine.addColorStop(1, "#7a5a14");
+        ctx.fillStyle = shine;
+        ctx.beginPath(); ctx.arc(poleW * 1.1, ball, ball, 0, Math.PI * 2); ctx.fill();
+        const cols = 36;
+        for (let i = 0; i < cols; i++) {
+          const p = i / cols;
+          const wave = Math.sin(t + p * 3.1) * (6 + p * 10);
+          const drop = Math.sin(t * 0.7 + p * 2.2) * (2 + p * 4);
+          const bright = 0.82 + 0.28 * Math.sin(t + p * 3.1);
+          ctx.save();
+          ctx.filter = "brightness(" + bright + ")";
+          ctx.drawImage(
+            art,
+            p * art.width, 0, art.width / cols + 1, art.height,
+            poleW * 1.7 + p * clothW,
+            top + wave,
+            clothW / cols + 1.2,
+            clothH + drop
+          );
+          ctx.restore();
+        }
+        if (!reduce) frame = requestAnimationFrame(draw);
+      }
+      size();
+      draw(0);
+      window.addEventListener("resize", () => { size(); if (reduce) draw(0); });
     }
-      buildFlag(document.getElementById("flag-hero"), 14);
-      buildFlag(document.getElementById("flag-mini"), 9);
+    startFlag(document.getElementById("flag-hero"));
+    startFlag(document.getElementById("flag-mini"));
 
     function grow() {
       q.style.height = "auto";
