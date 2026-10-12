@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dubai admin</title>
+  <style>
+    :root {
+      --bg: #f4f4f5;
+      --ink: #111111;
+      --muted: #5f5f5f;
+      --line: #e6e6e6;
+      --card: #ffffff;
+      --gold: #c4a056;
+      --red: #ef3340;
+      --green: #00732f;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(244, 244, 245, .9);
+    }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .flag {
+      width: 36px; height: 24px; border-radius: 3px;
+      background: linear-gradient(to bottom, #00732f 0 33.33%, #fff 33.33% 66.66%, #000 66.66% 100%);
+      box-shadow: inset 10px 0 0 var(--red);
+    }
+    .brand b { letter-spacing: .12em; font-size: 15px; }
+    .muted { color: var(--muted); font-size: 13px; }
+    main { max-width: 980px; margin: 0 auto; padding: 18px 16px 40px; }
+    .gate, .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px;
+    }
+    .gate { max-width: 420px; margin: 12vh auto 0; }
+    label { display: block; font-size: 14px; margin-bottom: 8px; }
+    input {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px 12px;
+      font: inherit;
+      font-size: 16px;
+    }
+    button, .btn {
+      border: 0;
+      background: #111;
+      color: #fff;
+      border-radius: 999px;
+      padding: 9px 16px;
+      font: inherit;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+    button.secondary, .btn.secondary {
+      background: var(--card);
+      color: var(--ink);
+      border: 1px solid var(--line);
+    }
+    .error { color: var(--red); font-size: 14px; margin-top: 10px; }
+    .row { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0; }
+    .stat {
+      flex: 1 1 140px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+    }
+    .stat b { display: block; font-size: 26px; margin-top: 4px; }
+    h2 { font-size: 16px; margin: 22px 0 10px; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { text-align: start; padding: 8px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    th { color: var(--muted); font-weight: 600; }
+    .q { white-space: pre-wrap; line-height: 1.4; }
+    .answer { color: var(--muted); white-space: pre-wrap; line-height: 1.4; }
+    .tag {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 2px 8px;
+      background: #f7f1e4;
+      color: #6a4e12;
+      font-size: 12px;
+    }
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    #app { display: none; }
+    @media (max-width: 640px) {
+      .stat b { font-size: 22px; }
+      td.answer { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <span class="flag" aria-hidden="true"></span>
+      <div>
+        <b>DUBAI ADMIN</b>
+        <div class="muted" id="storage"></div>
+      </div>
+    </div>
+    <div class="actions" id="toolbar" hidden>
+      <a class="btn secondary" id="csv" href="#">Download CSV</a>
+      <button class="secondary" id="out" type="button">Lock</button>
+    </div>
+  </header>
+  <main>
+    <form class="gate" id="gate">
+      <h1 style="margin:0 0 8px;font-size:22px;">Admin password</h1>
+      <p class="muted">Username is not needed. Use the ADMIN_PASSWORD from the server environment.</p>
+      <label>
+        Password
+        <input id="password" type="password" autocomplete="current-password" />
+      </label>
+      <button type="submit" style="margin-top:12px;">Open dashboard</button>
+      <p class="error" id="gate-error" hidden></p>
+    </form>
+    <div id="app">
+      <div class="row" id="stats"></div>
+      <h2>Visits per day (Dubai time)</h2>
+      <div class="card"><table><thead><tr><th>Day</th><th>Visits</th></tr></thead><tbody id="days"></tbody></table></div>
+      <h2>Countries</h2>
+      <div class="card"><table><thead><tr><th>Country</th><th>Visits</th></tr></thead><tbody id="countries"></tbody></table></div>
+      <h2>Top topics</h2>
+      <div class="card"><table><thead><tr><th>Topic</th><th>Clicks</th></tr></thead><tbody id="topics"></tbody></table></div>
+      <h2>Recent questions</h2>
+      <div class="card"><table><thead><tr><th>When</th><th>Topic</th><th>Question</th><th>Vote</th></tr></thead><tbody id="recent"></tbody></table></div>
+      <h2>Answers with a thumbs down</h2>
+      <div class="card"><table><thead><tr><th>When</th><th>Topic</th><th>Question</th><th>Answer</th></tr></thead><tbody id="down"></tbody></table></div>
+    </div>
+  </main>
+  <script>
+    const gate = document.getElementById("gate");
+    const app = document.getElementById("app");
+    const pass = document.getElementById("password");
+    let token = sessionStorage.getItem("dubai-admin") || "";
+
+    function authHeaders() {
+      return { Authorization: "Bearer " + token };
+    }
+    function cell(text) {
+      const td = document.createElement("td");
+      td.textContent = text || "—";
+      return td;
+    }
+    function fillTable(id, rows, cols) {
+      const body = document.getElementById(id);
+      body.innerHTML = "";
+      if (!rows.length) {
+        const tr = document.createElement("tr");
+        const td = document.createElement("td");
+        td.colSpan = cols;
+        td.className = "muted";
+        td.textContent = "No data yet";
+        tr.appendChild(td);
+        body.appendChild(tr);
+        return;
+      }
+      for (const row of rows) body.appendChild(row);
+    }
+    function showError(msg) {
+      const el = document.getElementById("gate-error");
+      el.hidden = false;
+      el.textContent = msg;
+    }
+    async function load() {
+      const r = await fetch("/admin/stats", { headers: authHeaders() });
+      if (r.status === 401) throw new Error("Wrong password");
+      if (r.status === 404) throw new Error("Admin is disabled. Set ADMIN_PASSWORD.");
+      if (!r.ok) throw new Error("Could not load stats");
+      const data = await r.json();
+      gate.style.display = "none";
+      app.style.display = "block";
+      document.getElementById("toolbar").hidden = false;
+      document.getElementById("storage").textContent =
+        data.storage === "postgres" ? "Stored in Postgres" : "Stored in a local JSON file";
+      const fb = data.feedback || {};
+      const cards = [
+        ["Visits", (data.visitsPerDay || []).reduce((n, d) => n + (d.count || 0), 0)],
+        ["Topic clicks", (data.topTopics || []).reduce((n, d) => n + (d.count || 0), 0)],
+        ["Questions", (fb.up || 0) + (fb.down || 0) + (fb.none || 0)],
+        ["Thumbs up / down", (fb.up || 0) + " / " + (fb.down || 0) + (fb.ratio == null ? "" : " (" + fb.ratio + "% up)")],
+      ];
+      const stats = document.getElementById("stats");
+      stats.innerHTML = "";
+      for (const [label, value] of cards) {
+        const div = document.createElement("div");
+        div.className = "stat";
+        div.innerHTML = "<span class='muted'></span><b></b>";
+        div.querySelector("span").textContent = label;
+        div.querySelector("b").textContent = value;
+        stats.appendChild(div);
+      }
+      fillTable("days", (data.visitsPerDay || []).map((row) => {
+        const tr = document.createElement("tr");
+        tr.appendChild(cell(row.day));
+        tr.appendChild(cell(row.count));
+        return tr;
+      }), 2);
+      fillTable("countries", (data.countries || []).map((row) => {
+        const tr = document.createElement("tr");
+        tr.appendChild(cell(row.country));
+        tr.appendChild(cell(row.count));
+        return tr;
+      }), 2);
+      fillTable("topics", (data.topTopics || []).map((row) => {
+        const tr = document.createElement("tr");
+        tr.appendChild(cell(row.topic));
+        tr.appendChild(cell(row.count));
+        return tr;
+      }), 2);
+      fillTable("recent", (data.recent || []).map((row) => {
+        const tr = document.createElement("tr");
+        tr.appendChild(cell(row.dubai_time));
+        const topic = document.createElement("td");
+        const tag = document.createElement("span");
+        tag.className = "tag";
+        tag.textContent = row.topic || "chat";
+        topic.appendChild(tag);
+        tr.appendChild(topic);
+        const q = document.createElement("td");
+        q.className = "q";
+        q.textContent = row.question;
+        tr.appendChild(q);
+        tr.appendChild(cell(row.feedback || "—"));
+        return tr;
+      }), 4);
+      fillTable("down", (data.downvoted || []).map((row) => {
+        const tr = document.createElement("tr");
+        tr.appendChild(cell(row.dubai_time));
+        tr.appendChild(cell(row.topic));
+        const q = document.createElement("td");
+        q.className = "q";
+        q.textContent = row.question;
+        tr.appendChild(q);
+        const a = document.createElement("td");
+        a.className = "answer";
+        a.textContent = row.answer;
+        tr.appendChild(a);
+        return tr;
+      }), 4);
+    }
+    gate.onsubmit = async (e) => {
+      e.preventDefault();
+      token = pass.value;
+      sessionStorage.setItem("dubai-admin", token);
+      try { await load(); } catch (err) { showError(err.message); }
+    };
+    document.getElementById("csv").onclick = async (e) => {
+      e.preventDefault();
+      const r = await fetch("/admin/export.csv", { headers: authHeaders() });
+      if (!r.ok) return;
+      const blob = await r.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "dubai-questions.csv";
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+    document.getElementById("out").onclick = () => {
+      sessionStorage.removeItem("dubai-admin");
+      location.reload();
+    };
+    if (token) load().catch(() => {
+      sessionStorage.removeItem("dubai-admin");
+      token = "";
+    });
+  </script>
+</body>
+</html>

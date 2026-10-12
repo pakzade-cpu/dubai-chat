@@ -1,19 +1,29 @@
+import crypto from "crypto";
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
 import { SYSTEM, topics } from "./guides.js";
 import { MAP_OFFLINE, readHere, resolveMaps, roundCoord, stripMapTags } from "./maps.js";
+import { countryOf, sanitizeTopic, stripPii, csvCell } from "./privacy.js";
+import {
+  closeStore,
+  exportQuestions,
+  getStats,
+  initStore,
+  recordTopicClick,
+  recordVisit,
+  saveQuestion,
+  setFeedback,
+  storageKind,
+} from "./store.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
+app.set("trust proxy", 1);
 app.use(express.json({ limit: "8mb" }));
-app.use(express.static(path.join(__dirname, "public")));
 
 const LANGS = new Set(["en", "ar", "hi", "ur", "ru", "zh", "fr", "tl"]);
-
-app.get("/guides", (_req, res) => {
-  res.json({ topics });
-});
+const buckets = new Map();
 
 function textOf(content) {
   if (typeof content === "string") return content;
@@ -57,6 +67,152 @@ function pickModel(hasImage) {
   if (/vision|grok-4|grok-2/i.test(base) && !/grok-3$/i.test(base)) return base;
   return "grok-2-vision-1212";
 }
+
+function rateOk(req, max = 60) {
+  const ip = String(req.headers["x-forwarded-for"] || "")
+    .split(",")[0]
+    .trim() || req.socket.remoteAddress || "x";
+  const now = Date.now();
+  if (buckets.size > 2000) {
+    for (const [key, row] of buckets) {
+      if (now - row.t > 60_000) buckets.delete(key);
+    }
+  }
+  const row = buckets.get(ip);
+  if (!row || now - row.t > 60_000) {
+    buckets.set(ip, { t: now, n: 1 });
+    return true;
+  }
+  if (row.n >= max) return false;
+  row.n += 1;
+  return true;
+}
+
+function safeEqual(a, b) {
+  const left = Buffer.from(String(a));
+  const right = Buffer.from(String(b));
+  if (left.length !== right.length) {
+    crypto.timingSafeEqual(left, left);
+    return false;
+  }
+  return crypto.timingSafeEqual(left, right);
+}
+
+function adminPassword(req) {
+  const header = req.headers.authorization || "";
+  if (header.startsWith("Bearer ")) return header.slice(7);
+  if (header.startsWith("Basic ")) {
+    const decoded = Buffer.from(header.slice(6), "base64").toString("utf8");
+    const idx = decoded.indexOf(":");
+    return idx >= 0 ? decoded.slice(idx + 1) : decoded;
+  }
+  return String(req.headers["x-admin-password"] || "");
+}
+
+function requireAdmin(req, res, next) {
+  const expected = process.env.ADMIN_PASSWORD || "";
+  if (!expected) return res.status(404).json({ error: "Admin is disabled" });
+  if (!safeEqual(adminPassword(req), expected)) {
+    return res.status(401).json({ error: "Password required" });
+  }
+  next();
+}
+
+async function replyWithLog(res, body, question, topic) {
+  const id = crypto.randomUUID();
+  try {
+    await saveQuestion({
+      id,
+      question: stripPii(question || "[photo]").slice(0, 2000),
+      topic: sanitizeTopic(topic),
+      answer: stripPii(body.text || "").slice(0, 4000),
+    });
+  } catch (err) {
+    console.error("question log failed:", err.message);
+  }
+  res.json({ ...body, id });
+}
+
+app.get("/guides", (_req, res) => {
+  res.json({ topics });
+});
+
+app.get("/analytics-config.js", (_req, res) => {
+  const goat = process.env.GOATCOUNTER_URL || "";
+  const plausible = process.env.PLAUSIBLE_DOMAIN || "";
+  const plausibleSrc = process.env.PLAUSIBLE_SRC || "https://plausible.io/js/script.js";
+  res.set("Cache-Control", "no-store");
+  res.type("js").send(`window.ANALYTICS_CONFIG=${JSON.stringify({ goat, plausible, plausibleSrc })};`);
+});
+
+app.post("/api/event", async (req, res) => {
+  if (!rateOk(req, 80)) return res.status(429).json({ error: "Too many requests" });
+  const type = req.body && req.body.type;
+  try {
+    if (type === "pageview") {
+      await recordVisit(countryOf(req));
+      return res.json({ ok: true });
+    }
+    if (type === "topic") {
+      await recordTopicClick(sanitizeTopic(req.body.topic));
+      return res.json({ ok: true });
+    }
+    return res.status(400).json({ error: "Unknown event" });
+  } catch (err) {
+    console.error("event failed:", err.message);
+    return res.status(500).json({ error: "Could not record event" });
+  }
+});
+
+app.post("/api/feedback", async (req, res) => {
+  if (!rateOk(req, 40)) return res.status(429).json({ error: "Too many requests" });
+  const id = typeof req.body?.id === "string" ? req.body.id : "";
+  const vote = req.body?.vote;
+  if (!/^[0-9a-f-]{36}$/i.test(id) || (vote !== "up" && vote !== "down")) {
+    return res.status(400).json({ error: "Invalid feedback" });
+  }
+  try {
+    const ok = await setFeedback(id, vote);
+    if (!ok) return res.status(404).json({ error: "Unknown answer" });
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error("feedback failed:", err.message);
+    return res.status(500).json({ error: "Could not save feedback" });
+  }
+});
+
+app.get("/admin", (req, res) => {
+  if (!process.env.ADMIN_PASSWORD) return res.status(404).send("Admin is disabled");
+  res.sendFile(path.join(__dirname, "views", "admin.html"));
+});
+
+app.get("/admin/stats", requireAdmin, async (_req, res) => {
+  try {
+    res.json(await getStats());
+  } catch (err) {
+    console.error("stats failed:", err.message);
+    res.status(500).json({ error: "Could not load stats" });
+  }
+});
+
+app.get("/admin/export.csv", requireAdmin, async (_req, res) => {
+  try {
+    const rows = await exportQuestions();
+    const header = ["dubai_time", "topic", "question", "answer", "feedback"];
+    const lines = [header.join(",")];
+    for (const row of rows) {
+      lines.push(header.map((key) => csvCell(row[key])).join(","));
+    }
+    res.set({
+      "Content-Type": "text/csv; charset=utf-8",
+      "Content-Disposition": 'attachment; filename="dubai-questions.csv"',
+    });
+    res.send("\uFEFF" + lines.join("\n"));
+  } catch (err) {
+    console.error("export failed:", err.message);
+    res.status(500).json({ error: "Could not export" });
+  }
+});
 
 app.post("/chat", async (req, res) => {
   const key = process.env.XAI_API_KEY;
@@ -112,11 +268,12 @@ app.post("/chat", async (req, res) => {
   if (!key) {
     const fallback = await withMaps("");
     if (fallback.maps.length) {
-      return res.json({
-        text: MAP_OFFLINE[lang] || MAP_OFFLINE.en,
-        maps: fallback.maps,
-        offline: true,
-      });
+      return replyWithLog(
+        res,
+        { text: MAP_OFFLINE[lang] || MAP_OFFLINE.en, maps: fallback.maps, offline: true },
+        userText,
+        req.body?.topic
+      );
     }
     return res.status(500).json({ error: "Server is missing XAI_API_KEY" });
   }
@@ -137,18 +294,38 @@ app.post("/chat", async (req, res) => {
   if (!r.ok) {
     const fallback = await withMaps("");
     if (fallback.maps.length) {
-      return res.json({
-        text: MAP_OFFLINE[lang] || MAP_OFFLINE.en,
-        maps: fallback.maps,
-        offline: true,
-      });
+      return replyWithLog(
+        res,
+        { text: MAP_OFFLINE[lang] || MAP_OFFLINE.en, maps: fallback.maps, offline: true },
+        userText,
+        req.body?.topic
+      );
     }
     const detail = data.error?.message || data.error || "Model request failed";
     return res.status(502).json({ error: String(detail) });
   }
   const text = data.choices?.[0]?.message?.content || "";
   const out = await withMaps(text);
-  res.json(out);
+  await replyWithLog(res, out, userText, req.body?.topic);
 });
 
-app.listen(process.env.PORT || 3000);
+app.use(express.static(path.join(__dirname, "public")));
+
+const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+
+export const ready = initStore();
+export { app, closeStore, storageKind };
+
+if (isMain) {
+  ready
+    .then((kind) => {
+      const port = process.env.PORT || 3000;
+      app.listen(port, () => {
+        console.log(`Dubai guide on http://localhost:${port} (${kind} store)`);
+      });
+    })
+    .catch((err) => {
+      console.error(err);
+      process.exit(1);
+    });
+}

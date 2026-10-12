@@ -34,6 +34,7 @@
       background: rgba(244, 244, 245, .86);
       backdrop-filter: blur(12px);
       border-bottom: 1px solid transparent;
+      flex-wrap: wrap;
     }
     body.chatting header { border-bottom-color: var(--line); }
     .brand {
@@ -47,7 +48,7 @@
       cursor: pointer;
     }
     .brand b { font-size: 16px; letter-spacing: .12em; }
-    .actions { display: flex; align-items: center; gap: 8px; }
+    .actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
     .lang {
       border: 1px solid var(--line);
       background: var(--card);
@@ -104,7 +105,70 @@
       text-align: inherit;
       color: inherit;
     }
-    .starter:hover, .svc:hover, .new:hover, .icon:hover { border-color: #cfcfcf; box-shadow: 0 6px 18px rgba(0,0,0,.04); }
+    .starter:hover, .svc:hover, .new:hover, .icon:hover, .bot-link:hover, .bot-card:hover { border-color: #cfcfcf; box-shadow: 0 6px 18px rgba(0,0,0,.04); }
+    .bot-link {
+      border: 1px solid var(--gold);
+      background: #111;
+      color: #fff;
+      border-radius: 999px;
+      padding: 8px 14px;
+      font: inherit;
+      font-size: 13px;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .bot-card {
+      width: 100%;
+      margin-top: 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-decoration: none;
+      color: inherit;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px 16px 14px 20px;
+      position: relative;
+      overflow: hidden;
+      text-align: start;
+    }
+    .bot-card::before {
+      content: "";
+      position: absolute;
+      inset-inline-start: 0;
+      top: 0;
+      bottom: 0;
+      width: 7px;
+      background: #ef3340;
+    }
+    .bot-card-flag {
+      flex: none;
+      width: 44px;
+      height: 30px;
+      border-radius: 4px;
+      background: linear-gradient(to bottom, #00732f 0 33.33%, #fff 33.33% 66.66%, #000 66.66% 100%);
+      box-shadow: inset 12px 0 0 #ef3340;
+    }
+    .bot-card-copy { flex: 1; min-width: 0; }
+    .bot-card-copy strong { display: block; font-size: 15px; }
+    .bot-card-copy span { display: block; margin-top: 3px; color: var(--muted); font-size: 13px; line-height: 1.4; }
+    .bot-card-go { flex: none; color: var(--gold); font-size: 20px; }
+    html[dir="rtl"] .bot-card-go { transform: scaleX(-1); }
+    .vote { display: flex; gap: 6px; margin-top: 10px; }
+    .vote button {
+      border: 1px solid var(--line);
+      background: var(--bg);
+      border-radius: 999px;
+      min-width: 36px;
+      height: 32px;
+      cursor: pointer;
+      font: inherit;
+      font-size: 15px;
+      line-height: 1;
+    }
+    .vote button[aria-pressed="true"] { border-color: var(--gold); background: #f4ead3; }
+    .vote button:disabled { opacity: .55; cursor: default; }
     .starter strong, .svc strong { display: block; font-size: 14px; }
     .starter span, .svc span { display: block; margin-top: 3px; color: var(--muted); font-size: 13px; line-height: 1.35; }
     .more { width: 100%; margin-top: 8px; text-align: start; }
@@ -143,7 +207,8 @@
     }
     #log { padding: 18px 0 8px; }
     .row-msg { display: flex; margin: 16px 0; }
-    .row-msg.user { justify-content: flex-end; }
+    .row-msg.user { flex-direction: column; align-items: flex-end; }
+    .row-msg.bot { flex-direction: column; align-items: flex-start; }
     .msg {
       max-width: 85%;
       white-space: pre-wrap;
@@ -332,6 +397,7 @@
       color: var(--muted);
       font-size: 12px;
     }
+    .privacy { margin-top: 4px; }
     .flag-scene {
       position: relative;
       width: 280px;
@@ -347,6 +413,7 @@
       .msg { max-width: 92%; }
       .flag-scene { width: 220px; height: 150px; }
       .lang { max-width: 120px; }
+      .bot-link { padding: 8px 10px; }
     }
     @media (max-width: 520px) {
       .starters { grid-template-columns: 1fr; }
@@ -369,6 +436,7 @@
         <span class="sr" id="lang-label" hidden>Language</span>
         <select class="lang" id="lang" aria-labelledby="lang-label"></select>
       </label>
+      <a class="bot-link" id="bot-link" href="https://x.ai/bot/pNVDukpGRUUOx_wtyRhiV" target="_blank" rel="noopener noreferrer">Get the Dubai Bot</a>
       <button class="new" id="reset" type="button">New chat</button>
     </div>
   </header>
@@ -379,6 +447,14 @@
         <h1 id="headline">Ask about Dubai</h1>
         <p class="lead" id="lead">Visas, trips, rent, schools, and daily life — tap a topic, type, add a photo, use Voice, or ask where a place is to see a map. Not a government website.</p>
         <div class="starters" id="topics"></div>
+        <a class="bot-card" id="bot-card" href="https://x.ai/bot/pNVDukpGRUUOx_wtyRhiV" target="_blank" rel="noopener noreferrer">
+          <span class="bot-card-flag" aria-hidden="true"></span>
+          <span class="bot-card-copy">
+            <strong id="bot-cta">Get the Dubai Bot</strong>
+            <span id="bot-blurb">A free personal Dubai guide that answers in your language.</span>
+          </span>
+          <span class="bot-card-go" aria-hidden="true">→</span>
+        </a>
         <details class="more">
           <summary id="official">Official websites</summary>
           <div class="svcs" id="services"></div>
@@ -420,7 +496,9 @@
       </button>
     </div>
     <p class="fine" id="fine">Checks official sources when it can. Not final legal, visa, or tax advice.</p>
+    <p class="fine privacy" id="privacy">Questions are logged anonymously to improve the service.</p>
   </form>
+  <script src="/analytics-config.js"></script>
   <script src="/i18n.js"></script>
   <script src="/flag.js"></script>
   <script>
@@ -467,6 +545,7 @@
     let here = null;
     let locatingHere = false;
     let lang = "en";
+    let currentTopic = "chat";
     let listening = false;
     let voiceAsked = false;
     let recognition = null;
@@ -478,6 +557,36 @@
 
     startFlag(document.getElementById("flag-hero"));
     startFlag(document.getElementById("flag-mini"));
+
+    function track(type, topic) {
+      const body = JSON.stringify({ type, topic });
+      try {
+        if (navigator.sendBeacon) {
+          const ok = navigator.sendBeacon("/api/event", new Blob([body], { type: "application/json" }));
+          if (ok) return;
+        }
+      } catch {}
+      fetch("/api/event", { method: "POST", headers: { "Content-Type": "application/json" }, body, keepalive: true }).catch(() => {});
+    }
+    function loadHostedAnalytics() {
+      const c = window.ANALYTICS_CONFIG || {};
+      if (c.goat) {
+        const s = document.createElement("script");
+        s.async = true;
+        s.src = "https://gc.zgo.at/count.js";
+        s.dataset.goatcounter = c.goat;
+        document.head.appendChild(s);
+      }
+      if (c.plausible) {
+        const s = document.createElement("script");
+        s.defer = true;
+        s.dataset.domain = c.plausible;
+        s.src = c.plausibleSrc || "https://plausible.io/js/script.js";
+        document.head.appendChild(s);
+      }
+    }
+    loadHostedAnalytics();
+    track("pageview");
 
     function t() { return I18N[lang] || I18N.en; }
     function topicCopy(topic) {
@@ -498,7 +607,11 @@
       document.getElementById("reset").textContent = copy.newChat;
       document.getElementById("official").textContent = copy.official;
       document.getElementById("fine").textContent = copy.fine;
+      document.getElementById("privacy").textContent = copy.privacy || I18N.en.privacy;
       document.getElementById("lang-label").textContent = copy.lang;
+      document.getElementById("bot-cta").textContent = copy.botCta || I18N.en.botCta;
+      document.getElementById("bot-blurb").textContent = copy.botBlurb || I18N.en.botBlurb;
+      document.getElementById("bot-link").textContent = copy.botCta || I18N.en.botCta;
       q.placeholder = copy.placeholder;
       document.getElementById("photo-btn").setAttribute("aria-label", copy.photo);
       document.getElementById("photo-label").textContent = copy.photo;
@@ -779,6 +892,7 @@
       });
     }
     function showTopic(topic) {
+      currentTopic = topic.id || "chat";
       const copy = topicCopy(topic);
       document.getElementById("topic-name").textContent = copy.name;
       document.getElementById("topic-about").textContent = topic.about;
@@ -811,7 +925,43 @@
       wrap.appendChild(d);
       log.appendChild(wrap);
       main.scrollTop = main.scrollHeight;
-      return d;
+      return wrap;
+    }
+    function addVotes(wrap, id) {
+      if (!id) return;
+      const copy = t();
+      const box = document.createElement("div");
+      box.className = "vote";
+      const up = document.createElement("button");
+      up.type = "button";
+      up.textContent = "👍";
+      up.setAttribute("aria-label", copy.up || "Helpful");
+      const down = document.createElement("button");
+      down.type = "button";
+      down.textContent = "👎";
+      down.setAttribute("aria-label", copy.down || "Not helpful");
+      async function vote(choice, btn) {
+        if (box.dataset.done) return;
+        try {
+          const r = await fetch("/api/feedback", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id, vote: choice })
+          });
+          if (!r.ok) return;
+          box.dataset.done = "1";
+          up.setAttribute("aria-pressed", choice === "up" ? "true" : "false");
+          down.setAttribute("aria-pressed", choice === "down" ? "true" : "false");
+          up.disabled = true;
+          down.disabled = true;
+          btn.setAttribute("aria-pressed", "true");
+        } catch {}
+      }
+      up.onclick = () => vote("up", up);
+      down.onclick = () => vote("down", down);
+      box.appendChild(up);
+      box.appendChild(down);
+      wrap.appendChild(box);
     }
     function userPayload(text, image) {
       if (!image) return text;
@@ -836,7 +986,7 @@
       history.push({ role: "user", content: payload });
       const userEl = add("user", text, false, image);
       if (here && text === copy.hereAsk) {
-        addMaps(userEl.parentNode, [{
+        addMaps(userEl, [{
           name: copy.here,
           lat: here.lat,
           lng: here.lng,
@@ -845,7 +995,8 @@
         }]);
       }
       if (image) clearPhoto(); else grow();
-      const pending = add("bot", "", true);
+      const pendingWrap = add("bot", "", true);
+      const pending = pendingWrap.querySelector(".msg");
       busy = true; go.disabled = true;
       try {
         const r = await fetch("/chat", {
@@ -856,7 +1007,8 @@
             language: lang,
             search: true,
             voice: fromVoice,
-            here: here || undefined
+            here: here || undefined,
+            topic: currentTopic
           })
         });
         const data = await r.json().catch(() => ({}));
@@ -864,7 +1016,10 @@
         const reply = String(raw).includes("XAI_API_KEY") ? copy.offline : raw;
         pending.textContent = reply;
         addMaps(pending, data.maps, here);
-        if (data.text) history.push({ role: "assistant", content: data.text });
+        if (data.text) {
+          history.push({ role: "assistant", content: data.text });
+          addVotes(pendingWrap, data.id);
+        }
         if (fromVoice) speakReply(reply);
       } catch {
         pending.textContent = copy.reach;
@@ -875,6 +1030,7 @@
     }
     function reset() {
       history.length = 0;
+      currentTopic = "chat";
       log.innerHTML = "";
       document.body.classList.remove("chatting");
       document.getElementById("topic").style.display = "none";
@@ -897,7 +1053,7 @@
         b.innerHTML = "<strong></strong><span></span>";
         b.querySelector("strong").textContent = copy.name;
         b.querySelector("span").textContent = copy.ask;
-        b.onclick = () => { showTopic(topic); send(copy.ask); };
+        b.onclick = () => { track("topic", topic.id); showTopic(topic); send(copy.ask); };
         box.appendChild(b);
       }
     }
@@ -908,7 +1064,7 @@
       b.innerHTML = "<strong></strong>";
       b.querySelector("strong").textContent = s[0];
       b.title = s[2];
-      b.onclick = () => send("What does " + s[0] + " do in Dubai, and what can I do on " + s[1] + "?");
+      b.onclick = () => { currentTopic = "official"; send("What does " + s[0] + " do in Dubai, and what can I do on " + s[1] + "?"); };
       services.appendChild(b);
     }
     renderTopics();
@@ -952,13 +1108,13 @@
         const copy = topicCopy(topic);
         const b = document.createElement("button");
         b.type = "button"; b.textContent = copy.name + " — " + copy.ask;
-        b.onclick = () => { menu.style.display = "none"; showTopic(topic); send(copy.ask); };
+        b.onclick = () => { menu.style.display = "none"; track("topic", topic.id); showTopic(topic); send(copy.ask); };
         menu.appendChild(b);
       }
       for (const s of serviceHits) {
         const b = document.createElement("button");
         b.type = "button"; b.textContent = s[0] + " — " + s[2];
-        b.onclick = () => { menu.style.display = "none"; send("What does " + s[0] + " do in Dubai, and what can I do on " + s[1] + "?"); };
+        b.onclick = () => { menu.style.display = "none"; currentTopic = "official"; send("What does " + s[0] + " do in Dubai, and what can I do on " + s[1] + "?"); };
         menu.appendChild(b);
       }
     };
