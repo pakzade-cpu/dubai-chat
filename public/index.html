@@ -6,13 +6,15 @@
   <title>Dubai</title>
   <style>
     :root {
-      --bg: #f4f4f5;
-      --ink: #111111;
-      --muted: #5f5f5f;
-      --line: #e6e6e6;
-      --card: #ffffff;
-      --gold: #c4a056;
-      --send: #111111;
+      --bg: #f3efe6;
+      --ink: #141414;
+      --muted: #6b6458;
+      --line: #e2d9cc;
+      --card: #fffcf7;
+      --gold: #b8954a;
+      --send: #141414;
+      --red: #c8102e;
+      --green: #007a3d;
     }
     * { box-sizing: border-box; }
     html, body { height: 100%; }
@@ -22,17 +24,27 @@
       flex-direction: column;
       background: var(--bg);
       color: var(--ink);
-      font-family: "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+      font-family: "Segoe UI", "Helvetica Neue", ui-sans-serif, system-ui, sans-serif;
     }
+    .uae-bar {
+      display: grid;
+      grid-template-columns: 18% 1fr 1fr 1fr;
+      height: 3px;
+      flex: none;
+    }
+    .uae-bar i:nth-child(1) { background: var(--red); }
+    .uae-bar i:nth-child(2) { background: var(--green); }
+    .uae-bar i:nth-child(3) { background: #fff; }
+    .uae-bar i:nth-child(4) { background: #111; }
     header {
       flex: none;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      padding: 12px 18px;
-      background: rgba(244, 244, 245, .86);
-      backdrop-filter: blur(12px);
+      padding: 14px 22px;
+      background: rgba(243, 239, 230, .88);
+      backdrop-filter: blur(16px);
       border-bottom: 1px solid transparent;
       flex-wrap: wrap;
     }
@@ -47,7 +59,7 @@
       padding: 0;
       cursor: pointer;
     }
-    .brand b { font-size: 16px; letter-spacing: .12em; }
+    .brand b { font-size: 15px; letter-spacing: .22em; font-weight: 650; }
     .actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
     .lang {
       border: 1px solid var(--line);
@@ -86,8 +98,8 @@
       gap: 8px;
     }
     body.chatting #welcome { display: none; }
-    h1 { margin: 10px 0 0; font-size: 34px; font-weight: 650; letter-spacing: -.03em; }
-    .lead { margin: 0 0 18px; color: var(--muted); font-size: 16px; max-width: 34rem; }
+    h1 { margin: 14px 0 0; font-size: 40px; font-weight: 600; letter-spacing: -.04em; }
+    .lead { margin: 8px 0 28px; color: var(--muted); font-size: 16.5px; line-height: 1.5; max-width: 36rem; }
     .starters {
       width: 100%;
       display: grid;
@@ -98,14 +110,21 @@
     .starter, .svc {
       border: 1px solid var(--line);
       background: var(--card);
-      border-radius: 16px;
-      padding: 12px 13px;
+      border-radius: 18px;
+      padding: 14px 15px;
       cursor: pointer;
       font: inherit;
       text-align: inherit;
       color: inherit;
+      transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease;
     }
-    .starter:hover, .svc:hover, .new:hover, .icon:hover, .bot-link:hover, .bot-card:hover { border-color: #cfcfcf; box-shadow: 0 6px 18px rgba(0,0,0,.04); }
+    .starter { box-shadow: 0 1px 0 rgba(184, 149, 74, .12); }
+    .starter:hover, .svc:hover, .new:hover, .icon:hover {
+      border-color: #d4c4a4;
+      box-shadow: 0 10px 24px rgba(40, 28, 8, .07);
+      transform: translateY(-1px);
+    }
+    .bot-link:hover, .bot-card:hover { border-color: #d4c4a4; box-shadow: 0 10px 24px rgba(40, 28, 8, .07); }
     .bot-link {
       border: 1px solid var(--gold);
       background: #111;
@@ -249,12 +268,13 @@
       background: var(--card);
       border: 1px solid var(--line);
       border-radius: 28px;
-      box-shadow: 0 8px 28px rgba(0,0,0,.05);
+      box-shadow: 0 10px 32px rgba(40, 28, 8, .06);
       padding: 8px 8px 8px 12px;
       display: flex;
       align-items: flex-end;
       gap: 8px;
     }
+    .composer:focus-within { border-color: #d4c4a4; box-shadow: 0 10px 32px rgba(184, 149, 74, .12); }
     .composer-main { flex: 1; min-width: 0; }
     #preview {
       display: none;
@@ -321,7 +341,8 @@
       cursor: pointer;
     }
     .icon {
-      height: 36px;
+      width: 40px;
+      height: 40px;
       border: 1px solid var(--line);
       border-radius: 999px;
       background: var(--bg);
@@ -330,11 +351,13 @@
       flex: none;
       display: flex;
       align-items: center;
-      gap: 6px;
-      padding: 0 10px;
+      justify-content: center;
+      gap: 0;
+      padding: 0;
       font: inherit;
       font-size: 13px;
     }
+    .icon span { display: none; }
     .icon.listening {
       border-color: var(--gold);
       background: #f7f1e3;
@@ -383,7 +406,7 @@
       background: transparent;
     }
     .send {
-      width: 36px; height: 36px;
+      width: 40px; height: 40px;
       border: 0; border-radius: 50%;
       background: var(--send); color: white;
       cursor: pointer; flex: none;
@@ -400,25 +423,23 @@
     .privacy { margin-top: 4px; }
     .flag-scene {
       position: relative;
-      width: 280px;
-      height: 186px;
+      width: 320px;
+      height: 210px;
     }
-    .flag-scene.mini { width: 64px; height: 42px; }
+    .flag-scene.mini { width: 72px; height: 48px; }
     .flag-scene canvas { display: block; width: 100%; height: 100%; }
     html[dir="rtl"] .starters, html[dir="rtl"] .starter { text-align: right; }
     html[dir="rtl"] .composer { padding: 8px 12px 8px 8px; }
     @media (max-width: 760px) {
-      h1 { font-size: 28px; }
+      h1 { font-size: 30px; }
       .starters { grid-template-columns: 1fr 1fr; }
       .msg { max-width: 92%; }
-      .flag-scene { width: 220px; height: 150px; }
+      .flag-scene { width: 240px; height: 160px; }
       .lang { max-width: 120px; }
       .bot-link { padding: 8px 10px; }
     }
     @media (max-width: 520px) {
       .starters { grid-template-columns: 1fr; }
-      .icon span { display: none; }
-      .icon { width: 36px; padding: 0; justify-content: center; }
     }
     @media (prefers-reduced-motion: reduce) {
       .dots i, .icon.listening { animation: none; }
@@ -426,6 +447,7 @@
   </style>
 </head>
 <body>
+  <div class="uae-bar" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
   <header>
     <button class="brand" id="home" type="button">
       <span class="flag-scene mini" id="flag-mini" aria-hidden="true"><canvas></canvas></span>
