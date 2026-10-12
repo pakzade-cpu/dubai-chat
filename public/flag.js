@@ -50,8 +50,8 @@ function startFlag(root) {
     const clothH = h * 0.5;
     const ox = poleX + poleW * 0.2;
     const oy = poleTop + poleW * 1.6;
-    const cols = w < 80 ? 12 : 20;
-    const rows = w < 80 ? 7 : 12;
+    const cols = w < 80 ? 14 : 28;
+    const rows = w < 80 ? 8 : 16;
     const pts = [];
 
     for (let j = 0; j <= rows; j++) {
