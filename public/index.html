@@ -52,9 +52,10 @@
       border: 1px solid var(--line);
       background: var(--card);
       border-radius: 999px;
-      padding: 7px 10px;
+      padding: 7px 12px;
       font: inherit;
       font-size: 14px;
+      min-width: 118px;
     }
     .new {
       border: 1px solid var(--line);
@@ -204,14 +205,19 @@
       background: #111; color: #fff; cursor: pointer; font-size: 12px; line-height: 20px;
     }
     .icon {
-      width: 36px; height: 36px;
-      border: 1px solid transparent;
-      border-radius: 50%;
-      background: none;
-      color: #444;
+      height: 36px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--bg);
+      color: #222;
       cursor: pointer;
       flex: none;
-      display: grid; place-items: center;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 10px;
+      font: inherit;
+      font-size: 13px;
     }
     #menu {
       display: none;
@@ -330,6 +336,7 @@
       <div id="menu"></div>
       <button class="icon" id="photo-btn" type="button" aria-label="Add a photo">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7.5A2.5 2.5 0 0 1 6.5 5h2.2l.7-1.2A1.5 1.5 0 0 1 10.7 3h2.6a1.5 1.5 0 0 1 1.3.8L15.3 5h2.2A2.5 2.5 0 0 1 20 7.5v9A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5v-9Z" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12.5" r="3.2" stroke="currentColor" stroke-width="1.7"/></svg>
+        <span id="photo-label">Photo</span>
       </button>
       <input id="file" type="file" accept="image/jpeg,image/png,image/webp" hidden />
       <div class="composer-main">
@@ -412,6 +419,7 @@
       document.getElementById("lang-label").textContent = copy.lang;
       q.placeholder = copy.placeholder;
       document.getElementById("photo-btn").setAttribute("aria-label", copy.photo);
+      document.getElementById("photo-label").textContent = copy.photo;
       renderTopics();
     }
     function setLang(next) {

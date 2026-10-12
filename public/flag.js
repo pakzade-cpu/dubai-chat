@@ -60,11 +60,11 @@ function startFlag(root) {
         const u = i / cols;
         const v = j / rows;
         const wave =
-          Math.sin(u * 3.6 - t * 2.4) * (10 + 26 * u) +
-          Math.sin(v * 2.8 + t * 1.6) * (5 + 9 * u);
+          Math.sin(u * 3.2 - t * 2.6) * (14 + 34 * u) +
+          Math.sin(v * 2.4 + t * 1.8) * (7 + 12 * u);
         const x = ox + u * clothW;
-        const y = oy + v * clothH + wave * 0.18;
-        const z = 36 + u * 42 - wave;
+        const y = oy + v * clothH + wave * 0.28;
+        const z = 18 + u * 70 - wave * 1.15;
         const p = project(x - w * 0.08, y, z);
         pts[j][i] = [p[0] + w * 0.08, p[1], p[2], wave];
       }
