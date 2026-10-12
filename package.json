@@ -2,6 +2,9 @@
   "name": "dubai",
   "private": true,
   "type": "module",
-  "scripts": { "start": "node server.js" },
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --check server.js && node --check guides.js && node -e \"import { topics, SYSTEM } from './guides.js'; if (topics.length !== 12) throw new Error('expected 12 topics'); if (!SYSTEM.includes('UTC+4') || !SYSTEM.includes('not a government website')) throw new Error('prompt missing required rules');\""
+  },
   "dependencies": { "express": "^4.21.2" }
 }

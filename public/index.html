@@ -23,6 +23,11 @@
     h2 { font-size: 15px; margin: 18px 0 8px; }
     .services { display: flex; flex-wrap: wrap; gap: 8px; }
     .services button, #menu button { border: 1px solid #d9d0c0; background: white; border-radius: 999px; padding: 8px 12px; cursor: pointer; }
+    .services button.on { background: #0e1c27; color: #f6f1e7; border-color: #0e1c27; }
+    #topic { display: none; margin-top: 10px; }
+    #topic p { margin: 6px 0 10px; color: #52616b; font-size: 14px; }
+    #topic .links { display: flex; flex-wrap: wrap; gap: 8px; }
+    #topic a { color: #0e6b57; text-decoration: none; border: 1px solid #d9d0c0; background: #fffdf8; border-radius: 999px; padding: 6px 10px; font-size: 13px; }
     #log { margin-top: 14px; }
     .msg { white-space: pre-wrap; padding: 12px 14px; border-radius: 16px; margin: 10px 0; line-height: 1.5; }
     .user { background: #0e6b57; color: white; margin-left: 18%; }
@@ -52,6 +57,13 @@
       <div class="card"><strong>Daily life</strong><span>Power and water, roads, health, police, and phones are run by named authorities. Use the buttons to see who does what.</span></div>
       <div class="card"><strong>Getting help</strong><span>This assistant explains public information. Accounts, payments, visas, and bookings stay on the official site.</span></div>
     </section>
+    <h2>Topic guides</h2>
+    <div class="services" id="topics"></div>
+    <div class="card" id="topic">
+      <strong id="topic-name"></strong>
+      <p id="topic-about"></p>
+      <div class="links" id="topic-links"></div>
+    </div>
     <h2>Public services</h2>
     <div class="services" id="services"></div>
     <div id="log"></div>
@@ -83,8 +95,23 @@
       ["du", "https://www.du.ae", "Phone and internet"],
       ["Dubai.ae", "https://www.dubai.ae", "Government portal"]
     ];
+    const fallbackTopics = [
+      { id: "itinerary", name: "Trip itinerary", about: "Day-by-day plans by days, budget, season, and group", prompt: "Help me plan a Dubai trip. Ask only if you need days, dates or month, budget, interests, group, and where we stay. Then give a day-by-day plan by area with transport tips and official links. Do not invent ticket prices.", links: [["Visit Dubai", "https://www.visitdubai.com/en"], ["RTA", "https://www.rta.ae"], ["Expo City", "https://expocitydubai.com"]] },
+      { id: "visa", name: "Visa and government", about: "Visas, residency, Emirates ID, and official procedures", prompt: "Walk me through a Dubai or UAE government procedure (visa, residency, Emirates ID, Golden Visa, or licence). Give a checklist with the right authority and official links. Do not invent fees or ask for passport numbers.", links: [["UAE portal", "https://u.ae"], ["ICP", "https://icp.gov.ae"], ["GDRFA Dubai", "https://gdrfad.gov.ae"], ["MOHRE", "https://www.mohre.gov.ae"]] },
+      { id: "events", name: "Events and news", about: "This week's events and recent Dubai announcements", prompt: "Give me this week's Dubai events and the top recent Dubai news. Use Dubai time (UTC+4), group events by day, and link sources. Say if you could not verify something.", links: [["Visit Dubai events", "https://www.visitdubai.com/en"], ["Dubai Calendar", "https://www.dubaicalendar.ae"], ["Expo City", "https://expocitydubai.com"]] },
+      { id: "cost", name: "Cost of living", about: "Rent ranges, utilities, and monthly household costs", prompt: "Help me estimate monthly living costs and rent in Dubai. Ask only if you need household size, area, home type, and lifestyle. Give ranges with sources and dates. Never invent numbers.", links: [["Dubai Land Department", "https://dubailand.gov.ae"], ["DEWA", "https://www.dewa.gov.ae"], ["KHDA", "https://www.khda.gov.ae"], ["RTA", "https://www.rta.ae"]] },
+      { id: "business", name: "Business setup", about: "Mainland vs free zone, licensing steps, and tax basics", prompt: "I want to start a company in Dubai. Compare mainland vs free zone for my activity, outline licence steps, and give tax basics with official links. Do not invent fees. This is not final legal or tax advice.", links: [["Dubai Economy and Tourism", "https://www.dubaidet.gov.ae"], ["Federal Tax Authority", "https://tax.gov.ae"], ["UAE portal", "https://u.ae"], ["MOHRE", "https://www.mohre.gov.ae"]] },
+      { id: "prayer", name: "Prayer and holidays", about: "Prayer times, UAE holidays, Ramadan, and Eid", prompt: "Give today's Dubai prayer times, this year's UAE public holidays, and how Ramadan or Eid changes hours and etiquette. Use Dubai time (UTC+4) and official sources.", links: [["IACAD", "https://www.iacad.gov.ae"], ["UAE holidays", "https://u.ae"]] },
+      { id: "property", name: "Buying property", about: "Freehold areas, purchase steps, costs, and property visas", prompt: "Explain how buying property in Dubai works (ready or off-plan). Cover freehold areas, the usual steps, fees to verify on DLD, and property-linked visas. Warn about escrow and scams. Do not invent fees.", links: [["Dubai Land Department", "https://dubailand.gov.ae"], ["GDRFA Dubai", "https://gdrfad.gov.ae"], ["ICP", "https://icp.gov.ae"]] },
+      { id: "schools", name: "Schools", about: "Private schools, KHDA ratings, fees, and admissions", prompt: "Help me shortlist Dubai schools or nurseries. Ask only if you need ages, curriculum, area, and budget. Use KHDA ratings and approved fee ranges. Never invent school fees.", links: [["KHDA", "https://www.khda.gov.ae"]] },
+      { id: "health", name: "Healthcare", about: "Insurance rules, hospitals, visa medicals, and medicines", prompt: "Explain Dubai healthcare and mandatory health insurance. Include emergencies, how to find care, visa medical fitness tests, and medicine rules. Link DHA and official pages.", links: [["Dubai Health Authority", "https://www.dha.gov.ae"], ["UAE portal", "https://u.ae"]] },
+      { id: "transport", name: "Transport and driving", about: "Metro, Nol, Salik, licences, parking, and traffic fines", prompt: "Explain getting around Dubai: Metro, Nol, taxis, driving licences, Salik, parking, and how to check traffic fines. Link RTA and Dubai Police. Do not quote fine amounts unless you can verify them.", links: [["RTA", "https://www.rta.ae"], ["Dubai Police", "https://www.dubaipolice.gov.ae"]] },
+      { id: "safety", name: "Safety and laws", about: "Emergency numbers, local laws, and visitor etiquette", prompt: "Give Dubai emergency numbers and the main laws and etiquette visitors and residents should know. Link official pages. Do not invent rules.", links: [["Dubai Police", "https://www.dubaipolice.gov.ae"], ["UAE portal", "https://u.ae"]] },
+      { id: "airport", name: "Airport and transit", about: "DXB and DWC arrival, visas, customs, and getting into the city", prompt: "I am flying into, out of, or transiting Dubai (DXB or DWC). Explain terminals, entry or transit visas, customs, and transport into the city. Verify rules on official sites.", links: [["Dubai Airports", "https://www.dubaiairports.ae"], ["Dubai Customs", "https://www.dubaicustoms.gov.ae"], ["GDRFA Dubai", "https://gdrfad.gov.ae"], ["UAE portal", "https://u.ae"]] }
+    ];
     const log = document.getElementById("log"), q = document.getElementById("q"), menu = document.getElementById("menu");
     const history = [];
+    let topics = fallbackTopics;
     function add(cls, text) {
       const d = document.createElement("div");
       d.className = "msg " + cls; d.textContent = text; log.appendChild(d); return d;
@@ -93,6 +120,31 @@
       q.value = "Explain " + name + " for someone new to Dubai. What does it do (" + about + "), what can a visitor do on the public website, and what must be done only on the official site " + url + "? Keep it practical and do not refuse the explanation.";
       q.focus();
     }
+    function showTopic(topic) {
+      document.querySelectorAll("#topics button").forEach((b) => b.classList.toggle("on", b.dataset.id === topic.id));
+      document.getElementById("topic-name").textContent = topic.name;
+      document.getElementById("topic-about").textContent = topic.about;
+      const links = document.getElementById("topic-links");
+      links.innerHTML = "";
+      for (const [label, href] of topic.links) {
+        const a = document.createElement("a");
+        a.href = href; a.target = "_blank"; a.rel = "noopener noreferrer"; a.textContent = label;
+        links.appendChild(a);
+      }
+      document.getElementById("topic").style.display = "block";
+      q.value = topic.prompt;
+      q.focus();
+    }
+    function renderTopics() {
+      const box = document.getElementById("topics");
+      box.innerHTML = "";
+      for (const topic of topics) {
+        const b = document.createElement("button");
+        b.type = "button"; b.textContent = topic.name; b.dataset.id = topic.id;
+        b.onclick = () => showTopic(topic);
+        box.appendChild(b);
+      }
+    }
     const box = document.getElementById("services");
     for (const s of sectors) {
       const b = document.createElement("button");
@@ -100,12 +152,27 @@
       b.onclick = () => ask(s[0], s[1], s[2]);
       box.appendChild(b);
     }
+    renderTopics();
+    fetch("/guides").then((r) => r.json()).then((data) => {
+      if (Array.isArray(data.topics) && data.topics.length) {
+        topics = data.topics;
+        renderTopics();
+      }
+    }).catch(() => {});
     q.oninput = () => {
       if (!q.value.startsWith("/")) { menu.style.display = "none"; return; }
       const f = q.value.slice(1).toLowerCase();
       menu.innerHTML = "";
       menu.style.display = "block";
-      for (const s of sectors.filter(x => x[0].toLowerCase().includes(f))) {
+      const serviceHits = sectors.filter((x) => x[0].toLowerCase().includes(f) || x[2].toLowerCase().includes(f));
+      const topicHits = topics.filter((t) => t.name.toLowerCase().includes(f) || t.about.toLowerCase().includes(f));
+      for (const t of topicHits) {
+        const b = document.createElement("button");
+        b.type = "button"; b.textContent = t.name + " — " + t.about;
+        b.onclick = () => { menu.style.display = "none"; showTopic(t); };
+        menu.appendChild(b);
+      }
+      for (const s of serviceHits) {
         const b = document.createElement("button");
         b.type = "button"; b.textContent = s[0] + " — " + s[2];
         b.onclick = () => { menu.style.display = "none"; ask(s[0], s[1], s[2]); };

@@ -1,18 +1,16 @@
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
+import { SYSTEM, topics } from "./guides.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 app.use(express.json({ limit: "32kb" }));
 app.use(express.static(path.join(__dirname, "public")));
 
-const SYSTEM = `You are Dubai, a practical assistant for visitors and residents.
-Answer the question first, in plain language, then give the useful detail.
-If they name a service, explain what it does, who it is for, the usual public steps, and the official website. Do not refuse a general explanation.
-You cannot log in, pay, book, or change an account. Mention that only if they ask you to do one of those things.
-Do not invent fees, laws, dates, or phone numbers. If a rule changes often, say to confirm it on the official page.
-Keep a short, direct tone. No lecture. No "as an AI" line.`;
+app.get("/guides", (_req, res) => {
+  res.json({ topics });
+});
 
 app.post("/chat", async (req, res) => {
   const key = process.env.XAI_API_KEY;
