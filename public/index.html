@@ -47,6 +47,15 @@
       cursor: pointer;
     }
     .brand b { font-size: 16px; letter-spacing: .12em; }
+    .actions { display: flex; align-items: center; gap: 8px; }
+    .lang {
+      border: 1px solid var(--line);
+      background: var(--card);
+      border-radius: 999px;
+      padding: 7px 10px;
+      font: inherit;
+      font-size: 14px;
+    }
     .new {
       border: 1px solid var(--line);
       background: var(--card);
@@ -91,13 +100,13 @@
       padding: 12px 13px;
       cursor: pointer;
       font: inherit;
-      text-align: left;
+      text-align: inherit;
       color: inherit;
     }
-    .starter:hover, .svc:hover, .new:hover { border-color: #cfcfcf; box-shadow: 0 6px 18px rgba(0,0,0,.04); }
+    .starter:hover, .svc:hover, .new:hover, .icon:hover { border-color: #cfcfcf; box-shadow: 0 6px 18px rgba(0,0,0,.04); }
     .starter strong, .svc strong { display: block; font-size: 14px; }
     .starter span, .svc span { display: block; margin-top: 3px; color: var(--muted); font-size: 13px; line-height: 1.35; }
-    .more { width: 100%; margin-top: 8px; text-align: left; }
+    .more { width: 100%; margin-top: 8px; text-align: start; }
     .more summary {
       list-style: none;
       cursor: pointer;
@@ -146,6 +155,14 @@
       padding: 10px 16px;
     }
     .bot .msg { padding: 2px 4px; }
+    .shot {
+      display: block;
+      max-width: 220px;
+      max-height: 160px;
+      border-radius: 12px;
+      margin-bottom: 8px;
+      object-fit: cover;
+    }
     .dots { display: inline-flex; gap: 5px; padding: 8px 2px; }
     .dots i {
       width: 7px; height: 7px; border-radius: 50%; background: #8a8a8a;
@@ -167,10 +184,34 @@
       border: 1px solid var(--line);
       border-radius: 28px;
       box-shadow: 0 8px 28px rgba(0,0,0,.05);
-      padding: 8px 8px 8px 18px;
+      padding: 8px 8px 8px 12px;
       display: flex;
       align-items: flex-end;
       gap: 8px;
+    }
+    .composer-main { flex: 1; min-width: 0; }
+    #preview {
+      display: none;
+      position: relative;
+      width: max-content;
+      margin: 6px 6px 0;
+    }
+    #preview.on { display: block; }
+    #preview img { width: 72px; height: 72px; object-fit: cover; border-radius: 12px; }
+    #preview button {
+      position: absolute; top: -6px; right: -6px;
+      width: 20px; height: 20px; border: 0; border-radius: 50%;
+      background: #111; color: #fff; cursor: pointer; font-size: 12px; line-height: 20px;
+    }
+    .icon {
+      width: 36px; height: 36px;
+      border: 1px solid transparent;
+      border-radius: 50%;
+      background: none;
+      color: #444;
+      cursor: pointer;
+      flex: none;
+      display: grid; place-items: center;
     }
     #menu {
       display: none;
@@ -187,7 +228,7 @@
     #menu button {
       display: block;
       width: 100%;
-      text-align: left;
+      text-align: start;
       border: 0;
       background: none;
       border-radius: 10px;
@@ -197,7 +238,7 @@
     }
     #menu button:hover { background: var(--bg); }
     textarea {
-      flex: 1;
+      width: 100%;
       border: 0;
       resize: none;
       outline: none;
@@ -226,21 +267,25 @@
     }
     .flag-scene {
       position: relative;
-      width: 220px;
-      height: 150px;
+      width: 280px;
+      height: 186px;
     }
-    .flag-scene.mini { width: 56px; height: 36px; }
+    .flag-scene.mini { width: 64px; height: 42px; }
     .flag-scene canvas { display: block; width: 100%; height: 100%; }
+    html[dir="rtl"] .starters, html[dir="rtl"] .starter { text-align: right; }
+    html[dir="rtl"] .composer { padding: 8px 12px 8px 8px; }
     @media (max-width: 760px) {
       h1 { font-size: 28px; }
       .starters { grid-template-columns: 1fr 1fr; }
       .msg { max-width: 92%; }
+      .flag-scene { width: 220px; height: 150px; }
+      .lang { max-width: 120px; }
     }
     @media (max-width: 520px) {
       .starters { grid-template-columns: 1fr; }
     }
     @media (prefers-reduced-motion: reduce) {
-      .flag-cloth i, .dots i { animation: none; }
+      .dots i { animation: none; }
     }
   </style>
 </head>
@@ -250,17 +295,23 @@
       <span class="flag-scene mini" id="flag-mini" aria-hidden="true"><canvas></canvas></span>
       <b>DUBAI</b>
     </button>
-    <button class="new" id="reset" type="button">New chat</button>
+    <div class="actions">
+      <label>
+        <span class="sr" id="lang-label" hidden>Language</span>
+        <select class="lang" id="lang" aria-labelledby="lang-label"></select>
+      </label>
+      <button class="new" id="reset" type="button">New chat</button>
+    </div>
   </header>
   <main>
     <div class="stage">
       <section id="welcome">
         <div class="flag-scene" id="flag-hero" aria-label="UAE flag"><canvas></canvas></div>
-        <h1>Ask about Dubai</h1>
-        <p class="lead">Visas, trips, rent, schools, and daily life — tap a topic or type a question. Not a government website.</p>
+        <h1 id="headline">Ask about Dubai</h1>
+        <p class="lead" id="lead">Visas, trips, rent, schools, and daily life — tap a topic, type a question, or add a photo. Not a government website.</p>
         <div class="starters" id="topics"></div>
         <details class="more">
-          <summary>Official websites</summary>
+          <summary id="official">Official websites</summary>
           <div class="svcs" id="services"></div>
         </details>
       </section>
@@ -277,13 +328,22 @@
     </div>
     <div class="composer">
       <div id="menu"></div>
-      <textarea id="q" rows="1" placeholder="Ask anything about Dubai" autocomplete="off"></textarea>
+      <button class="icon" id="photo-btn" type="button" aria-label="Add a photo">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7.5A2.5 2.5 0 0 1 6.5 5h2.2l.7-1.2A1.5 1.5 0 0 1 10.7 3h2.6a1.5 1.5 0 0 1 1.3.8L15.3 5h2.2A2.5 2.5 0 0 1 20 7.5v9A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5v-9Z" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12.5" r="3.2" stroke="currentColor" stroke-width="1.7"/></svg>
+      </button>
+      <input id="file" type="file" accept="image/jpeg,image/png,image/webp" hidden />
+      <div class="composer-main">
+        <div id="preview"><img id="preview-img" alt="" /><button type="button" id="clear-photo" aria-label="Remove photo">×</button></div>
+        <textarea id="q" rows="1" placeholder="Ask anything about Dubai" autocomplete="off"></textarea>
+      </div>
       <button class="send" id="go" aria-label="Send" disabled>
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 13V3M8 3l-4 4M8 3l4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
     </div>
-    <p class="fine">Checks official sources when it can. Not final legal, visa, or tax advice.</p>
+    <p class="fine" id="fine">Checks official sources when it can. Not final legal, visa, or tax advice.</p>
   </form>
+  <script src="/i18n.js"></script>
+  <script src="/flag.js"></script>
   <script>
     const sectors = [
       ["DEWA", "https://www.dewa.gov.ae", "Electricity and water"],
@@ -324,83 +384,88 @@
     const history = [];
     let topics = fallbackTopics;
     let busy = false;
+    let photo = "";
+    let lang = "en";
 
-    function startFlag(root) {
-      const canvas = root.querySelector("canvas");
-      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      let w = 0, h = 0, t = 0, frame;
-      const art = document.createElement("canvas");
-      const a = art.getContext("2d");
-      function paintFlag(fw, fh) {
-        art.width = fw; art.height = fh;
-        a.fillStyle = "#ef3340"; a.fillRect(0, 0, fw * 0.28, fh);
-        a.fillStyle = "#009739"; a.fillRect(fw * 0.28, 0, fw, fh / 3);
-        a.fillStyle = "#ffffff"; a.fillRect(fw * 0.28, fh / 3, fw, fh / 3);
-        a.fillStyle = "#111111"; a.fillRect(fw * 0.28, (fh * 2) / 3, fw, fh / 3);
-      }
-      function size() {
-        const box = root.getBoundingClientRect();
-        w = Math.max(40, box.width); h = Math.max(28, box.height);
-        canvas.width = w * dpr; canvas.height = h * dpr;
-        paintFlag(200, 120);
-      }
-      const ctx = canvas.getContext("2d");
-      function draw(now) {
-        t = reduce ? 0.6 : now / 420;
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        ctx.clearRect(0, 0, w, h);
-        const poleW = Math.max(3, w * 0.035);
-        const ball = poleW * 1.7;
-        const clothW = w - poleW * 3;
-        const clothH = h * 0.62;
-        const top = h * 0.16;
-        ctx.fillStyle = "#00000022";
-        ctx.beginPath();
-        ctx.ellipse(w * 0.55, h * 0.92, clothW * 0.42, h * 0.07, 0, 0, Math.PI * 2);
-        ctx.fill();
-        const g = ctx.createLinearGradient(0, 0, poleW, 0);
-        g.addColorStop(0, "#6a6a6a"); g.addColorStop(0.45, "#f3f3f3"); g.addColorStop(1, "#6f6f6f");
-        ctx.fillStyle = g;
-        ctx.fillRect(poleW * 0.6, ball, poleW, h - ball - 4);
-        const shine = ctx.createRadialGradient(poleW, ball * 0.7, 1, poleW * 1.1, ball, ball);
-        shine.addColorStop(0, "#fff4c2"); shine.addColorStop(0.55, "#c4a056"); shine.addColorStop(1, "#7a5a14");
-        ctx.fillStyle = shine;
-        ctx.beginPath(); ctx.arc(poleW * 1.1, ball, ball, 0, Math.PI * 2); ctx.fill();
-        const cols = 36;
-        for (let i = 0; i < cols; i++) {
-          const p = i / cols;
-          const wave = Math.sin(t + p * 3.1) * (6 + p * 10);
-          const drop = Math.sin(t * 0.7 + p * 2.2) * (2 + p * 4);
-          const bright = 0.82 + 0.28 * Math.sin(t + p * 3.1);
-          ctx.save();
-          ctx.filter = "brightness(" + bright + ")";
-          ctx.drawImage(
-            art,
-            p * art.width, 0, art.width / cols + 1, art.height,
-            poleW * 1.7 + p * clothW,
-            top + wave,
-            clothW / cols + 1.2,
-            clothH + drop
-          );
-          ctx.restore();
-        }
-        if (!reduce) frame = requestAnimationFrame(draw);
-      }
-      size();
-      draw(0);
-      window.addEventListener("resize", () => { size(); if (reduce) draw(0); });
-    }
     startFlag(document.getElementById("flag-hero"));
     startFlag(document.getElementById("flag-mini"));
+
+    function t() { return I18N[lang] || I18N.en; }
+    function topicCopy(topic) {
+      const pack = t().topics && t().topics[topic.id];
+      return {
+        name: (pack && pack.name) || topic.name,
+        ask: (pack && pack.ask) || topic.ask,
+        about: topic.about
+      };
+    }
+    function applyLang() {
+      const copy = t();
+      const meta = LANGS.find((x) => x.id === lang) || LANGS[0];
+      document.documentElement.lang = lang;
+      document.documentElement.dir = meta.dir;
+      document.getElementById("headline").textContent = copy.title;
+      document.getElementById("lead").textContent = copy.lead;
+      document.getElementById("reset").textContent = copy.newChat;
+      document.getElementById("official").textContent = copy.official;
+      document.getElementById("fine").textContent = copy.fine;
+      document.getElementById("lang-label").textContent = copy.lang;
+      q.placeholder = copy.placeholder;
+      document.getElementById("photo-btn").setAttribute("aria-label", copy.photo);
+      renderTopics();
+    }
+    function setLang(next) {
+      lang = I18N[next] ? next : "en";
+      localStorage.setItem("dubai-lang", lang);
+      document.getElementById("lang").value = lang;
+      applyLang();
+    }
+    const langSel = document.getElementById("lang");
+    for (const item of LANGS) {
+      const o = document.createElement("option");
+      o.value = item.id; o.textContent = item.label;
+      langSel.appendChild(o);
+    }
+    const guess = (navigator.language || "en").slice(0, 2).toLowerCase();
+    setLang(localStorage.getItem("dubai-lang") || (I18N[guess] ? guess : "en"));
+    langSel.onchange = () => setLang(langSel.value);
 
     function grow() {
       q.style.height = "auto";
       q.style.height = Math.min(q.scrollHeight, 160) + "px";
-      go.disabled = busy || !q.value.trim() || q.value.startsWith("/");
+      go.disabled = busy || (!q.value.trim() && !photo) || q.value.startsWith("/");
+    }
+    function clearPhoto() {
+      photo = "";
+      document.getElementById("file").value = "";
+      document.getElementById("preview").classList.remove("on");
+      grow();
+    }
+    function readPhoto(file) {
+      return new Promise((resolve, reject) => {
+        if (!file || !/^image\/(jpeg|png|webp)$/i.test(file.type)) return reject(new Error("type"));
+        const img = new Image();
+        const url = URL.createObjectURL(file);
+        img.onload = () => {
+          const max = 1280;
+          let w = img.width, h = img.height;
+          if (Math.max(w, h) > max) {
+            const s = max / Math.max(w, h);
+            w = Math.round(w * s); h = Math.round(h * s);
+          }
+          const c = document.createElement("canvas");
+          c.width = w; c.height = h;
+          c.getContext("2d").drawImage(img, 0, 0, w, h);
+          URL.revokeObjectURL(url);
+          resolve(c.toDataURL("image/jpeg", 0.78));
+        };
+        img.onerror = reject;
+        img.src = url;
+      });
     }
     function showTopic(topic) {
-      document.getElementById("topic-name").textContent = topic.name;
+      const copy = topicCopy(topic);
+      document.getElementById("topic-name").textContent = copy.name;
       document.getElementById("topic-about").textContent = topic.about;
       const links = document.getElementById("topic-links");
       links.innerHTML = "";
@@ -411,45 +476,62 @@
       }
       document.getElementById("topic").style.display = "block";
     }
-    function add(role, text, pending) {
+    function add(role, text, pending, image) {
       const wrap = document.createElement("div");
       wrap.className = "row-msg " + role;
       const d = document.createElement("div");
       d.className = "msg";
+      if (image) {
+        const img = document.createElement("img");
+        img.className = "shot"; img.src = image; img.alt = "";
+        d.appendChild(img);
+      }
       if (pending) {
-        d.innerHTML = '<span class="dots"><i></i><i></i><i></i></span>';
-      } else {
-        d.textContent = text;
+        const dots = document.createElement("span");
+        dots.className = "dots"; dots.innerHTML = "<i></i><i></i><i></i>";
+        d.appendChild(dots);
+      } else if (text) {
+        d.appendChild(document.createTextNode(text));
       }
       wrap.appendChild(d);
       log.appendChild(wrap);
       main.scrollTop = main.scrollHeight;
       return d;
     }
-    async function send(text) {
-      text = (text || "").trim();
-      if (!text || text.startsWith("/") || busy) return;
+    function userPayload(text, image) {
+      if (!image) return text;
+      return [
+        { type: "image_url", image_url: { url: image, detail: "high" } },
+        { type: "text", text: text }
+      ];
+    }
+    async function send(text, image) {
+      const copy = t();
+      text = (text || q.value || "").trim();
+      image = image === undefined ? photo : image;
+      if ((!text && !image) || String(text).startsWith("/") || busy) return;
+      if (!text) text = copy.photoAsk;
       document.body.classList.add("chatting");
-      q.value = ""; grow(); menu.style.display = "none";
-      history.push({ role: "user", content: text });
-      add("user", text);
+      q.value = ""; menu.style.display = "none";
+      const payload = userPayload(text, image);
+      history.push({ role: "user", content: payload });
+      add("user", text, false, image);
+      if (image) clearPhoto(); else grow();
       const pending = add("bot", "", true);
       busy = true; go.disabled = true;
       try {
         const r = await fetch("/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ messages: history, search: true })
+          body: JSON.stringify({ messages: history, language: lang, search: true })
         });
         const data = await r.json().catch(() => ({}));
         const raw = data.text || data.error || "No reply";
-        const reply = String(raw).includes("XAI_API_KEY")
-          ? "The assistant is temporarily unavailable. Please try again in a moment."
-          : raw;
+        const reply = String(raw).includes("XAI_API_KEY") ? copy.offline : raw;
         pending.textContent = reply;
         if (data.text) history.push({ role: "assistant", content: data.text });
       } catch {
-        pending.textContent = "Could not reach the assistant. Try again.";
+        pending.textContent = copy.reach;
       }
       busy = false; grow();
       main.scrollTop = main.scrollHeight;
@@ -459,20 +541,22 @@
       log.innerHTML = "";
       document.body.classList.remove("chatting");
       document.getElementById("topic").style.display = "none";
-      q.value = ""; grow();
+      q.value = "";
+      clearPhoto();
       q.focus();
     }
     function renderTopics() {
       const box = document.getElementById("topics");
       box.innerHTML = "";
       for (const topic of topics) {
+        const copy = topicCopy(topic);
         const b = document.createElement("button");
         b.type = "button";
         b.className = "starter";
         b.innerHTML = "<strong></strong><span></span>";
-        b.querySelector("strong").textContent = topic.name;
-        b.querySelector("span").textContent = topic.ask || topic.about;
-        b.onclick = () => { showTopic(topic); send(topic.ask || topic.name); };
+        b.querySelector("strong").textContent = copy.name;
+        b.querySelector("span").textContent = copy.ask;
+        b.onclick = () => { showTopic(topic); send(copy.ask); };
         box.appendChild(b);
       }
     }
@@ -493,18 +577,36 @@
         renderTopics();
       }
     }).catch(() => {});
+    document.getElementById("photo-btn").onclick = () => document.getElementById("file").click();
+    document.getElementById("file").onchange = async (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      try {
+        photo = await readPhoto(file);
+        document.getElementById("preview-img").src = photo;
+        document.getElementById("preview").classList.add("on");
+        grow();
+      } catch {
+        clearPhoto();
+      }
+    };
+    document.getElementById("clear-photo").onclick = clearPhoto;
     q.oninput = () => {
       grow();
       if (!q.value.startsWith("/")) { menu.style.display = "none"; return; }
       const f = q.value.slice(1).toLowerCase();
       menu.innerHTML = "";
       menu.style.display = "block";
-      const topicHits = topics.filter((t) => t.name.toLowerCase().includes(f) || (t.about || "").toLowerCase().includes(f));
+      const topicHits = topics.filter((x) => {
+        const copy = topicCopy(x);
+        return copy.name.toLowerCase().includes(f) || (x.about || "").toLowerCase().includes(f);
+      });
       const serviceHits = sectors.filter((x) => x[0].toLowerCase().includes(f) || x[2].toLowerCase().includes(f));
-      for (const t of topicHits) {
+      for (const topic of topicHits) {
+        const copy = topicCopy(topic);
         const b = document.createElement("button");
-        b.type = "button"; b.textContent = t.name + " — " + (t.ask || t.about);
-        b.onclick = () => { menu.style.display = "none"; showTopic(t); send(t.ask || t.name); };
+        b.type = "button"; b.textContent = copy.name + " — " + copy.ask;
+        b.onclick = () => { menu.style.display = "none"; showTopic(topic); send(copy.ask); };
         menu.appendChild(b);
       }
       for (const s of serviceHits) {
@@ -517,10 +619,10 @@
     q.onkeydown = (e) => {
       if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
-        send(q.value);
+        send();
       }
     };
-    document.getElementById("f").onsubmit = (e) => { e.preventDefault(); send(q.value); };
+    document.getElementById("f").onsubmit = (e) => { e.preventDefault(); send(); };
     document.getElementById("reset").onclick = reset;
     document.getElementById("home").onclick = reset;
     grow();
