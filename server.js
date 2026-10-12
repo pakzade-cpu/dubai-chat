@@ -91,7 +91,10 @@ app.post("/chat", async (req, res) => {
     SYSTEM +
     "\n\nReply in this language unless the user writes in a different one: " +
     lang +
-    ".";
+    "." +
+    (req.body.voice
+      ? "\nThe user asked by voice. Keep the reply concise and easy to hear: short sentences, no long tables."
+      : "");
 
   const r = await fetch("https://api.x.ai/v1/chat/completions", {
     method: "POST",

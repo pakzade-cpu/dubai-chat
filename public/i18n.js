@@ -1,18 +1,18 @@
 const LANGS = [
-  { id: "en", label: "English", dir: "ltr" },
-  { id: "ar", label: "العربية", dir: "rtl" },
-  { id: "hi", label: "हिन्दी", dir: "ltr" },
-  { id: "ur", label: "اردو", dir: "rtl" },
-  { id: "ru", label: "Русский", dir: "ltr" },
-  { id: "zh", label: "中文", dir: "ltr" },
-  { id: "fr", label: "Français", dir: "ltr" },
-  { id: "tl", label: "Filipino", dir: "ltr" }
+  { id: "en", label: "English", dir: "ltr", speech: "en-AE" },
+  { id: "ar", label: "العربية", dir: "rtl", speech: "ar-AE" },
+  { id: "hi", label: "हिन्दी", dir: "ltr", speech: "hi-IN" },
+  { id: "ur", label: "اردو", dir: "rtl", speech: "ur-PK" },
+  { id: "ru", label: "Русский", dir: "ltr", speech: "ru-RU" },
+  { id: "zh", label: "中文", dir: "ltr", speech: "zh-CN" },
+  { id: "fr", label: "Français", dir: "ltr", speech: "fr-FR" },
+  { id: "tl", label: "Filipino", dir: "ltr", speech: "fil-PH" }
 ];
 
 const I18N = {
   en: {
     title: "Ask about Dubai",
-    lead: "Visas, trips, rent, schools, and daily life — tap a topic, type a question, or add a photo. Not a government website.",
+    lead: "Visas, trips, rent, schools, and daily life — tap a topic, type, add a photo, or use Voice. Not a government website.",
     newChat: "New chat",
     placeholder: "Ask anything about Dubai",
     official: "Official websites",
@@ -22,6 +22,9 @@ const I18N = {
     offline: "The assistant is temporarily unavailable. Please try again in a moment.",
     reach: "Could not reach the assistant. Try again.",
     lang: "Language",
+    voice: "Voice",
+    listening: "Listening…",
+    noVoice: "Voice is not available in this browser. Try Chrome or Safari on this page.",
     topics: {
       itinerary: { name: "Trip itinerary", ask: "Plan a 4-day Dubai trip for me" },
       visa: { name: "Visa and government", ask: "Do I need a visa for Dubai?" },
@@ -39,7 +42,7 @@ const I18N = {
   },
   ar: {
     title: "اسأل عن دبي",
-    lead: "تأشيرات، رحلات، إيجار، مدارس والحياة اليومية — اختر موضوعاً أو اكتب سؤالاً أو أضف صورة. هذا ليس موقعاً حكومياً.",
+    lead: "تأشيرات، رحلات، إيجار، مدارس والحياة اليومية — اختر موضوعاً أو اكتب أو أضف صورة أو استخدم الصوت. هذا ليس موقعاً حكومياً.",
     newChat: "محادثة جديدة",
     placeholder: "اسأل أي شيء عن دبي",
     official: "مواقع رسمية",
@@ -49,6 +52,9 @@ const I18N = {
     offline: "المساعد غير متاح مؤقتاً. حاول مرة أخرى بعد قليل.",
     reach: "تعذر الوصول إلى المساعد. حاول مرة أخرى.",
     lang: "اللغة",
+    voice: "صوت",
+    listening: "جارٍ الاستماع…",
+    noVoice: "الصوت غير متاح في هذا المتصفح. جرّب Chrome أو Safari.",
     topics: {
       itinerary: { name: "برنامج الرحلة", ask: "خطط لي رحلة 4 أيام في دبي" },
       visa: { name: "التأشيرة والحكومة", ask: "هل أحتاج تأشيرة لدبي؟" },
@@ -66,7 +72,7 @@ const I18N = {
   },
   hi: {
     title: "दुबई के बारे में पूछें",
-    lead: "वीज़ा, यात्रा, किराया, स्कूल और रोज़मर्रा — विषय चुनें, सवाल लिखें या फ़ोटो जोड़ें। यह सरकारी वेबसाइट नहीं है।",
+    lead: "वीज़ा, यात्रा, किराया, स्कूल और रोज़मर्रा — विषय चुनें, लिखें, फ़ोटो जोड़ें या आवाज़ का उपयोग करें। यह सरकारी वेबसाइट नहीं है।",
     newChat: "नई बातचीत",
     placeholder: "दुबई के बारे में कुछ भी पूछें",
     official: "आधिकारिक वेबसाइटें",
@@ -76,6 +82,9 @@ const I18N = {
     offline: "सहायक अभी उपलब्ध नहीं है। थोड़ी देर बाद कोशिश करें।",
     reach: "सहायक से संपर्क नहीं हो सका। फिर कोशिश करें।",
     lang: "भाषा",
+    voice: "आवाज़",
+    listening: "सुन रहा है…",
+    noVoice: "इस ब्राउज़र में आवाज़ उपलब्ध नहीं है। Chrome या Safari आज़माएँ।",
     topics: {
       itinerary: { name: "यात्रा योजना", ask: "मेरे लिए 4 दिन की दुबई यात्रा बनाएँ" },
       visa: { name: "वीज़ा और सरकार", ask: "क्या मुझे दुबई के लिए वीज़ा चाहिए?" },
@@ -93,7 +102,7 @@ const I18N = {
   },
   ur: {
     title: "دبئی کے بارے میں پوچھیں",
-    lead: "ویزا، سفر، کرایہ، اسکول اور روزمرہ — موضوع چنیں، سوال لکھیں یا تصویر شامل کریں۔ یہ سرکاری ویب سائٹ نہیں ہے۔",
+    lead: "ویزا، سفر، کرایہ، اسکول اور روزمرہ — موضوع چنیں، لکھیں، تصویر شامل کریں یا آواز استعمال کریں۔ یہ سرکاری ویب سائٹ نہیں ہے۔",
     newChat: "نئی گفتگو",
     placeholder: "دبئی کے بارے میں کچھ بھی پوچھیں",
     official: "سرکاری ویب سائٹس",
@@ -103,6 +112,9 @@ const I18N = {
     offline: "معاون عارضی طور پر دستیاب نہیں۔ تھوڑی دیر بعد کوشش کریں۔",
     reach: "معاون تک نہیں پہنچ سکا۔ دوبارہ کوشش کریں۔",
     lang: "زبان",
+    voice: "آواز",
+    listening: "سن رہا ہے…",
+    noVoice: "اس براؤزر میں آواز دستیاب نہیں۔ Chrome یا Safari استعمال کریں۔",
     topics: {
       itinerary: { name: "سفر کا پلان", ask: "میرے لیے دبئی کا 4 دن کا سفر بنائیں" },
       visa: { name: "ویزا اور حکومت", ask: "کیا مجھے دبئی کے لیے ویزا چاہیے؟" },
@@ -120,7 +132,7 @@ const I18N = {
   },
   ru: {
     title: "Спросите о Дубае",
-    lead: "Визы, поездки, аренда, школы и быт — выберите тему, напишите вопрос или добавьте фото. Это не государственный сайт.",
+    lead: "Визы, поездки, аренда, школы и быт — выберите тему, напишите, добавьте фото или используйте голос. Это не государственный сайт.",
     newChat: "Новый чат",
     placeholder: "Спросите что угодно о Дубае",
     official: "Официальные сайты",
@@ -130,6 +142,9 @@ const I18N = {
     offline: "Помощник временно недоступен. Попробуйте через минуту.",
     reach: "Не удалось связаться с помощником. Попробуйте ещё раз.",
     lang: "Язык",
+    voice: "Голос",
+    listening: "Слушаю…",
+    noVoice: "Голос недоступен в этом браузере. Попробуйте Chrome или Safari.",
     topics: {
       itinerary: { name: "Маршрут поездки", ask: "Составь 4-дневную поездку в Дубай" },
       visa: { name: "Виза и госуслуги", ask: "Нужна ли мне виза в Дубай?" },
@@ -147,7 +162,7 @@ const I18N = {
   },
   zh: {
     title: "询问迪拜",
-    lead: "签证、行程、房租、学校和日常生活 — 点选主题、提问或上传照片。这不是政府网站。",
+    lead: "签证、行程、房租、学校和日常生活 — 点选主题、提问、上传照片或使用语音。这不是政府网站。",
     newChat: "新对话",
     placeholder: "随便问关于迪拜的问题",
     official: "官方网站",
@@ -157,6 +172,9 @@ const I18N = {
     offline: "助手暂时不可用，请稍后再试。",
     reach: "无法连接助手，请重试。",
     lang: "语言",
+    voice: "语音",
+    listening: "正在听…",
+    noVoice: "当前浏览器不支持语音。请使用 Chrome 或 Safari。",
     topics: {
       itinerary: { name: "行程规划", ask: "帮我规划4天迪拜行程" },
       visa: { name: "签证与政务", ask: "去迪拜需要签证吗？" },
@@ -174,7 +192,7 @@ const I18N = {
   },
   fr: {
     title: "Demandez sur Dubaï",
-    lead: "Visas, voyages, loyer, écoles et vie quotidienne — choisissez un sujet, posez une question ou ajoutez une photo. Ce n'est pas un site gouvernemental.",
+    lead: "Visas, voyages, loyer, écoles et vie quotidienne — choisissez un sujet, écrivez, ajoutez une photo ou utilisez la voix. Ce n'est pas un site gouvernemental.",
     newChat: "Nouvelle discussion",
     placeholder: "Demandez n'importe quoi sur Dubaï",
     official: "Sites officiels",
@@ -184,6 +202,9 @@ const I18N = {
     offline: "L'assistant est temporairement indisponible. Réessayez dans un moment.",
     reach: "Impossible de joindre l'assistant. Réessayez.",
     lang: "Langue",
+    voice: "Voix",
+    listening: "Écoute…",
+    noVoice: "La voix n'est pas disponible dans ce navigateur. Essayez Chrome ou Safari.",
     topics: {
       itinerary: { name: "Itinéraire", ask: "Prépare-moi un voyage de 4 jours à Dubaï" },
       visa: { name: "Visa et administration", ask: "Ai-je besoin d'un visa pour Dubaï ?" },
@@ -201,7 +222,7 @@ const I18N = {
   },
   tl: {
     title: "Magtanong tungkol sa Dubai",
-    lead: "Visa, biyahe, upa, eskwela, at pang-araw-araw — pumili ng topic, magtanong, o magdagdag ng litrato. Hindi ito website ng gobyerno.",
+    lead: "Visa, biyahe, upa, eskwela, at pang-araw-araw — pumili ng topic, magtanong, magdagdag ng litrato, o gumamit ng boses. Hindi ito website ng gobyerno.",
     newChat: "Bagong usapan",
     placeholder: "Magtanong kahit ano tungkol sa Dubai",
     official: "Opisyal na website",
@@ -211,6 +232,9 @@ const I18N = {
     offline: "Pansamantalang hindi available ang assistant. Subukan ulit later.",
     reach: "Hindi ma-contact ang assistant. Subukan ulit.",
     lang: "Wika",
+    voice: "Boses",
+    listening: "Nakikinig…",
+    noVoice: "Hindi available ang voice sa browser na ito. Subukan ang Chrome o Safari.",
     topics: {
       itinerary: { name: "Itinerary ng biyahe", ask: "Planuhan mo ako ng 4 na araw sa Dubai" },
       visa: { name: "Visa at gobyerno", ask: "Kailangan ko ba ng visa para sa Dubai?" },

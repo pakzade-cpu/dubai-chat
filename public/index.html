@@ -219,6 +219,16 @@
       font: inherit;
       font-size: 13px;
     }
+    .icon.listening {
+      border-color: var(--gold);
+      background: #f7f1e3;
+      color: #7a5a1e;
+      animation: listen 1.2s ease-in-out infinite;
+    }
+    @keyframes listen {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(196, 160, 86, .4); }
+      50% { box-shadow: 0 0 0 7px rgba(196, 160, 86, 0); }
+    }
     #menu {
       display: none;
       position: absolute;
@@ -289,9 +299,11 @@
     }
     @media (max-width: 520px) {
       .starters { grid-template-columns: 1fr; }
+      .icon span { display: none; }
+      .icon { width: 36px; padding: 0; justify-content: center; }
     }
     @media (prefers-reduced-motion: reduce) {
-      .dots i { animation: none; }
+      .dots i, .icon.listening { animation: none; }
     }
   </style>
 </head>
@@ -314,7 +326,7 @@
       <section id="welcome">
         <div class="flag-scene" id="flag-hero" aria-label="UAE flag"><canvas></canvas></div>
         <h1 id="headline">Ask about Dubai</h1>
-        <p class="lead" id="lead">Visas, trips, rent, schools, and daily life — tap a topic, type a question, or add a photo. Not a government website.</p>
+        <p class="lead" id="lead">Visas, trips, rent, schools, and daily life — tap a topic, type, add a photo, or use Voice. Not a government website.</p>
         <div class="starters" id="topics"></div>
         <details class="more">
           <summary id="official">Official websites</summary>
@@ -337,6 +349,10 @@
       <button class="icon" id="photo-btn" type="button" aria-label="Add a photo">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7.5A2.5 2.5 0 0 1 6.5 5h2.2l.7-1.2A1.5 1.5 0 0 1 10.7 3h2.6a1.5 1.5 0 0 1 1.3.8L15.3 5h2.2A2.5 2.5 0 0 1 20 7.5v9A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5v-9Z" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12.5" r="3.2" stroke="currentColor" stroke-width="1.7"/></svg>
         <span id="photo-label">Photo</span>
+      </button>
+      <button class="icon" id="voice-btn" type="button" aria-label="Voice" aria-pressed="false">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" stroke="currentColor" stroke-width="1.7"/><path d="M6.5 11.5a5.5 5.5 0 0 0 11 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M12 17v3.5M9 20.5h6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        <span id="voice-label">Voice</span>
       </button>
       <input id="file" type="file" accept="image/jpeg,image/png,image/webp" hidden />
       <div class="composer-main">
@@ -393,6 +409,12 @@
     let busy = false;
     let photo = "";
     let lang = "en";
+    let listening = false;
+    let voiceAsked = false;
+    let recognition = null;
+    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const voiceBtn = document.getElementById("voice-btn");
+    const voiceLabel = document.getElementById("voice-label");
 
     startFlag(document.getElementById("flag-hero"));
     startFlag(document.getElementById("flag-mini"));
@@ -420,6 +442,12 @@
       q.placeholder = copy.placeholder;
       document.getElementById("photo-btn").setAttribute("aria-label", copy.photo);
       document.getElementById("photo-label").textContent = copy.photo;
+      const voiceText = listening ? copy.listening : copy.voice;
+      voiceBtn.setAttribute("aria-label", voiceText);
+      voiceLabel.textContent = voiceText;
+      if (listening && recognition) {
+        try { recognition.lang = speechLang(); } catch (_) {}
+      }
       renderTopics();
     }
     function setLang(next) {
@@ -438,6 +466,92 @@
     setLang(localStorage.getItem("dubai-lang") || (I18N[guess] ? guess : "en"));
     langSel.onchange = () => setLang(langSel.value);
 
+    function speechLang() {
+      const meta = LANGS.find((x) => x.id === lang) || LANGS[0];
+      return meta.speech || "en-AE";
+    }
+    function stopTalking() {
+      if (window.speechSynthesis) speechSynthesis.cancel();
+    }
+    function pickVoice(locale) {
+      if (!window.speechSynthesis) return null;
+      const voices = speechSynthesis.getVoices();
+      if (!voices.length) return null;
+      const wanted = String(locale || "").replace("_", "-");
+      const exact = voices.find((v) => (v.lang || "").replace("_", "-") === wanted);
+      if (exact) return exact;
+      const prefix = wanted.slice(0, 2).toLowerCase();
+      return voices.find((v) => (v.lang || "").toLowerCase().startsWith(prefix)) || null;
+    }
+    function speakReply(text) {
+      if (!window.speechSynthesis || !text) return;
+      stopTalking();
+      const u = new SpeechSynthesisUtterance(String(text).slice(0, 1200));
+      u.lang = speechLang();
+      const voice = pickVoice(u.lang);
+      if (voice) u.voice = voice;
+      speechSynthesis.speak(u);
+    }
+    function setListening(on) {
+      listening = on;
+      voiceBtn.classList.toggle("listening", on);
+      voiceBtn.setAttribute("aria-pressed", on ? "true" : "false");
+      const copy = t();
+      const label = on ? copy.listening : copy.voice;
+      voiceBtn.setAttribute("aria-label", label);
+      voiceLabel.textContent = label;
+    }
+    function stopListening() {
+      if (recognition) {
+        try { recognition.onend = null; recognition.stop(); } catch (_) {}
+      }
+      recognition = null;
+      setListening(false);
+    }
+    function startListening() {
+      const copy = t();
+      if (!SpeechRec) {
+        window.alert(copy.noVoice);
+        return;
+      }
+      stopTalking();
+      if (listening) {
+        stopListening();
+        return;
+      }
+      const rec = new SpeechRec();
+      rec.lang = speechLang();
+      rec.interimResults = true;
+      rec.continuous = false;
+      rec.maxAlternatives = 1;
+      rec.onstart = () => setListening(true);
+      rec.onresult = (e) => {
+        let finalText = "";
+        let interim = "";
+        for (let i = e.resultIndex; i < e.results.length; i++) {
+          const said = e.results[i][0].transcript;
+          if (e.results[i].isFinal) finalText += said;
+          else interim += said;
+        }
+        const shown = (finalText || interim).trim();
+        if (shown) {
+          q.value = shown;
+          grow();
+        }
+        if (finalText.trim()) {
+          voiceAsked = true;
+          stopListening();
+          send(finalText.trim());
+        }
+      };
+      rec.onerror = () => stopListening();
+      rec.onend = () => {
+        if (listening) setListening(false);
+        recognition = null;
+      };
+      recognition = rec;
+      try { rec.start(); } catch (_) { stopListening(); }
+    }
     function grow() {
       q.style.height = "auto";
       q.style.height = Math.min(q.scrollHeight, 160) + "px";
@@ -519,6 +633,10 @@
       image = image === undefined ? photo : image;
       if ((!text && !image) || String(text).startsWith("/") || busy) return;
       if (!text) text = copy.photoAsk;
+      const fromVoice = voiceAsked;
+      voiceAsked = false;
+      stopListening();
+      stopTalking();
       document.body.classList.add("chatting");
       q.value = ""; menu.style.display = "none";
       const payload = userPayload(text, image);
@@ -531,15 +649,17 @@
         const r = await fetch("/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ messages: history, language: lang, search: true })
+          body: JSON.stringify({ messages: history, language: lang, search: true, voice: fromVoice })
         });
         const data = await r.json().catch(() => ({}));
         const raw = data.text || data.error || "No reply";
         const reply = String(raw).includes("XAI_API_KEY") ? copy.offline : raw;
         pending.textContent = reply;
         if (data.text) history.push({ role: "assistant", content: data.text });
+        if (fromVoice) speakReply(reply);
       } catch {
         pending.textContent = copy.reach;
+        if (fromVoice) speakReply(copy.reach);
       }
       busy = false; grow();
       main.scrollTop = main.scrollHeight;
@@ -550,6 +670,9 @@
       document.body.classList.remove("chatting");
       document.getElementById("topic").style.display = "none";
       q.value = "";
+      voiceAsked = false;
+      stopListening();
+      stopTalking();
       clearPhoto();
       q.focus();
     }
@@ -586,6 +709,8 @@
       }
     }).catch(() => {});
     document.getElementById("photo-btn").onclick = () => document.getElementById("file").click();
+    voiceBtn.onclick = () => startListening();
+    if (window.speechSynthesis) speechSynthesis.onvoiceschanged = () => {};
     document.getElementById("file").onchange = async (e) => {
       const file = e.target.files && e.target.files[0];
       if (!file) return;
@@ -600,6 +725,7 @@
     };
     document.getElementById("clear-photo").onclick = clearPhoto;
     q.oninput = () => {
+      stopTalking();
       grow();
       if (!q.value.startsWith("/")) { menu.style.display = "none"; return; }
       const f = q.value.slice(1).toLowerCase();
