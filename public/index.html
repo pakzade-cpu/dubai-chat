@@ -111,9 +111,8 @@
     .svc span { display: none; }
     #topic {
       display: none;
-      margin: 0 auto 8px;
       max-width: 760px;
-      padding: 0 16px;
+      margin: 0 auto 10px;
     }
     #topic .box {
       background: var(--card);
@@ -132,7 +131,7 @@
       font-size: 13px;
       background: var(--bg);
     }
-    #log { padding-bottom: 8px; }
+    #log { padding: 18px 0 8px; }
     .row-msg { display: flex; margin: 16px 0; }
     .row-msg.user { justify-content: flex-end; }
     .msg {
@@ -226,60 +225,75 @@
       font-size: 12px;
     }
     .flag-scene {
-      --h: 92px;
+      --h: 118px;
+      position: relative;
       height: var(--h);
       display: flex;
       align-items: flex-end;
-      perspective: 900px;
-      filter: drop-shadow(0 16px 18px rgba(17, 17, 17, .22));
+      perspective: 640px;
     }
-    .flag-scene.mini { --h: 28px; filter: drop-shadow(0 6px 8px rgba(17, 17, 17, .2)); }
+    .flag-scene::after {
+      content: "";
+      position: absolute;
+      left: 18px; right: -8px; bottom: -18px;
+      height: 18px;
+      background: radial-gradient(ellipse, rgba(0,0,0,.28), transparent 70%);
+      pointer-events: none;
+    }
+    .flag-scene.mini { --h: 30px; }
+    .flag-scene.mini::after { bottom: -8px; height: 10px; }
     .pole {
-      width: 5px;
-      height: calc(var(--h) + 10px);
+      width: 6px;
+      height: calc(var(--h) + 14px);
       border-radius: 4px;
-      background: linear-gradient(90deg, #7d7d7d, #f4f4f4 45%, #8b8b8b);
-      box-shadow: 2px 0 4px rgba(0,0,0,.2);
+      background: linear-gradient(90deg, #6c6c6c, #f7f7f7 42%, #9a9a9a 78%, #5c5c5c);
+      box-shadow: 3px 4px 8px rgba(0,0,0,.28);
       position: relative;
       z-index: 2;
     }
-    .flag-scene.mini .pole { width: 3px; height: calc(var(--h) + 4px); }
+    .flag-scene.mini .pole { width: 3px; height: calc(var(--h) + 6px); }
     .pole::before {
       content: "";
       position: absolute;
-      top: -6px; left: 50%;
-      width: 10px; height: 10px;
-      margin-left: -5px;
+      top: -7px; left: 50%;
+      width: 12px; height: 12px;
+      margin-left: -6px;
       border-radius: 50%;
-      background: radial-gradient(circle at 35% 30%, #ffe7a3, var(--gold) 55%, #8a6a1f);
+      background: radial-gradient(circle at 32% 28%, #fff3c4, var(--gold) 52%, #7a5a14);
+      box-shadow: 0 2px 4px rgba(0,0,0,.25);
     }
     .flag-scene.mini .pole::before { width: 7px; height: 7px; margin-left: -3.5px; top: -4px; }
     .flag-cloth {
       display: flex;
       height: var(--h);
-      transform: rotateX(14deg) rotateY(-22deg);
+      transform: rotateX(22deg) rotateY(-32deg) rotateZ(-4deg);
       transform-style: preserve-3d;
       transform-origin: left center;
+      animation: turn 7s ease-in-out infinite;
     }
     .flag-cloth i {
-      width: 8px;
+      width: 12px;
       height: 100%;
       display: block;
       background: linear-gradient(180deg, #009739 0 33.34%, #ffffff 33.34% 66.66%, #111111 66.66%);
       transform-origin: left center;
-      animation: wave 2.6s ease-in-out infinite;
-      animation-delay: calc(var(--i) * 75ms);
-      box-shadow: inset -1px 0 0 rgba(255,255,255,.14);
+      animation: wave 2.2s ease-in-out infinite;
+      animation-delay: calc(var(--i) * 90ms);
+      box-shadow: inset -2px 0 0 rgba(0,0,0,.18), inset 2px 0 0 rgba(255,255,255,.16);
     }
     .flag-cloth i.hoist {
-      width: 10px;
-      background: #ef3340;
+      width: 16px;
+      background: linear-gradient(90deg, #c41b28, #ef3340 55%, #b31420);
     }
-    .flag-scene.mini .flag-cloth i { width: 4px; }
-    .flag-scene.mini .flag-cloth i.hoist { width: 5px; }
+    .flag-scene.mini .flag-cloth i { width: 5px; }
+    .flag-scene.mini .flag-cloth i.hoist { width: 7px; }
     @keyframes wave {
-      0%, 100% { transform: rotateY(-12deg) translateZ(0); filter: brightness(.9); }
-      50% { transform: rotateY(14deg) translateZ(12px); filter: brightness(1.12); }
+      0%, 100% { transform: rotateY(-18deg) translateZ(-6px); filter: brightness(.82); }
+      50% { transform: rotateY(16deg) translateZ(22px); filter: brightness(1.16); }
+    }
+    @keyframes turn {
+      0%, 100% { transform: rotateX(22deg) rotateY(-34deg) rotateZ(-4deg); }
+      50% { transform: rotateX(12deg) rotateY(-12deg) rotateZ(2deg); }
     }
     @media (max-width: 760px) {
       h1 { font-size: 28px; }
@@ -317,14 +331,14 @@
       <div id="log"></div>
     </div>
   </main>
-  <div id="topic">
-    <div class="box">
-      <strong id="topic-name"></strong>
-      <p id="topic-about"></p>
-      <div class="links" id="topic-links"></div>
-    </div>
-  </div>
   <form id="f">
+    <div id="topic">
+      <div class="box">
+        <strong id="topic-name"></strong>
+        <p id="topic-about"></p>
+        <div class="links" id="topic-links"></div>
+      </div>
+    </div>
     <div class="composer">
       <div id="menu"></div>
       <textarea id="q" rows="1" placeholder="Ask anything about Dubai" autocomplete="off"></textarea>
@@ -386,8 +400,8 @@
         cloth.appendChild(s);
       }
     }
-    buildFlag(document.getElementById("flag-hero"), 18);
-    buildFlag(document.getElementById("flag-mini"), 10);
+      buildFlag(document.getElementById("flag-hero"), 14);
+      buildFlag(document.getElementById("flag-mini"), 9);
 
     function grow() {
       q.style.height = "auto";
@@ -437,7 +451,10 @@
           body: JSON.stringify({ messages: history, search: true })
         });
         const data = await r.json().catch(() => ({}));
-        const reply = data.text || data.error || "No reply";
+        const raw = data.text || data.error || "No reply";
+        const reply = String(raw).includes("XAI_API_KEY")
+          ? "The assistant is temporarily unavailable. Please try again in a moment."
+          : raw;
         pending.textContent = reply;
         if (data.text) history.push({ role: "assistant", content: data.text });
       } catch {
