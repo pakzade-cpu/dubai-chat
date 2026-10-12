@@ -3,6 +3,7 @@ export const topics = [
     id: "itinerary",
     name: "Trip itinerary",
     about: "Day-by-day plans by days, budget, season, and group",
+    ask: "Plan a 4-day Dubai trip for me",
     prompt:
       "Help me plan a Dubai trip. Ask only if you need days, dates or month, budget, interests, group, and where we stay. Then give a day-by-day plan by area with transport tips and official links. Do not invent ticket prices.",
     links: [
@@ -15,6 +16,7 @@ export const topics = [
     id: "visa",
     name: "Visa and government",
     about: "Visas, residency, Emirates ID, and official procedures",
+    ask: "Do I need a visa for Dubai?",
     prompt:
       "Walk me through a Dubai or UAE government procedure (visa, residency, Emirates ID, Golden Visa, or licence). Give a checklist with the right authority and official links. Do not invent fees or ask for passport numbers.",
     links: [
@@ -28,6 +30,7 @@ export const topics = [
     id: "events",
     name: "Events and news",
     about: "This week's events and recent Dubai announcements",
+    ask: "What's on in Dubai this week?",
     prompt:
       "Give me this week's Dubai events and the top recent Dubai news. Use Dubai time (UTC+4), group events by day, and link sources. Say if you could not verify something.",
     links: [
@@ -40,6 +43,7 @@ export const topics = [
     id: "cost",
     name: "Cost of living",
     about: "Rent ranges, utilities, and monthly household costs",
+    ask: "What does it cost to live in Dubai?",
     prompt:
       "Help me estimate monthly living costs and rent in Dubai. Ask only if you need household size, area, home type, and lifestyle. Give ranges with sources and dates. Never invent numbers.",
     links: [
@@ -53,6 +57,7 @@ export const topics = [
     id: "business",
     name: "Business setup",
     about: "Mainland vs free zone, licensing steps, and tax basics",
+    ask: "How do I start a company in Dubai?",
     prompt:
       "I want to start a company in Dubai. Compare mainland vs free zone for my activity, outline licence steps, and give tax basics with official links. Do not invent fees. This is not final legal or tax advice.",
     links: [
@@ -66,6 +71,7 @@ export const topics = [
     id: "prayer",
     name: "Prayer and holidays",
     about: "Prayer times, UAE holidays, Ramadan, and Eid",
+    ask: "What are today's prayer times in Dubai?",
     prompt:
       "Give today's Dubai prayer times, this year's UAE public holidays, and how Ramadan or Eid changes hours and etiquette. Use Dubai time (UTC+4) and official sources.",
     links: [
@@ -77,6 +83,7 @@ export const topics = [
     id: "property",
     name: "Buying property",
     about: "Freehold areas, purchase steps, costs, and property visas",
+    ask: "How do I buy a home in Dubai?",
     prompt:
       "Explain how buying property in Dubai works (ready or off-plan). Cover freehold areas, the usual steps, fees to verify on DLD, and property-linked visas. Warn about escrow and scams. Do not invent fees.",
     links: [
@@ -89,6 +96,7 @@ export const topics = [
     id: "schools",
     name: "Schools",
     about: "Private schools, KHDA ratings, fees, and admissions",
+    ask: "Help me choose a school in Dubai",
     prompt:
       "Help me shortlist Dubai schools or nurseries. Ask only if you need ages, curriculum, area, and budget. Use KHDA ratings and approved fee ranges. Never invent school fees.",
     links: [["KHDA", "https://www.khda.gov.ae"]],
@@ -97,6 +105,7 @@ export const topics = [
     id: "health",
     name: "Healthcare",
     about: "Insurance rules, hospitals, visa medicals, and medicines",
+    ask: "How does health insurance work in Dubai?",
     prompt:
       "Explain Dubai healthcare and mandatory health insurance. Include emergencies, how to find care, visa medical fitness tests, and medicine rules. Link DHA and official pages.",
     links: [
@@ -108,6 +117,7 @@ export const topics = [
     id: "transport",
     name: "Transport and driving",
     about: "Metro, Nol, Salik, licences, parking, and traffic fines",
+    ask: "How do I get around Dubai?",
     prompt:
       "Explain getting around Dubai: Metro, Nol, taxis, driving licences, Salik, parking, and how to check traffic fines. Link RTA and Dubai Police. Do not quote fine amounts unless you can verify them.",
     links: [
@@ -119,6 +129,7 @@ export const topics = [
     id: "safety",
     name: "Safety and laws",
     about: "Emergency numbers, local laws, and visitor etiquette",
+    ask: "What are the emergency numbers and main laws in Dubai?",
     prompt:
       "Give Dubai emergency numbers and the main laws and etiquette visitors and residents should know. Link official pages. Do not invent rules.",
     links: [
@@ -130,6 +141,7 @@ export const topics = [
     id: "airport",
     name: "Airport and transit",
     about: "DXB and DWC arrival, visas, customs, and getting into the city",
+    ask: "I just landed at DXB. What should I do next?",
     prompt:
       "I am flying into, out of, or transiting Dubai (DXB or DWC). Explain terminals, entry or transit visas, customs, and transport into the city. Verify rules on official sites.",
     links: [

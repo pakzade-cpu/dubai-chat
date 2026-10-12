@@ -5,77 +5,334 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Dubai</title>
   <style>
+    :root {
+      --bg: #f4f4f5;
+      --ink: #111111;
+      --muted: #5f5f5f;
+      --line: #e6e6e6;
+      --card: #ffffff;
+      --gold: #c4a056;
+      --send: #111111;
+    }
     * { box-sizing: border-box; }
-    body { margin: 0; font-family: "Segoe UI", system-ui, sans-serif; background: #f4f0e8; color: #17232b; }
-    header { background: #0e1c27; color: #f6f1e7; padding: 18px 20px 16px; }
-    .bar { max-width: 920px; margin: 0 auto; display: flex; gap: 16px; align-items: center; }
-    .flag { width: 54px; height: 34px; display: grid; grid-template-columns: 14px 1fr; border-radius: 3px; overflow: hidden; flex: none; }
-    .flag b { background: #ef3340; grid-row: 1 / 4; }
-    .flag i { display: block; height: 11.33px; }
-    .g { background: #009739; } .w { background: #fff; } .k { background: #111; }
-    h1 { margin: 0; font-size: 22px; letter-spacing: .14em; }
-    header p { margin: 4px 0 0; color: #c9d5dc; font-size: 14px; }
-    main { max-width: 920px; margin: 0 auto; padding: 18px 16px 150px; }
-    .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-    .card { background: white; border-radius: 14px; padding: 14px; border: 1px solid #e4dccb; }
-    .card strong { display: block; margin-bottom: 4px; }
-    .card span { color: #52616b; font-size: 14px; }
-    h2 { font-size: 15px; margin: 18px 0 8px; }
-    .services { display: flex; flex-wrap: wrap; gap: 8px; }
-    .services button, #menu button { border: 1px solid #d9d0c0; background: white; border-radius: 999px; padding: 8px 12px; cursor: pointer; }
-    .services button.on { background: #0e1c27; color: #f6f1e7; border-color: #0e1c27; }
-    #topic { display: none; margin-top: 10px; }
-    #topic p { margin: 6px 0 10px; color: #52616b; font-size: 14px; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+    }
+    header {
+      flex: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 18px;
+      background: rgba(244, 244, 245, .86);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid transparent;
+    }
+    body.chatting header { border-bottom-color: var(--line); }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 0;
+      background: none;
+      color: inherit;
+      padding: 0;
+      cursor: pointer;
+    }
+    .brand b { font-size: 16px; letter-spacing: .12em; }
+    .new {
+      border: 1px solid var(--line);
+      background: var(--card);
+      border-radius: 999px;
+      padding: 8px 14px;
+      cursor: pointer;
+      font: inherit;
+    }
+    main {
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+    }
+    .stage {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 12px 16px 8px;
+    }
+    #welcome {
+      min-height: calc(100dvh - 210px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      gap: 8px;
+    }
+    body.chatting #welcome { display: none; }
+    h1 { margin: 10px 0 0; font-size: 34px; font-weight: 650; letter-spacing: -.03em; }
+    .lead { margin: 0 0 18px; color: var(--muted); font-size: 16px; max-width: 34rem; }
+    .starters {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      text-align: left;
+    }
+    .starter, .svc {
+      border: 1px solid var(--line);
+      background: var(--card);
+      border-radius: 16px;
+      padding: 12px 13px;
+      cursor: pointer;
+      font: inherit;
+      text-align: left;
+      color: inherit;
+    }
+    .starter:hover, .svc:hover, .new:hover { border-color: #cfcfcf; box-shadow: 0 6px 18px rgba(0,0,0,.04); }
+    .starter strong, .svc strong { display: block; font-size: 14px; }
+    .starter span, .svc span { display: block; margin-top: 3px; color: var(--muted); font-size: 13px; line-height: 1.35; }
+    .more { width: 100%; margin-top: 8px; text-align: left; }
+    .more summary {
+      list-style: none;
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 14px;
+      padding: 8px 4px;
+    }
+    .more summary::-webkit-details-marker { display: none; }
+    .svcs { display: flex; flex-wrap: wrap; gap: 8px; }
+    .svc { border-radius: 999px; padding: 8px 12px; }
+    .svc span { display: none; }
+    #topic {
+      display: none;
+      margin: 0 auto 8px;
+      max-width: 760px;
+      padding: 0 16px;
+    }
+    #topic .box {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 10px 12px;
+    }
+    #topic p { margin: 2px 0 8px; color: var(--muted); font-size: 13px; }
     #topic .links { display: flex; flex-wrap: wrap; gap: 8px; }
-    #topic a { color: #0e6b57; text-decoration: none; border: 1px solid #d9d0c0; background: #fffdf8; border-radius: 999px; padding: 6px 10px; font-size: 13px; }
-    #log { margin-top: 14px; }
-    .msg { white-space: pre-wrap; padding: 12px 14px; border-radius: 16px; margin: 10px 0; line-height: 1.5; }
-    .user { background: #0e6b57; color: white; margin-left: 18%; }
-    .bot { background: white; border: 1px solid #e4dccb; margin-right: 8%; }
-    form { position: fixed; left: 0; right: 0; bottom: 0; background: #fffdf8; border-top: 1px solid #e4dccb; padding: 10px 12px 14px; }
-    .wrap { max-width: 920px; margin: 0 auto; position: relative; }
-    #menu { display: none; position: absolute; left: 0; right: 78px; bottom: 54px; background: white; border: 1px solid #e4dccb; border-radius: 12px; padding: 8px; max-height: 220px; overflow: auto; }
-    .row { display: flex; gap: 8px; }
-    input { flex: 1; border: 1px solid #d9d0c0; border-radius: 12px; padding: 14px; font-size: 16px; }
-    .send { border: 0; border-radius: 12px; background: #b8860b; color: white; font-weight: 700; padding: 0 16px; }
-    @media (max-width: 700px) { .cards { grid-template-columns: 1fr; } .user { margin-left: 8%; } }
+    #topic a {
+      color: inherit;
+      text-decoration: none;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 13px;
+      background: var(--bg);
+    }
+    #log { padding-bottom: 8px; }
+    .row-msg { display: flex; margin: 16px 0; }
+    .row-msg.user { justify-content: flex-end; }
+    .msg {
+      max-width: 85%;
+      white-space: pre-wrap;
+      line-height: 1.55;
+      font-size: 15.5px;
+    }
+    .user .msg {
+      background: #ececec;
+      border-radius: 22px;
+      padding: 10px 16px;
+    }
+    .bot .msg { padding: 2px 4px; }
+    .dots { display: inline-flex; gap: 5px; padding: 8px 2px; }
+    .dots i {
+      width: 7px; height: 7px; border-radius: 50%; background: #8a8a8a;
+      animation: blink 1s infinite;
+    }
+    .dots i:nth-child(2) { animation-delay: .15s; }
+    .dots i:nth-child(3) { animation-delay: .3s; }
+    @keyframes blink { 0%, 80%, 100% { opacity: .25; } 40% { opacity: 1; } }
+    form {
+      flex: none;
+      padding: 8px 16px 14px;
+      background: linear-gradient(to top, var(--bg) 70%, transparent);
+    }
+    .composer {
+      max-width: 760px;
+      margin: 0 auto;
+      position: relative;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      box-shadow: 0 8px 28px rgba(0,0,0,.05);
+      padding: 8px 8px 8px 18px;
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+    }
+    #menu {
+      display: none;
+      position: absolute;
+      left: 0; right: 0; bottom: calc(100% + 8px);
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 8px;
+      max-height: 220px;
+      overflow: auto;
+      box-shadow: 0 10px 30px rgba(0,0,0,.08);
+    }
+    #menu button {
+      display: block;
+      width: 100%;
+      text-align: left;
+      border: 0;
+      background: none;
+      border-radius: 10px;
+      padding: 8px 10px;
+      cursor: pointer;
+      font: inherit;
+    }
+    #menu button:hover { background: var(--bg); }
+    textarea {
+      flex: 1;
+      border: 0;
+      resize: none;
+      outline: none;
+      font: inherit;
+      font-size: 16px;
+      line-height: 1.4;
+      max-height: 160px;
+      min-height: 28px;
+      padding: 10px 0;
+      background: transparent;
+    }
+    .send {
+      width: 36px; height: 36px;
+      border: 0; border-radius: 50%;
+      background: var(--send); color: white;
+      cursor: pointer; flex: none;
+      display: grid; place-items: center;
+    }
+    .send:disabled { opacity: .28; cursor: default; }
+    .fine {
+      max-width: 760px;
+      margin: 8px auto 0;
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .flag-scene {
+      --h: 92px;
+      height: var(--h);
+      display: flex;
+      align-items: flex-end;
+      perspective: 900px;
+      filter: drop-shadow(0 16px 18px rgba(17, 17, 17, .22));
+    }
+    .flag-scene.mini { --h: 28px; filter: drop-shadow(0 6px 8px rgba(17, 17, 17, .2)); }
+    .pole {
+      width: 5px;
+      height: calc(var(--h) + 10px);
+      border-radius: 4px;
+      background: linear-gradient(90deg, #7d7d7d, #f4f4f4 45%, #8b8b8b);
+      box-shadow: 2px 0 4px rgba(0,0,0,.2);
+      position: relative;
+      z-index: 2;
+    }
+    .flag-scene.mini .pole { width: 3px; height: calc(var(--h) + 4px); }
+    .pole::before {
+      content: "";
+      position: absolute;
+      top: -6px; left: 50%;
+      width: 10px; height: 10px;
+      margin-left: -5px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 30%, #ffe7a3, var(--gold) 55%, #8a6a1f);
+    }
+    .flag-scene.mini .pole::before { width: 7px; height: 7px; margin-left: -3.5px; top: -4px; }
+    .flag-cloth {
+      display: flex;
+      height: var(--h);
+      transform: rotateX(14deg) rotateY(-22deg);
+      transform-style: preserve-3d;
+      transform-origin: left center;
+    }
+    .flag-cloth i {
+      width: 8px;
+      height: 100%;
+      display: block;
+      background: linear-gradient(180deg, #009739 0 33.34%, #ffffff 33.34% 66.66%, #111111 66.66%);
+      transform-origin: left center;
+      animation: wave 2.6s ease-in-out infinite;
+      animation-delay: calc(var(--i) * 75ms);
+      box-shadow: inset -1px 0 0 rgba(255,255,255,.14);
+    }
+    .flag-cloth i.hoist {
+      width: 10px;
+      background: #ef3340;
+    }
+    .flag-scene.mini .flag-cloth i { width: 4px; }
+    .flag-scene.mini .flag-cloth i.hoist { width: 5px; }
+    @keyframes wave {
+      0%, 100% { transform: rotateY(-12deg) translateZ(0); filter: brightness(.9); }
+      50% { transform: rotateY(14deg) translateZ(12px); filter: brightness(1.12); }
+    }
+    @media (max-width: 760px) {
+      h1 { font-size: 28px; }
+      .starters { grid-template-columns: 1fr 1fr; }
+      .msg { max-width: 92%; }
+    }
+    @media (max-width: 520px) {
+      .starters { grid-template-columns: 1fr; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .flag-cloth i, .dots i { animation: none; }
+    }
   </style>
 </head>
 <body>
   <header>
-    <div class="bar">
-      <div class="flag" aria-label="UAE flag"><b></b><i class="g"></i><i class="w"></i><i class="k"></i></div>
-      <div>
-        <h1>DUBAI</h1>
-        <p>A plain-language guide for visitors and residents. Not a government website.</p>
-      </div>
-    </div>
+    <button class="brand" id="home" type="button">
+      <span class="flag-scene mini" id="flag-mini" aria-hidden="true"><span class="pole"></span><span class="flag-cloth"></span></span>
+      <b>DUBAI</b>
+    </button>
+    <button class="new" id="reset" type="button">New chat</button>
   </header>
   <main>
-    <section class="cards">
-      <div class="card"><strong>Arriving</strong><span>Dubai is one emirate in the UAE. Abu Dhabi is the federal capital. Rules for entry sit with federal and Dubai authorities, not with this chat.</span></div>
-      <div class="card"><strong>Daily life</strong><span>Power and water, roads, health, police, and phones are run by named authorities. Use the buttons to see who does what.</span></div>
-      <div class="card"><strong>Getting help</strong><span>This assistant explains public information. Accounts, payments, visas, and bookings stay on the official site.</span></div>
-    </section>
-    <h2>Topic guides</h2>
-    <div class="services" id="topics"></div>
-    <div class="card" id="topic">
+    <div class="stage">
+      <section id="welcome">
+        <div class="flag-scene" id="flag-hero" aria-label="UAE flag"><span class="pole"></span><span class="flag-cloth"></span></div>
+        <h1>Ask about Dubai</h1>
+        <p class="lead">Visas, trips, rent, schools, and daily life — tap a topic or type a question. Not a government website.</p>
+        <div class="starters" id="topics"></div>
+        <details class="more">
+          <summary>Official websites</summary>
+          <div class="svcs" id="services"></div>
+        </details>
+      </section>
+      <div id="log"></div>
+    </div>
+  </main>
+  <div id="topic">
+    <div class="box">
       <strong id="topic-name"></strong>
       <p id="topic-about"></p>
       <div class="links" id="topic-links"></div>
     </div>
-    <h2>Public services</h2>
-    <div class="services" id="services"></div>
-    <div id="log"></div>
-  </main>
+  </div>
   <form id="f">
-    <div class="wrap">
+    <div class="composer">
       <div id="menu"></div>
-      <div class="row">
-        <input id="q" placeholder="Ask about Dubai, or type /" autocomplete="off" />
-        <button class="send">Send</button>
-      </div>
+      <textarea id="q" rows="1" placeholder="Ask anything about Dubai" autocomplete="off"></textarea>
+      <button class="send" id="go" aria-label="Send" disabled>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 13V3M8 3l-4 4M8 3l4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
     </div>
+    <p class="fine">Checks official sources when it can. Not final legal, visa, or tax advice.</p>
   </form>
   <script>
     const sectors = [
@@ -96,32 +353,48 @@
       ["Dubai.ae", "https://www.dubai.ae", "Government portal"]
     ];
     const fallbackTopics = [
-      { id: "itinerary", name: "Trip itinerary", about: "Day-by-day plans by days, budget, season, and group", prompt: "Help me plan a Dubai trip. Ask only if you need days, dates or month, budget, interests, group, and where we stay. Then give a day-by-day plan by area with transport tips and official links. Do not invent ticket prices.", links: [["Visit Dubai", "https://www.visitdubai.com/en"], ["RTA", "https://www.rta.ae"], ["Expo City", "https://expocitydubai.com"]] },
-      { id: "visa", name: "Visa and government", about: "Visas, residency, Emirates ID, and official procedures", prompt: "Walk me through a Dubai or UAE government procedure (visa, residency, Emirates ID, Golden Visa, or licence). Give a checklist with the right authority and official links. Do not invent fees or ask for passport numbers.", links: [["UAE portal", "https://u.ae"], ["ICP", "https://icp.gov.ae"], ["GDRFA Dubai", "https://gdrfad.gov.ae"], ["MOHRE", "https://www.mohre.gov.ae"]] },
-      { id: "events", name: "Events and news", about: "This week's events and recent Dubai announcements", prompt: "Give me this week's Dubai events and the top recent Dubai news. Use Dubai time (UTC+4), group events by day, and link sources. Say if you could not verify something.", links: [["Visit Dubai events", "https://www.visitdubai.com/en"], ["Dubai Calendar", "https://www.dubaicalendar.ae"], ["Expo City", "https://expocitydubai.com"]] },
-      { id: "cost", name: "Cost of living", about: "Rent ranges, utilities, and monthly household costs", prompt: "Help me estimate monthly living costs and rent in Dubai. Ask only if you need household size, area, home type, and lifestyle. Give ranges with sources and dates. Never invent numbers.", links: [["Dubai Land Department", "https://dubailand.gov.ae"], ["DEWA", "https://www.dewa.gov.ae"], ["KHDA", "https://www.khda.gov.ae"], ["RTA", "https://www.rta.ae"]] },
-      { id: "business", name: "Business setup", about: "Mainland vs free zone, licensing steps, and tax basics", prompt: "I want to start a company in Dubai. Compare mainland vs free zone for my activity, outline licence steps, and give tax basics with official links. Do not invent fees. This is not final legal or tax advice.", links: [["Dubai Economy and Tourism", "https://www.dubaidet.gov.ae"], ["Federal Tax Authority", "https://tax.gov.ae"], ["UAE portal", "https://u.ae"], ["MOHRE", "https://www.mohre.gov.ae"]] },
-      { id: "prayer", name: "Prayer and holidays", about: "Prayer times, UAE holidays, Ramadan, and Eid", prompt: "Give today's Dubai prayer times, this year's UAE public holidays, and how Ramadan or Eid changes hours and etiquette. Use Dubai time (UTC+4) and official sources.", links: [["IACAD", "https://www.iacad.gov.ae"], ["UAE holidays", "https://u.ae"]] },
-      { id: "property", name: "Buying property", about: "Freehold areas, purchase steps, costs, and property visas", prompt: "Explain how buying property in Dubai works (ready or off-plan). Cover freehold areas, the usual steps, fees to verify on DLD, and property-linked visas. Warn about escrow and scams. Do not invent fees.", links: [["Dubai Land Department", "https://dubailand.gov.ae"], ["GDRFA Dubai", "https://gdrfad.gov.ae"], ["ICP", "https://icp.gov.ae"]] },
-      { id: "schools", name: "Schools", about: "Private schools, KHDA ratings, fees, and admissions", prompt: "Help me shortlist Dubai schools or nurseries. Ask only if you need ages, curriculum, area, and budget. Use KHDA ratings and approved fee ranges. Never invent school fees.", links: [["KHDA", "https://www.khda.gov.ae"]] },
-      { id: "health", name: "Healthcare", about: "Insurance rules, hospitals, visa medicals, and medicines", prompt: "Explain Dubai healthcare and mandatory health insurance. Include emergencies, how to find care, visa medical fitness tests, and medicine rules. Link DHA and official pages.", links: [["Dubai Health Authority", "https://www.dha.gov.ae"], ["UAE portal", "https://u.ae"]] },
-      { id: "transport", name: "Transport and driving", about: "Metro, Nol, Salik, licences, parking, and traffic fines", prompt: "Explain getting around Dubai: Metro, Nol, taxis, driving licences, Salik, parking, and how to check traffic fines. Link RTA and Dubai Police. Do not quote fine amounts unless you can verify them.", links: [["RTA", "https://www.rta.ae"], ["Dubai Police", "https://www.dubaipolice.gov.ae"]] },
-      { id: "safety", name: "Safety and laws", about: "Emergency numbers, local laws, and visitor etiquette", prompt: "Give Dubai emergency numbers and the main laws and etiquette visitors and residents should know. Link official pages. Do not invent rules.", links: [["Dubai Police", "https://www.dubaipolice.gov.ae"], ["UAE portal", "https://u.ae"]] },
-      { id: "airport", name: "Airport and transit", about: "DXB and DWC arrival, visas, customs, and getting into the city", prompt: "I am flying into, out of, or transiting Dubai (DXB or DWC). Explain terminals, entry or transit visas, customs, and transport into the city. Verify rules on official sites.", links: [["Dubai Airports", "https://www.dubaiairports.ae"], ["Dubai Customs", "https://www.dubaicustoms.gov.ae"], ["GDRFA Dubai", "https://gdrfad.gov.ae"], ["UAE portal", "https://u.ae"]] }
+      { id: "itinerary", name: "Trip itinerary", about: "Day-by-day plans by days, budget, and group", ask: "Plan a 4-day Dubai trip for me", links: [["Visit Dubai", "https://www.visitdubai.com/en"], ["RTA", "https://www.rta.ae"], ["Expo City", "https://expocitydubai.com"]] },
+      { id: "visa", name: "Visa and government", about: "Visas, residency, and Emirates ID", ask: "Do I need a visa for Dubai?", links: [["UAE portal", "https://u.ae"], ["ICP", "https://icp.gov.ae"], ["GDRFA Dubai", "https://gdrfad.gov.ae"], ["MOHRE", "https://www.mohre.gov.ae"]] },
+      { id: "events", name: "Events and news", about: "This week's events and news", ask: "What's on in Dubai this week?", links: [["Visit Dubai events", "https://www.visitdubai.com/en"], ["Dubai Calendar", "https://www.dubaicalendar.ae"], ["Expo City", "https://expocitydubai.com"]] },
+      { id: "cost", name: "Cost of living", about: "Rent, utilities, and monthly costs", ask: "What does it cost to live in Dubai?", links: [["Dubai Land Department", "https://dubailand.gov.ae"], ["DEWA", "https://www.dewa.gov.ae"], ["KHDA", "https://www.khda.gov.ae"], ["RTA", "https://www.rta.ae"]] },
+      { id: "business", name: "Business setup", about: "Mainland, free zones, and tax basics", ask: "How do I start a company in Dubai?", links: [["Dubai Economy and Tourism", "https://www.dubaidet.gov.ae"], ["Federal Tax Authority", "https://tax.gov.ae"], ["UAE portal", "https://u.ae"], ["MOHRE", "https://www.mohre.gov.ae"]] },
+      { id: "prayer", name: "Prayer and holidays", about: "Prayer times, holidays, and Ramadan", ask: "What are today's prayer times in Dubai?", links: [["IACAD", "https://www.iacad.gov.ae"], ["UAE holidays", "https://u.ae"]] },
+      { id: "property", name: "Buying property", about: "Freehold areas, steps, and visas", ask: "How do I buy a home in Dubai?", links: [["Dubai Land Department", "https://dubailand.gov.ae"], ["GDRFA Dubai", "https://gdrfad.gov.ae"], ["ICP", "https://icp.gov.ae"]] },
+      { id: "schools", name: "Schools", about: "KHDA ratings, fees, and admissions", ask: "Help me choose a school in Dubai", links: [["KHDA", "https://www.khda.gov.ae"]] },
+      { id: "health", name: "Healthcare", about: "Insurance, hospitals, and medicines", ask: "How does health insurance work in Dubai?", links: [["Dubai Health Authority", "https://www.dha.gov.ae"], ["UAE portal", "https://u.ae"]] },
+      { id: "transport", name: "Transport and driving", about: "Metro, Nol, licences, and fines", ask: "How do I get around Dubai?", links: [["RTA", "https://www.rta.ae"], ["Dubai Police", "https://www.dubaipolice.gov.ae"]] },
+      { id: "safety", name: "Safety and laws", about: "Emergency numbers and local laws", ask: "What are the emergency numbers and main laws in Dubai?", links: [["Dubai Police", "https://www.dubaipolice.gov.ae"], ["UAE portal", "https://u.ae"]] },
+      { id: "airport", name: "Airport and transit", about: "DXB, DWC, visas, and getting to the city", ask: "I just landed at DXB. What should I do next?", links: [["Dubai Airports", "https://www.dubaiairports.ae"], ["Dubai Customs", "https://www.dubaicustoms.gov.ae"], ["GDRFA Dubai", "https://gdrfad.gov.ae"], ["UAE portal", "https://u.ae"]] }
     ];
-    const log = document.getElementById("log"), q = document.getElementById("q"), menu = document.getElementById("menu");
+    const log = document.getElementById("log");
+    const q = document.getElementById("q");
+    const go = document.getElementById("go");
+    const menu = document.getElementById("menu");
+    const main = document.querySelector("main");
     const history = [];
     let topics = fallbackTopics;
-    function add(cls, text) {
-      const d = document.createElement("div");
-      d.className = "msg " + cls; d.textContent = text; log.appendChild(d); return d;
+    let busy = false;
+
+    function buildFlag(root, slats) {
+      const cloth = root.querySelector(".flag-cloth");
+      cloth.innerHTML = "";
+      const hoist = Math.max(2, Math.round(slats * 0.25));
+      for (let i = 0; i < slats; i++) {
+        const s = document.createElement("i");
+        s.style.setProperty("--i", i);
+        if (i < hoist) s.className = "hoist";
+        cloth.appendChild(s);
+      }
     }
-    function ask(name, url, about) {
-      q.value = "Explain " + name + " for someone new to Dubai. What does it do (" + about + "), what can a visitor do on the public website, and what must be done only on the official site " + url + "? Keep it practical and do not refuse the explanation.";
-      q.focus();
+    buildFlag(document.getElementById("flag-hero"), 18);
+    buildFlag(document.getElementById("flag-mini"), 10);
+
+    function grow() {
+      q.style.height = "auto";
+      q.style.height = Math.min(q.scrollHeight, 160) + "px";
+      go.disabled = busy || !q.value.trim() || q.value.startsWith("/");
     }
     function showTopic(topic) {
-      document.querySelectorAll("#topics button").forEach((b) => b.classList.toggle("on", b.dataset.id === topic.id));
       document.getElementById("topic-name").textContent = topic.name;
       document.getElementById("topic-about").textContent = topic.about;
       const links = document.getElementById("topic-links");
@@ -132,7 +405,53 @@
         links.appendChild(a);
       }
       document.getElementById("topic").style.display = "block";
-      q.value = topic.prompt;
+    }
+    function add(role, text, pending) {
+      const wrap = document.createElement("div");
+      wrap.className = "row-msg " + role;
+      const d = document.createElement("div");
+      d.className = "msg";
+      if (pending) {
+        d.innerHTML = '<span class="dots"><i></i><i></i><i></i></span>';
+      } else {
+        d.textContent = text;
+      }
+      wrap.appendChild(d);
+      log.appendChild(wrap);
+      main.scrollTop = main.scrollHeight;
+      return d;
+    }
+    async function send(text) {
+      text = (text || "").trim();
+      if (!text || text.startsWith("/") || busy) return;
+      document.body.classList.add("chatting");
+      q.value = ""; grow(); menu.style.display = "none";
+      history.push({ role: "user", content: text });
+      add("user", text);
+      const pending = add("bot", "", true);
+      busy = true; go.disabled = true;
+      try {
+        const r = await fetch("/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ messages: history, search: true })
+        });
+        const data = await r.json().catch(() => ({}));
+        const reply = data.text || data.error || "No reply";
+        pending.textContent = reply;
+        if (data.text) history.push({ role: "assistant", content: data.text });
+      } catch {
+        pending.textContent = "Could not reach the assistant. Try again.";
+      }
+      busy = false; grow();
+      main.scrollTop = main.scrollHeight;
+    }
+    function reset() {
+      history.length = 0;
+      log.innerHTML = "";
+      document.body.classList.remove("chatting");
+      document.getElementById("topic").style.display = "none";
+      q.value = ""; grow();
       q.focus();
     }
     function renderTopics() {
@@ -140,17 +459,24 @@
       box.innerHTML = "";
       for (const topic of topics) {
         const b = document.createElement("button");
-        b.type = "button"; b.textContent = topic.name; b.dataset.id = topic.id;
-        b.onclick = () => showTopic(topic);
+        b.type = "button";
+        b.className = "starter";
+        b.innerHTML = "<strong></strong><span></span>";
+        b.querySelector("strong").textContent = topic.name;
+        b.querySelector("span").textContent = topic.ask || topic.about;
+        b.onclick = () => { showTopic(topic); send(topic.ask || topic.name); };
         box.appendChild(b);
       }
     }
-    const box = document.getElementById("services");
+    const services = document.getElementById("services");
     for (const s of sectors) {
       const b = document.createElement("button");
-      b.type = "button"; b.textContent = s[0];
-      b.onclick = () => ask(s[0], s[1], s[2]);
-      box.appendChild(b);
+      b.type = "button"; b.className = "svc";
+      b.innerHTML = "<strong></strong>";
+      b.querySelector("strong").textContent = s[0];
+      b.title = s[2];
+      b.onclick = () => send("What does " + s[0] + " do in Dubai, and what can I do on " + s[1] + "?");
+      services.appendChild(b);
     }
     renderTopics();
     fetch("/guides").then((r) => r.json()).then((data) => {
@@ -160,38 +486,36 @@
       }
     }).catch(() => {});
     q.oninput = () => {
+      grow();
       if (!q.value.startsWith("/")) { menu.style.display = "none"; return; }
       const f = q.value.slice(1).toLowerCase();
       menu.innerHTML = "";
       menu.style.display = "block";
+      const topicHits = topics.filter((t) => t.name.toLowerCase().includes(f) || (t.about || "").toLowerCase().includes(f));
       const serviceHits = sectors.filter((x) => x[0].toLowerCase().includes(f) || x[2].toLowerCase().includes(f));
-      const topicHits = topics.filter((t) => t.name.toLowerCase().includes(f) || t.about.toLowerCase().includes(f));
       for (const t of topicHits) {
         const b = document.createElement("button");
-        b.type = "button"; b.textContent = t.name + " — " + t.about;
-        b.onclick = () => { menu.style.display = "none"; showTopic(t); };
+        b.type = "button"; b.textContent = t.name + " — " + (t.ask || t.about);
+        b.onclick = () => { menu.style.display = "none"; showTopic(t); send(t.ask || t.name); };
         menu.appendChild(b);
       }
       for (const s of serviceHits) {
         const b = document.createElement("button");
         b.type = "button"; b.textContent = s[0] + " — " + s[2];
-        b.onclick = () => { menu.style.display = "none"; ask(s[0], s[1], s[2]); };
+        b.onclick = () => { menu.style.display = "none"; send("What does " + s[0] + " do in Dubai, and what can I do on " + s[1] + "?"); };
         menu.appendChild(b);
       }
     };
-    document.getElementById("f").onsubmit = async (e) => {
-      e.preventDefault();
-      const text = q.value.trim();
-      if (!text || text.startsWith("/")) return;
-      q.value = ""; menu.style.display = "none";
-      history.push({ role: "user", content: text });
-      add("user", text);
-      const pending = add("bot", "…");
-      const r = await fetch("/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ messages: history, search: true }) });
-      const data = await r.json();
-      pending.textContent = data.text || data.error || "No reply";
-      if (data.text) history.push({ role: "assistant", content: data.text });
+    q.onkeydown = (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        send(q.value);
+      }
     };
+    document.getElementById("f").onsubmit = (e) => { e.preventDefault(); send(q.value); };
+    document.getElementById("reset").onclick = reset;
+    document.getElementById("home").onclick = reset;
+    grow();
   </script>
 </body>
 </html>
