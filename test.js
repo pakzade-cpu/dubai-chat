@@ -257,6 +257,26 @@ test("business registration stays private until approved", async () => {
   assert.match(await guide.text(), /id="dock"/);
 });
 
+test("araslab home shows the agent and both bots", async () => {
+  const home = await origFetch(base + "/", { headers: { "x-forwarded-host": "www.araslab.ae" } });
+  assert.equal(home.status, 200);
+  const html = await home.text();
+  assert.match(html, /Aras Lab/);
+  assert.match(html, /Dubai AI Agent/);
+  assert.match(html, /www\.dubaiaiagent\.ae/);
+  assert.match(html, /Dubai Bot/);
+  assert.match(html, /Abu Dhabi Bot/);
+  assert.match(html, /x\.ai\/bot\/pNVDukpGRUUOx_wtyRhiV/);
+  assert.match(html, /The public link is not added yet/);
+
+  const guide = await origFetch(base + "/agent");
+  assert.equal(guide.status, 200);
+  assert.match(await guide.text(), /id="dock"/);
+
+  const local = await origFetch(base + "/");
+  assert.match(await local.text(), /Ask about Dubai/);
+});
+
 test("hosted analytics config is empty when env vars are unset", async () => {
   const r = await origFetch(base + "/analytics-config.js");
   const js = await r.text();

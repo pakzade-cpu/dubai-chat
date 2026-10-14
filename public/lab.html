@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Aras Lab</title>
+  <style>
+    :root {
+      --bg: #f6f1e8;
+      --ink: #1a1714;
+      --muted: #7a7268;
+      --line: #e6dccf;
+      --card: #fffdf9;
+      --gold: #b0893a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Segoe UI", "Helvetica Neue", ui-sans-serif, system-ui, sans-serif;
+    }
+    .uae-bar { display: grid; grid-template-columns: 18% 1fr 1fr 1fr; height: 3px; }
+    .uae-bar i:nth-child(1) { background: #c8102e; }
+    .uae-bar i:nth-child(2) { background: #007a3d; }
+    .uae-bar i:nth-child(3) { background: #fff; }
+    .uae-bar i:nth-child(4) { background: #111; }
+    header { padding: 28px 32px 0; }
+    header img { width: 92px; height: auto; }
+    main { max-width: 980px; margin: 0 auto; padding: 28px 24px 72px; }
+    h1 { margin: 28px 0 8px; font-size: 46px; font-weight: 500; letter-spacing: -.03em; }
+    .lead { margin: 0 0 40px; color: var(--muted); font-size: 18px; line-height: 1.6; max-width: 36rem; }
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    article {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 22px 20px 20px;
+      min-height: 280px;
+      display: flex;
+      flex-direction: column;
+    }
+    .place { margin: 0; color: var(--gold); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; }
+    h2 { margin: 14px 0 8px; font-size: 24px; font-weight: 550; letter-spacing: -.02em; }
+    p { margin: 0; color: var(--muted); line-height: 1.55; font-size: 15px; }
+    .go { margin-top: auto; padding-top: 22px; }
+    a.go-link {
+      display: inline-block;
+      color: var(--ink);
+      text-decoration: none;
+      border-bottom: 1px solid var(--gold);
+      padding-bottom: 2px;
+    }
+    [hidden] { display: none !important; }
+    .wait { color: var(--muted); font-size: 14px; }
+    @media (max-width: 800px) {
+      h1 { font-size: 34px; }
+      .grid { grid-template-columns: 1fr; }
+      article { min-height: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="uae-bar" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+  <header>
+    <img src="/emirates-mark.png" alt="The Emirates" />
+  </header>
+  <main>
+    <h1>Aras Lab</h1>
+    <p class="lead">The Dubai AI Agent we built, and the Dubai and Abu Dhabi bots.</p>
+    <div class="grid">
+      <article>
+        <p class="place">www.dubaiaiagent.ae</p>
+        <h2>Dubai AI Agent</h2>
+        <p>Ask about Dubai in your language. Maps, voice, photos, and the business directory.</p>
+        <p class="go"><a class="go-link" href="https://www.dubaiaiagent.ae">Open Dubai AI Agent</a></p>
+      </article>
+      <article>
+        <p class="place">Grok bot</p>
+        <h2>Dubai Bot</h2>
+        <p>A personal Dubai guide that answers in your language.</p>
+        <p class="go"><a class="go-link" href="https://x.ai/bot/pNVDukpGRUUOx_wtyRhiV">Open Dubai Bot</a></p>
+      </article>
+      <article>
+        <p class="place">Grok bot</p>
+        <h2>Abu Dhabi Bot</h2>
+        <p>A personal Abu Dhabi guide that answers in your language.</p>
+        <p class="go"><a class="go-link" id="abudhabi-link" href="" hidden>Open Abu Dhabi Bot</a><span class="wait" id="abudhabi-wait">The public link is not added yet.</span></p>
+      </article>
+    </div>
+  </main>
+  <script src="/lab-config.js"></script>
+  <script>
+    const cfg = window.LAB_CONFIG || {};
+    const link = document.getElementById("abudhabi-link");
+    const wait = document.getElementById("abudhabi-wait");
+    if (cfg.abuDhabiBot) {
+      link.href = cfg.abuDhabiBot;
+      link.hidden = false;
+      wait.hidden = true;
+    }
+  </script>
+</body>
+</html>

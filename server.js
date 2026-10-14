@@ -436,6 +436,39 @@ app.post("/chat", async (req, res) => {
   await replyWithLog(res, { ...out, businesses }, userText, req.body?.topic);
 });
 
+function siteHosts(req) {
+  return [req.headers["x-forwarded-host"], req.headers.host]
+    .flatMap((value) => String(Array.isArray(value) ? value[0] : value || "").split(","))
+    .map((host) => host.trim().toLowerCase().replace(/:\d+$/, ""))
+    .filter(Boolean);
+}
+
+function isArasLab(req) {
+  return siteHosts(req).some((host) => host === "araslab.ae" || host === "www.araslab.ae");
+}
+
+app.get("/lab-config.js", (_req, res) => {
+  res.set("Cache-Control", "no-store");
+  res.type("js").send(
+    `window.LAB_CONFIG=${JSON.stringify({
+      abuDhabiBot: process.env.ABUDHABI_BOT_URL || "",
+    })};`
+  );
+});
+
+app.get("/agent", (_req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+
+app.get("/lab", (_req, res) => {
+  res.sendFile(path.join(__dirname, "public", "lab.html"));
+});
+
+app.get("/", (req, res, next) => {
+  if (!isArasLab(req)) return next();
+  res.sendFile(path.join(__dirname, "public", "lab.html"));
+});
+
 app.use(express.static(path.join(__dirname, "public")));
 
 const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
