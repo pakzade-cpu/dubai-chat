@@ -4,6 +4,7 @@ import os from "os";
 import path from "path";
 import test from "node:test";
 import { csvCell, dubaiDay, dubaiStamp, sanitizeTopic, stripPii } from "./privacy.js";
+import { SYSTEM } from "./guides.js";
 
 test("stripPii removes emails and phone numbers", () => {
   assert.equal(stripPii("Ask jane.doe@example.com about visas"), "Ask [email] about visas");
@@ -63,13 +64,18 @@ test("public pages and analytics events", async () => {
   const home = await origFetch(base + "/");
   assert.equal(home.status, 200);
   const html = await home.text();
-  assert.match(html, /Get the Dubai Bot/);
+  assert.match(html, /Dubai Bot/);
   assert.match(html, /x\.ai\/bot\/pNVDukpGRUUOx_wtyRhiV/);
   assert.match(html, /logged anonymously/);
   assert.match(html, /id="here-btn"/);
   assert.match(html, /id="voice-btn"/);
+  assert.match(html, /id="tools-menu"/);
+  assert.match(html, /emirates-mark\.png/);
   assert.match(html, /id="more-topics"/);
   assert.match(html, /Take your time/);
+  assert.doesNotMatch(html, /Official websites/);
+  assert.match(SYSTEM, /Which app or portal/);
+  assert.match(SYSTEM, /App and payment troubles/);
 
   const page = await json(base + "/api/event", {
     method: "POST",
