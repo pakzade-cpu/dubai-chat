@@ -79,6 +79,16 @@ The dashboard shows visits per day (Dubai time), countries when known, top topic
 
 If `ADMIN_PASSWORD` is unset, `/admin` is disabled.
 
+## Business directory
+
+`/directory` is the public member list. `/join` is the registration form. Every field is required, including the trade licence file, VAT certificate, and logo.
+
+New listings stay **pending** until you approve them on `/admin`. Only approved businesses are shown in the directory, in the right-hand details panel, and to the chat assistant. Licence and VAT files are stored for review and are not included in the public API.
+
+Set `DATABASE_URL` so memberships survive a redeploy. Optional `MEMBERSHIP_FEE` (for example `AED 99 / year`) is shown on the form. The site does not take payment itself.
+
+A Google Form is not created from the server, because that needs your Google account. The form on `/join` writes straight into the same database the assistant searches.
+
 ## Dubai Bot
 
 The homepage and header link to the free personal [Dubai Bot](https://x.ai/bot/pNVDukpGRUUOx_wtyRhiV). The footer notes that questions are logged anonymously to improve the service.

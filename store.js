@@ -14,7 +14,7 @@ let state = emptyState();
 let chain = Promise.resolve();
 
 function emptyState() {
-  return { visits: [], clicks: [], questions: [] };
+  return { visits: [], clicks: [], questions: [], businesses: [] };
 }
 
 function withLock(fn) {
@@ -68,6 +68,30 @@ export async function initStore() {
         );
         CREATE INDEX IF NOT EXISTS questions_ts_idx ON questions (ts DESC);
         CREATE INDEX IF NOT EXISTS questions_feedback_idx ON questions (feedback);
+        CREATE TABLE IF NOT EXISTS businesses (
+          id TEXT PRIMARY KEY,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          status TEXT NOT NULL DEFAULT 'pending',
+          code_hash TEXT NOT NULL,
+          company_name TEXT NOT NULL,
+          trade_license_no TEXT NOT NULL,
+          trade_license_file TEXT NOT NULL,
+          vat_no TEXT NOT NULL,
+          vat_file TEXT NOT NULL,
+          phone TEXT NOT NULL,
+          mobile TEXT NOT NULL,
+          whatsapp TEXT NOT NULL,
+          website TEXT NOT NULL,
+          location TEXT NOT NULL,
+          logo TEXT NOT NULL,
+          category TEXT NOT NULL,
+          business_type TEXT NOT NULL,
+          services TEXT NOT NULL,
+          extra TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS businesses_status_idx ON businesses (status);
+        CREATE INDEX IF NOT EXISTS businesses_category_idx ON businesses (category);
       `);
       backend = "postgres";
       return backend;
@@ -85,6 +109,7 @@ export async function initStore() {
       visits: Array.isArray(parsed.visits) ? parsed.visits : [],
       clicks: Array.isArray(parsed.clicks) ? parsed.clicks : [],
       questions: Array.isArray(parsed.questions) ? parsed.questions : [],
+      businesses: Array.isArray(parsed.businesses) ? parsed.businesses : [],
     };
   } catch {
     state = emptyState();
@@ -261,6 +286,169 @@ export async function exportQuestions() {
     question: row.question,
     answer: row.answer || "",
     feedback: row.feedback || "",
+  }));
+}
+
+function businessFromDb(row) {
+  return {
+    id: row.id,
+    status: row.status,
+    codeHash: row.code_hash,
+    companyName: row.company_name,
+    tradeLicenseNo: row.trade_license_no,
+    tradeLicenseFile: row.trade_license_file,
+    vatNo: row.vat_no,
+    vatFile: row.vat_file,
+    phone: row.phone,
+    mobile: row.mobile,
+    whatsapp: row.whatsapp,
+    website: row.website,
+    location: row.location,
+    logo: row.logo,
+    category: row.category,
+    businessType: row.business_type,
+    services: row.services,
+    extra: row.extra,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+const BUSINESS_PUBLIC_SQL = `id, status, company_name, trade_license_no, vat_no, phone, mobile, whatsapp,
+  website, location, logo, category, business_type, services, extra, created_at, updated_at`;
+
+export async function createBusiness(fields) {
+  const now = new Date().toISOString();
+  const row = {
+    id: newId(),
+    status: "pending",
+    codeHash: fields.codeHash,
+    companyName: fields.companyName,
+    tradeLicenseNo: fields.tradeLicenseNo,
+    tradeLicenseFile: fields.tradeLicenseFile,
+    vatNo: fields.vatNo,
+    vatFile: fields.vatFile,
+    phone: fields.phone,
+    mobile: fields.mobile,
+    whatsapp: fields.whatsapp,
+    website: fields.website,
+    location: fields.location,
+    logo: fields.logo,
+    category: fields.category,
+    businessType: fields.businessType,
+    services: fields.services,
+    extra: fields.extra,
+    createdAt: now,
+    updatedAt: now,
+  };
+  if (backend === "postgres") {
+    await pool.query(
+      `INSERT INTO businesses (
+        id, created_at, updated_at, status, code_hash, company_name, trade_license_no, trade_license_file,
+        vat_no, vat_file, phone, mobile, whatsapp, website, location, logo, category, business_type, services, extra
+      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20)`,
+      [
+        row.id, row.createdAt, row.updatedAt, row.status, row.codeHash, row.companyName, row.tradeLicenseNo,
+        row.tradeLicenseFile, row.vatNo, row.vatFile, row.phone, row.mobile, row.whatsapp, row.website,
+        row.location, row.logo, row.category, row.businessType, row.services, row.extra,
+      ]
+    );
+    return { id: row.id, status: row.status };
+  }
+  await withLock(async () => {
+    state.businesses.push(row);
+    if (state.businesses.length > 5000) state.businesses = state.businesses.slice(-5000);
+    await persistJson();
+  });
+  return { id: row.id, status: row.status };
+}
+
+export async function getBusiness(id) {
+  if (backend === "postgres") {
+    const result = await pool.query("SELECT * FROM businesses WHERE id = $1", [id]);
+    return result.rows[0] ? businessFromDb(result.rows[0]) : null;
+  }
+  return state.businesses.find((row) => row.id === id) || null;
+}
+
+export async function findBusinessByCode(codeHash) {
+  if (backend === "postgres") {
+    const result = await pool.query("SELECT * FROM businesses WHERE code_hash = $1", [codeHash]);
+    return result.rows[0] ? businessFromDb(result.rows[0]) : null;
+  }
+  return state.businesses.find((row) => row.codeHash === codeHash) || null;
+}
+
+export async function updateBusiness(id, fields) {
+  const now = new Date().toISOString();
+  if (backend === "postgres") {
+    const result = await pool.query(
+      `UPDATE businesses SET
+        updated_at = $2, status = 'pending', company_name = $3, trade_license_no = $4, trade_license_file = $5,
+        vat_no = $6, vat_file = $7, phone = $8, mobile = $9, whatsapp = $10, website = $11, location = $12,
+        logo = $13, category = $14, business_type = $15, services = $16, extra = $17
+       WHERE id = $1`,
+      [
+        id, now, fields.companyName, fields.tradeLicenseNo, fields.tradeLicenseFile, fields.vatNo, fields.vatFile,
+        fields.phone, fields.mobile, fields.whatsapp, fields.website, fields.location, fields.logo,
+        fields.category, fields.businessType, fields.services, fields.extra,
+      ]
+    );
+    return result.rowCount > 0;
+  }
+  return withLock(async () => {
+    const row = state.businesses.find((item) => item.id === id);
+    if (!row) return false;
+    Object.assign(row, fields, { status: "pending", updatedAt: now });
+    await persistJson();
+    return true;
+  });
+}
+
+export async function setBusinessStatus(id, status) {
+  if (backend === "postgres") {
+    const result = await pool.query(
+      "UPDATE businesses SET status = $2, updated_at = NOW() WHERE id = $1",
+      [id, status]
+    );
+    return result.rowCount > 0;
+  }
+  return withLock(async () => {
+    const row = state.businesses.find((item) => item.id === id);
+    if (!row) return false;
+    row.status = status;
+    row.updatedAt = new Date().toISOString();
+    await persistJson();
+    return true;
+  });
+}
+
+export async function listBusinesses(status) {
+  if (backend === "postgres") {
+    const result = status
+      ? await pool.query(
+          `SELECT ${BUSINESS_PUBLIC_SQL}, (trade_license_file <> '') AS has_license, (vat_file <> '') AS has_vat
+           FROM businesses WHERE status = $1 ORDER BY created_at DESC LIMIT 500`,
+          [status]
+        )
+      : await pool.query(
+          `SELECT ${BUSINESS_PUBLIC_SQL}, (trade_license_file <> '') AS has_license, (vat_file <> '') AS has_vat
+           FROM businesses ORDER BY created_at DESC LIMIT 500`
+        );
+    return result.rows.map((row) => ({
+      ...businessFromDb(row),
+      tradeLicenseFile: row.has_license ? "yes" : "",
+      vatFile: row.has_vat ? "yes" : "",
+      codeHash: "",
+    }));
+  }
+  const rows = status ? state.businesses.filter((row) => row.status === status) : state.businesses;
+  return [...rows].reverse().slice(0, 500).map((row) => ({
+    ...row,
+    tradeLicenseFile: row.tradeLicenseFile ? "yes" : "",
+    vatFile: row.vatFile ? "yes" : "",
+    logo: row.logo,
+    codeHash: "",
   }));
 }
 

@@ -2,6 +2,16 @@ import crypto from "crypto";
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
+import {
+  CATEGORIES,
+  adminBusiness,
+  businessPrompt,
+  hashUpdateCode,
+  matchBusinesses,
+  newUpdateCode,
+  publicBusiness,
+  validateApplication,
+} from "./directory.js";
 import { SYSTEM, topics } from "./guides.js";
 import { MAP_OFFLINE, readHere, resolveMaps, roundCoord, stripMapTags } from "./maps.js";
 import { countryOf, sanitizeTopic, stripPii, csvCell } from "./privacy.js";
@@ -10,17 +20,23 @@ import {
   exportQuestions,
   getStats,
   initStore,
+  createBusiness,
+  findBusinessByCode,
+  getBusiness,
+  listBusinesses,
   recordTopicClick,
   recordVisit,
   saveQuestion,
+  setBusinessStatus,
   setFeedback,
   storageKind,
+  updateBusiness,
 } from "./store.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 app.set("trust proxy", 1);
-app.use(express.json({ limit: "8mb" }));
+app.use(express.json({ limit: "12mb" }));
 
 const LANGS = new Set(["en", "ar", "hi", "ur", "ru", "zh", "fr", "tl"]);
 const buckets = new Map();
@@ -137,6 +153,95 @@ app.get("/guides", (_req, res) => {
   res.json({ topics });
 });
 
+app.get("/directory", (_req, res) => {
+  res.sendFile(path.join(__dirname, "public", "directory.html"));
+});
+
+app.get("/join", (_req, res) => {
+  res.sendFile(path.join(__dirname, "public", "join.html"));
+});
+
+app.get("/api/directory-info", (_req, res) => {
+  res.json({
+    categories: CATEGORIES,
+    fee: process.env.MEMBERSHIP_FEE || "",
+  });
+});
+
+app.get("/api/businesses", async (req, res) => {
+  const category = typeof req.query.category === "string" ? req.query.category : "";
+  const q = typeof req.query.q === "string" ? req.query.q : "";
+  try {
+    let rows = await listBusinesses("active");
+    if (category) rows = rows.filter((row) => row.category === category);
+    const businesses = q.trim()
+      ? matchBusinesses(rows, q, 24)
+      : rows.slice(0, 60).map(publicBusiness);
+    res.json({ businesses });
+  } catch (err) {
+    console.error("business list failed:", err.message);
+    res.status(500).json({ error: "Could not load businesses" });
+  }
+});
+
+app.get("/api/businesses/:id", async (req, res) => {
+  try {
+    const row = await getBusiness(req.params.id);
+    if (!row || row.status !== "active") return res.status(404).json({ error: "Not found" });
+    res.json({ business: publicBusiness(row) });
+  } catch (err) {
+    console.error("business read failed:", err.message);
+    res.status(500).json({ error: "Could not load business" });
+  }
+});
+
+app.post("/api/businesses", async (req, res) => {
+  if (!rateOk(req, 8)) return res.status(429).json({ error: "Too many requests" });
+  const parsed = validateApplication(req.body);
+  if (!parsed.ok) return res.status(400).json({ error: parsed.error });
+  const updateCode = typeof req.body?.updateCode === "string" ? req.body.updateCode.trim() : "";
+  try {
+    if (updateCode) {
+      const existing = await findBusinessByCode(hashUpdateCode(updateCode));
+      if (!existing) return res.status(404).json({ error: "Update code was not recognised" });
+      const ok = await updateBusiness(existing.id, parsed.value);
+      if (!ok) return res.status(404).json({ error: "Update code was not recognised" });
+      return res.json({ id: existing.id, status: "pending" });
+    }
+    const code = newUpdateCode();
+    const created = await createBusiness({ ...parsed.value, codeHash: hashUpdateCode(code) });
+    return res.status(201).json({ id: created.id, status: "pending", updateCode: code });
+  } catch (err) {
+    console.error("business save failed:", err.message);
+    return res.status(500).json({ error: "Could not save the business" });
+  }
+});
+
+app.get("/admin/businesses", requireAdmin, async (_req, res) => {
+  try {
+    const rows = await listBusinesses();
+    res.json({ businesses: rows.map(adminBusiness) });
+  } catch (err) {
+    console.error("admin businesses failed:", err.message);
+    res.status(500).json({ error: "Could not load businesses" });
+  }
+});
+
+app.post("/admin/businesses/:id/status", requireAdmin, async (req, res) => {
+  const status = req.body?.status;
+  if (status !== "active" && status !== "hidden" && status !== "pending") {
+    return res.status(400).json({ error: "Invalid status" });
+  }
+  try {
+    const ok = await setBusinessStatus(req.params.id, status);
+    if (!ok) return res.status(404).json({ error: "Unknown business" });
+    res.json({ ok: true, status });
+  } catch (err) {
+    console.error("business status failed:", err.message);
+    res.status(500).json({ error: "Could not update status" });
+  }
+});
+
 app.get("/analytics-config.js", (_req, res) => {
   const goat = process.env.GOATCOUNTER_URL || "";
   const plausible = process.env.PLAUSIBLE_DOMAIN || "";
@@ -244,11 +349,19 @@ app.post("/chat", async (req, res) => {
   }
 
   const hasImage = clean.some((m) => Array.isArray(m.content) && m.content.some((p) => p.type === "image_url"));
+  let businesses = [];
+  try {
+    const listed = await listBusinesses("active");
+    businesses = matchBusinesses(listed, userText, 4);
+  } catch (err) {
+    console.error("business match failed:", err.message);
+  }
   const system =
     SYSTEM +
     "\n\nReply in this language unless the user writes in a different one: " +
     lang +
     "." +
+    (businesses.length ? "\n\n" + businessPrompt(businesses) : "") +
     (req.body.voice
       ? "\nThe user asked by voice. Keep the reply concise and easy to hear: short sentences, no long tables."
       : "") +
@@ -267,10 +380,17 @@ app.post("/chat", async (req, res) => {
 
   if (!key) {
     const fallback = await withMaps("");
-    if (fallback.maps.length) {
+    if (fallback.maps.length || businesses.length) {
       return replyWithLog(
         res,
-        { text: MAP_OFFLINE[lang] || MAP_OFFLINE.en, maps: fallback.maps, offline: true },
+        {
+          text: fallback.maps.length
+            ? MAP_OFFLINE[lang] || MAP_OFFLINE.en
+            : "The assistant is temporarily unavailable. Matching businesses are in the side panel.",
+          maps: fallback.maps,
+          businesses,
+          offline: true,
+        },
         userText,
         req.body?.topic
       );
@@ -293,10 +413,17 @@ app.post("/chat", async (req, res) => {
   const data = await r.json().catch(() => ({}));
   if (!r.ok) {
     const fallback = await withMaps("");
-    if (fallback.maps.length) {
+    if (fallback.maps.length || businesses.length) {
       return replyWithLog(
         res,
-        { text: MAP_OFFLINE[lang] || MAP_OFFLINE.en, maps: fallback.maps, offline: true },
+        {
+          text: fallback.maps.length
+            ? MAP_OFFLINE[lang] || MAP_OFFLINE.en
+            : "The assistant is temporarily unavailable. Matching businesses are in the side panel.",
+          maps: fallback.maps,
+          businesses,
+          offline: true,
+        },
         userText,
         req.body?.topic
       );
@@ -306,7 +433,7 @@ app.post("/chat", async (req, res) => {
   }
   const text = data.choices?.[0]?.message?.content || "";
   const out = await withMaps(text);
-  await replyWithLog(res, out, userText, req.body?.topic);
+  await replyWithLog(res, { ...out, businesses }, userText, req.body?.topic);
 });
 
 app.use(express.static(path.join(__dirname, "public")));

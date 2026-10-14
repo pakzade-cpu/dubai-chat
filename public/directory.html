@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dubai business directory</title>
+  <link rel="stylesheet" href="/directory.css" />
+</head>
+<body>
+  <div class="uae-bar" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+  <header>
+    <a class="brand" href="/"><img src="/emirates-mark.png" alt="The Emirates" /></a>
+    <nav>
+      <a href="/">Guide</a>
+      <a href="/directory">Directory</a>
+      <a class="solid" href="/join">List your business</a>
+    </nav>
+  </header>
+  <main>
+    <h1>Find a business in Dubai</h1>
+    <p class="lead">Member businesses, small and large, in one directory. Search by what you need. A listing appears here after the licence and VAT certificate are checked.</p>
+    <div class="cats" id="cats"></div>
+    <form class="search" id="search">
+      <input id="q" type="search" placeholder="Search restaurants, clinics, schools, areas…" aria-label="Search businesses" />
+    </form>
+    <div class="layout">
+      <div>
+        <div id="list"></div>
+        <p class="note" id="empty" hidden>No member business is listed for this search yet.</p>
+      </div>
+      <aside class="dock" id="dock">
+        <p class="note" id="dock-empty">Choose a business to see the phone, WhatsApp, website, and location.</p>
+        <div id="detail"></div>
+      </aside>
+    </div>
+  </main>
+  <script>
+    const cats = document.getElementById("cats");
+    const list = document.getElementById("list");
+    const empty = document.getElementById("empty");
+    const q = document.getElementById("q");
+    let category = "";
+    let current = [];
+
+    function el(tag, text, className) {
+      const node = document.createElement(tag);
+      if (className) node.className = className;
+      if (text != null) node.textContent = text;
+      return node;
+    }
+    function showDetail(biz) {
+      const box = document.getElementById("detail");
+      document.getElementById("dock-empty").hidden = true;
+      box.innerHTML = "";
+      const head = el("div", null, "detail");
+      if (biz.logo) {
+        const img = document.createElement("img");
+        img.src = biz.logo;
+        img.alt = "";
+        head.appendChild(img);
+      }
+      head.appendChild(el("strong", biz.companyName));
+      head.appendChild(el("span", biz.categoryName + " · " + biz.businessType, "muted"));
+      const services = el("p");
+      services.appendChild(el("strong", "Services"));
+      services.appendChild(document.createTextNode(" " + biz.services));
+      head.appendChild(services);
+      const extra = el("p", biz.extra);
+      head.appendChild(extra);
+      const loc = el("p", biz.location);
+      head.appendChild(loc);
+      const phone = el("p");
+      phone.appendChild(document.createTextNode("Phone " + biz.phone + " · Mobile " + biz.mobile));
+      head.appendChild(phone);
+      const wa = document.createElement("a");
+      const digits = String(biz.whatsapp || "").replace(/\D/g, "");
+      wa.href = digits ? "https://wa.me/" + digits : "#";
+      wa.target = "_blank";
+      wa.rel = "noopener noreferrer";
+      wa.textContent = "WhatsApp " + biz.whatsapp;
+      head.appendChild(el("p")).appendChild(wa);
+      const site = document.createElement("a");
+      site.href = biz.website;
+      site.target = "_blank";
+      site.rel = "noopener noreferrer";
+      site.textContent = biz.website;
+      head.appendChild(el("p")).appendChild(site);
+      box.appendChild(head);
+    }
+    function render(rows) {
+      current = rows;
+      list.innerHTML = "";
+      empty.hidden = rows.length > 0;
+      for (const biz of rows) {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "card";
+        if (biz.logo) {
+          const img = document.createElement("img");
+          img.src = biz.logo;
+          img.alt = "";
+          b.appendChild(img);
+        }
+        const copy = el("span");
+        copy.appendChild(el("strong", biz.companyName));
+        copy.appendChild(document.createElement("br"));
+        copy.appendChild(document.createTextNode(biz.categoryName + " · " + biz.location));
+        b.appendChild(copy);
+        b.onclick = () => showDetail(biz);
+        list.appendChild(b);
+      }
+      if (rows[0]) showDetail(rows[0]);
+    }
+    async function load() {
+      const params = new URLSearchParams();
+      if (category) params.set("category", category);
+      if (q.value.trim()) params.set("q", q.value.trim());
+      const data = await fetch("/api/businesses?" + params.toString()).then((r) => r.json());
+      render(data.businesses || []);
+    }
+    function setCats(categories) {
+      cats.innerHTML = "";
+      const all = el("button", "All", "cat on");
+      all.type = "button";
+      all.onclick = () => {
+        category = "";
+        for (const btn of cats.querySelectorAll(".cat")) btn.classList.remove("on");
+        all.classList.add("on");
+        load();
+      };
+      cats.appendChild(all);
+      for (const cat of categories) {
+        const btn = el("button", cat.name, "cat");
+        btn.type = "button";
+        btn.onclick = () => {
+          category = cat.id;
+          for (const node of cats.querySelectorAll(".cat")) node.classList.remove("on");
+          btn.classList.add("on");
+          load();
+        };
+        cats.appendChild(btn);
+      }
+    }
+    document.getElementById("search").onsubmit = (e) => { e.preventDefault(); load(); };
+    q.oninput = () => { clearTimeout(q._t); q._t = setTimeout(load, 250); };
+    fetch("/api/directory-info").then((r) => r.json()).then((data) => {
+      setCats(data.categories || []);
+      load();
+    }).catch(() => load());
+  </script>
+</body>
+</html>

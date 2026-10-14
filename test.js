@@ -3,6 +3,7 @@ import { mkdtemp, rm } from "fs/promises";
 import os from "os";
 import path from "path";
 import test from "node:test";
+import { matchBusinesses, validateApplication } from "./directory.js";
 import { csvCell, dubaiDay, dubaiStamp, sanitizeTopic, stripPii } from "./privacy.js";
 import { SYSTEM } from "./guides.js";
 
@@ -157,6 +158,103 @@ test("admin is password-protected and shows stats", async () => {
   assert.match(text, /dubai_time,topic,question,answer,feedback/);
   assert.match(text, /transport/);
   assert.match(text, /\[email\]/);
+});
+
+test("directory validation rejects an incomplete application", () => {
+  const bad = validateApplication({ companyName: "Only a name" });
+  assert.equal(bad.ok, false);
+  const rows = [
+    {
+      id: "1",
+      companyName: "Marina Dental",
+      category: "health",
+      businessType: "Dental clinic",
+      services: "Family dentistry",
+      extra: "Saturday clinic",
+      phone: "+971400000000",
+      mobile: "+971500000000",
+      whatsapp: "+971500000000",
+      website: "https://example.com",
+      location: "Dubai Marina",
+      logo: "data:image/png;base64,iVBORw0KGgo=",
+    },
+  ];
+  assert.equal(matchBusinesses(rows, "dentist in dubai marina")[0].companyName, "Marina Dental");
+  assert.equal(matchBusinesses(rows, "what is the weather").length, 0);
+});
+
+test("business registration stays private until approved", async () => {
+  const logo = "data:image/png;base64,iVBORw0KGgo=";
+  const pdf = "data:application/pdf;base64,JVBERi0=";
+  const application = {
+    companyName: "Marina Dental",
+    tradeLicenseNo: "DED-100",
+    tradeLicenseFile: pdf,
+    vatNo: "100234567800003",
+    vatFile: pdf,
+    phone: "+971 4 123 4567",
+    mobile: "+971 50 123 4567",
+    whatsapp: "+971501234567",
+    website: "https://example.com",
+    location: "Dubai Marina",
+    logo,
+    category: "health",
+    businessType: "Dental clinic",
+    services: "Family dentistry and cleaning",
+    extra: "Open Saturday",
+  };
+  const created = await json(base + "/api/businesses", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(application),
+  });
+  assert.equal(created.status, 201);
+  assert.match(created.data.updateCode, /^[a-f0-9]{16}$/);
+  assert.equal(created.data.status, "pending");
+
+  const hidden = await json(base + "/api/businesses?q=dental");
+  assert.equal(hidden.status, 200);
+  assert.equal(hidden.data.businesses.length, 0);
+  const raw = JSON.stringify(hidden.data);
+  assert.equal(raw.includes("DED-100"), false);
+  assert.equal(raw.includes("JVBERi0"), false);
+
+  const admin = await json(base + "/admin/businesses", {
+    headers: { Authorization: "Bearer test-pass" },
+  });
+  assert.equal(admin.status, 200);
+  assert.equal(admin.data.businesses[0].tradeLicenseNo, "DED-100");
+  assert.equal(admin.data.businesses[0].hasLicenseFile, true);
+  assert.equal(JSON.stringify(admin.data).includes("JVBERi0"), false);
+
+  const approved = await json(base + "/admin/businesses/" + created.data.id + "/status", {
+    method: "POST",
+    headers: { Authorization: "Bearer test-pass", "Content-Type": "application/json" },
+    body: JSON.stringify({ status: "active" }),
+  });
+  assert.equal(approved.status, 200);
+
+  const listed = await json(base + "/api/businesses?q=dentist");
+  assert.equal(listed.data.businesses[0].companyName, "Marina Dental");
+  assert.equal(listed.data.businesses[0].tradeLicenseNo, undefined);
+
+  const chat = await json(base + "/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      language: "en",
+      messages: [{ role: "user", content: "I need a dentist in Dubai Marina" }],
+    }),
+  });
+  assert.equal(chat.status, 200);
+  assert.equal(chat.data.businesses[0].companyName, "Marina Dental");
+  assert.equal(JSON.stringify(chat.data.businesses).includes("DED-100"), false);
+
+  const home = await origFetch(base + "/directory");
+  assert.equal(home.status, 200);
+  assert.match(await home.text(), /Find a business in Dubai/);
+  const guide = await origFetch(base + "/");
+  assert.match(await guide.text(), /id="dock"/);
 });
 
 test("hosted analytics config is empty when env vars are unset", async () => {

@@ -83,10 +83,71 @@
       letter-spacing: .01em;
       color: var(--ink);
     }
+    .shell {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+    }
     main {
       flex: 1;
       min-height: 0;
       overflow: auto;
+    }
+    .dock {
+      width: 340px;
+      flex: none;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      background: var(--card);
+      border-inline-start: 1px solid var(--line);
+    }
+    .dock[hidden] { display: none !important; }
+    .dock-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 16px 16px 12px;
+      border-bottom: 1px solid var(--line);
+    }
+    .dock-head strong { font-size: 14px; font-weight: 600; }
+    .dock-close {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      font: inherit;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .dock-body { overflow: auto; padding: 8px 16px 24px; }
+    .dock-empty { color: var(--muted); font-size: 14px; line-height: 1.5; }
+    .dock-body a.join {
+      color: inherit;
+      font-size: 14px;
+    }
+    .biz {
+      display: flex;
+      gap: 12px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .biz img {
+      width: 48px;
+      height: 48px;
+      object-fit: contain;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      flex: none;
+    }
+    .biz strong { display: block; font-size: 14px; }
+    .biz p { margin: 4px 0 0; color: var(--muted); font-size: 13px; line-height: 1.4; }
+    .biz a { color: inherit; font-size: 13px; }
+    .nav {
+      color: inherit;
+      text-decoration: none;
+      font-size: 14px;
     }
     .stage {
       max-width: 760px;
@@ -460,6 +521,15 @@
       .mark.mini { width: 72px; }
       .lang { max-width: 120px; }
       #welcome { padding: 28px 0 32px; }
+      .dock {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        inset-inline-end: 0;
+        z-index: 30;
+        width: min(100%, 360px);
+        box-shadow: -16px 0 40px rgba(40, 28, 8, .12);
+      }
     }
     @media (max-width: 520px) {
       .starters { grid-template-columns: 1fr; }
@@ -477,6 +547,8 @@
       <img class="mark mini" src="/emirates-mark.png" alt="" />
     </button>
     <div class="actions">
+      <a class="nav" id="directory-link" href="/directory">Directory</a>
+      <a class="nav" id="join-link" href="/join">List your business</a>
       <label>
         <span class="sr" id="lang-label" hidden>Language</span>
         <select class="lang" id="lang" aria-labelledby="lang-label"></select>
@@ -487,6 +559,7 @@
       <button class="new" id="reset" type="button">New chat</button>
     </div>
   </header>
+  <div class="shell">
   <main>
     <div class="stage">
       <section id="welcome">
@@ -506,6 +579,14 @@
       <div id="log"></div>
     </div>
   </main>
+  <aside class="dock" id="dock" hidden>
+    <div class="dock-head">
+      <strong id="dock-title">Listed businesses</strong>
+      <button class="dock-close" id="dock-close" type="button">Close</button>
+    </div>
+    <div class="dock-body" id="dock-body"></div>
+  </aside>
+  </div>
   <form id="f">
     <div id="topic">
       <div class="box">
@@ -663,6 +744,8 @@
       document.getElementById("privacy").textContent = copy.privacy || I18N.en.privacy;
       document.getElementById("lang-label").textContent = copy.lang;
       const botName = copy.botCta || I18N.en.botCta;
+      document.getElementById("directory-link").textContent = copy.directory || I18N.en.directory;
+      document.getElementById("join-link").textContent = copy.join || I18N.en.join;
       document.getElementById("bot-cta").textContent = botName;
       document.getElementById("bot-link").setAttribute("aria-label", botName);
       document.getElementById("bot-link").title = botName;
@@ -1078,6 +1161,7 @@
           history.push({ role: "assistant", content: data.text });
           addVotes(pendingWrap, data.id);
         }
+        if (r.ok) openDock(Array.isArray(data.businesses) ? data.businesses : []);
         if (fromVoice) speakReply(reply);
       } catch {
         pending.textContent = copy.reach;
@@ -1098,8 +1182,78 @@
       stopTalking();
       clearPhoto();
       clearHere();
+      closeDock();
       q.focus();
     }
+    function closeDock() {
+      document.getElementById("dock").hidden = true;
+      document.body.classList.remove("dock-open");
+    }
+    function bizLine(parent, text) {
+      const p = document.createElement("p");
+      p.textContent = text;
+      parent.appendChild(p);
+    }
+    function openDock(businesses) {
+      const copy = t();
+      const dock = document.getElementById("dock");
+      const body = document.getElementById("dock-body");
+      document.getElementById("dock-title").textContent = copy.listed || I18N.en.listed;
+      body.innerHTML = "";
+      if (!businesses.length) {
+        const p = document.createElement("p");
+        p.className = "dock-empty";
+        p.textContent = copy.noListed || I18N.en.noListed;
+        body.appendChild(p);
+        const a = document.createElement("a");
+        a.className = "join";
+        a.href = "/join";
+        a.textContent = copy.join || I18N.en.join;
+        body.appendChild(a);
+      }
+      for (const biz of businesses) {
+        const card = document.createElement("article");
+        card.className = "biz";
+        if (biz.logo) {
+          const img = document.createElement("img");
+          img.src = biz.logo;
+          img.alt = "";
+          card.appendChild(img);
+        }
+        const copyBox = document.createElement("div");
+        const name = document.createElement("strong");
+        name.textContent = biz.companyName || "";
+        copyBox.appendChild(name);
+        bizLine(copyBox, (biz.categoryName || "") + (biz.businessType ? " · " + biz.businessType : ""));
+        if (biz.services) bizLine(copyBox, biz.services);
+        if (biz.location) bizLine(copyBox, biz.location);
+        if (biz.phone) bizLine(copyBox, biz.phone);
+        if (biz.whatsapp) {
+          const a = document.createElement("a");
+          const digits = String(biz.whatsapp).replace(/\D/g, "");
+          a.href = "https://wa.me/" + digits;
+          a.target = "_blank";
+          a.rel = "noopener noreferrer";
+          a.textContent = "WhatsApp " + biz.whatsapp;
+          copyBox.appendChild(a);
+        }
+        if (biz.website) {
+          const a = document.createElement("a");
+          a.href = biz.website;
+          a.target = "_blank";
+          a.rel = "noopener noreferrer";
+          a.textContent = biz.website;
+          const p = document.createElement("p");
+          p.appendChild(a);
+          copyBox.appendChild(p);
+        }
+        card.appendChild(copyBox);
+        body.appendChild(card);
+      }
+      dock.hidden = false;
+      document.body.classList.add("dock-open");
+    }
+    document.getElementById("dock-close").onclick = closeDock;
     function setTools(open) {
       toolsMenu.classList.toggle("open", open);
       toolsBtn.setAttribute("aria-expanded", open ? "true" : "false");

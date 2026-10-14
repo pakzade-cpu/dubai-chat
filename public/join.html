@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>List your Dubai business</title>
+  <link rel="stylesheet" href="/directory.css" />
+</head>
+<body>
+  <div class="uae-bar" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+  <header>
+    <a class="brand" href="/"><img src="/emirates-mark.png" alt="The Emirates" /></a>
+    <nav>
+      <a href="/">Guide</a>
+      <a href="/directory">Directory</a>
+      <a class="solid" href="/join">List your business</a>
+    </nav>
+  </header>
+  <main>
+    <h1>Membership form</h1>
+    <p class="lead" id="lead">Every field is required. The licence and VAT certificate are checked by us and are not shown on the public page. After approval, the guide can mention your business when someone asks for it.</p>
+    <p class="note" id="fee">A small membership fee is confirmed after the documents are checked. The listing stays hidden until then.</p>
+    <form class="form" id="form">
+      <div class="grid">
+        <label class="wide">Company name<input name="companyName" required maxlength="120" /></label>
+        <label>Trade licence number<input name="tradeLicenseNo" required maxlength="40" /></label>
+        <label>Trade licence file<input name="tradeLicenseFile" type="file" accept="application/pdf,image/jpeg,image/png,image/webp" required /></label>
+        <label>FTA / VAT number<input name="vatNo" required maxlength="40" /></label>
+        <label>VAT certificate<input name="vatFile" type="file" accept="application/pdf,image/jpeg,image/png,image/webp" required /></label>
+        <label>Phone<input name="phone" required maxlength="30" inputmode="tel" /></label>
+        <label>Mobile<input name="mobile" required maxlength="30" inputmode="tel" /></label>
+        <label>WhatsApp number<input name="whatsapp" required maxlength="30" inputmode="tel" /></label>
+        <label>Website<input name="website" type="url" required maxlength="200" placeholder="https://" /></label>
+        <label class="wide">Location<input name="location" required maxlength="180" placeholder="Area, Dubai" /></label>
+        <label>Logo<input name="logo" type="file" accept="image/jpeg,image/png,image/webp" required /></label>
+        <label>Category<select name="category" id="category" required><option value="" disabled selected>Choose</option></select></label>
+        <label class="wide">Business type<input name="businessType" required maxlength="80" placeholder="Example: family clinic, cafe, free-zone consultant" /></label>
+        <label class="wide">Services<textarea name="services" required maxlength="800"></textarea></label>
+        <label class="wide">Extra details<textarea name="extra" required maxlength="800"></textarea></label>
+        <label class="wide">Update code<input name="updateCode" maxlength="40" autocomplete="off" placeholder="Only if you are updating a listing you already sent" /></label>
+      </div>
+      <button type="submit">Submit for review</button>
+      <p class="error" id="error" hidden></p>
+    </form>
+    <div class="form" id="done" hidden>
+      <h2>Saved for review</h2>
+      <p class="note">Your business is not public yet. Keep this update code. You will need it to change the form later. It is shown only once.</p>
+      <p class="code" id="code"></p>
+      <p><a href="/directory">Back to the directory</a></p>
+    </div>
+  </main>
+  <script>
+    const form = document.getElementById("form");
+    const error = document.getElementById("error");
+    const category = document.getElementById("category");
+    function readFile(file, max) {
+      return new Promise((resolve, reject) => {
+        if (!file) return reject(new Error("Attach every file"));
+        if (file.size > max) return reject(new Error("A file is too large"));
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result || ""));
+        reader.onerror = () => reject(new Error("Could not read a file"));
+        reader.readAsDataURL(file);
+      });
+    }
+    fetch("/api/directory-info").then((r) => r.json()).then((data) => {
+      if (data.fee) document.getElementById("fee").textContent = "Membership fee: " + data.fee + ". The listing stays hidden until the documents are checked.";
+      for (const cat of data.categories || []) {
+        const o = document.createElement("option");
+        o.value = cat.id;
+        o.textContent = cat.name;
+        category.appendChild(o);
+      }
+    });
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      error.hidden = true;
+      const data = Object.fromEntries(new FormData(form).entries());
+      try {
+        data.logo = await readFile(form.logo.files[0], 900000);
+        data.tradeLicenseFile = await readFile(form.tradeLicenseFile.files[0], 1800000);
+        data.vatFile = await readFile(form.vatFile.files[0], 1800000);
+        const r = await fetch("/api/businesses", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        });
+        const body = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(body.error || "Could not save");
+        form.hidden = true;
+        document.getElementById("done").hidden = false;
+        document.getElementById("code").textContent = body.updateCode || "Updated. It will be checked again before it goes live.";
+      } catch (err) {
+        error.hidden = false;
+        error.textContent = err.message;
+      }
+    };
+  </script>
+</body>
+</html>

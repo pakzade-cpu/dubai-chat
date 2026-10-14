@@ -141,6 +141,8 @@
       <div class="card"><table><thead><tr><th>When</th><th>Topic</th><th>Question</th><th>Vote</th></tr></thead><tbody id="recent"></tbody></table></div>
       <h2>Answers with a thumbs down</h2>
       <div class="card"><table><thead><tr><th>When</th><th>Topic</th><th>Question</th><th>Answer</th></tr></thead><tbody id="down"></tbody></table></div>
+      <h2>Business memberships</h2>
+      <div class="card"><table><thead><tr><th>Status</th><th>Company</th><th>Category</th><th>Licence / VAT</th><th></th></tr></thead><tbody id="businesses"></tbody></table></div>
     </div>
   </main>
   <script>
@@ -242,6 +244,32 @@
         tr.appendChild(cell(row.feedback || "—"));
         return tr;
       }), 4);
+      const members = await fetch("/admin/businesses", { headers: authHeaders() });
+      const memberData = members.ok ? await members.json() : { businesses: [] };
+      fillTable("businesses", (memberData.businesses || []).map((row) => {
+        const tr = document.createElement("tr");
+        tr.appendChild(cell(row.status));
+        const company = document.createElement("td");
+        company.textContent = (row.companyName || "") + " — " + (row.location || "");
+        tr.appendChild(company);
+        tr.appendChild(cell((row.categoryName || "") + " / " + (row.businessType || "")));
+        tr.appendChild(cell((row.tradeLicenseNo || "") + " / " + (row.vatNo || "")));
+        const action = document.createElement("td");
+        const approve = document.createElement("button");
+        approve.type = "button";
+        approve.textContent = row.status === "active" ? "Hide" : "Approve";
+        approve.onclick = async () => {
+          await fetch("/admin/businesses/" + encodeURIComponent(row.id) + "/status", {
+            method: "POST",
+            headers: { ...authHeaders(), "Content-Type": "application/json" },
+            body: JSON.stringify({ status: row.status === "active" ? "hidden" : "active" }),
+          });
+          load();
+        };
+        action.appendChild(approve);
+        tr.appendChild(action);
+        return tr;
+      }), 5);
       fillTable("down", (data.downvoted || []).map((row) => {
         const tr = document.createElement("tr");
         tr.appendChild(cell(row.dubai_time));
