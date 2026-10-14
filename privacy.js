@@ -19,6 +19,10 @@ export const TOPIC_IDS = new Set([
   "airport",
   "chat",
   "official",
+  "bot",
+  "voice",
+  "photo",
+  "map",
 ]);
 
 export function stripPii(input) {

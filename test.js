@@ -14,6 +14,7 @@ test("stripPii removes emails and phone numbers", () => {
 
 test("sanitizeTopic only keeps short ids", () => {
   assert.equal(sanitizeTopic("visa"), "visa");
+  assert.equal(sanitizeTopic("bot"), "bot");
   assert.equal(sanitizeTopic("not a topic"), "chat");
   assert.equal(sanitizeTopic(""), "chat");
 });
@@ -67,6 +68,8 @@ test("public pages and analytics events", async () => {
   assert.match(html, /logged anonymously/);
   assert.match(html, /id="here-btn"/);
   assert.match(html, /id="voice-btn"/);
+  assert.match(html, /id="more-topics"/);
+  assert.match(html, /Take your time/);
 
   const page = await json(base + "/api/event", {
     method: "POST",
@@ -81,6 +84,13 @@ test("public pages and analytics events", async () => {
     body: JSON.stringify({ type: "topic", topic: "visa" }),
   });
   assert.equal(topic.status, 200);
+
+  const bot = await json(base + "/api/event", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ type: "topic", topic: "bot" }),
+  });
+  assert.equal(bot.status, 200);
 });
 
 test("chat logs a sanitized question and returns an id", async () => {
@@ -127,7 +137,8 @@ test("admin is password-protected and shows stats", async () => {
   assert.equal(stats.data.storage, "json");
   assert.ok(stats.data.visitsPerDay.length >= 1);
   assert.equal(stats.data.countries[0].country, "AE");
-  assert.equal(stats.data.topTopics[0].topic, "visa");
+  assert.ok(stats.data.topTopics.some((row) => row.topic === "visa"));
+  assert.equal(stats.data.usage.bot, 1);
   assert.ok(stats.data.recent.some((row) => row.question.includes("[email]")));
   assert.ok(!JSON.stringify(stats.data.recent).includes("leak@example.com"));
   assert.equal(stats.data.feedback.up, 1);

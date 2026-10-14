@@ -230,11 +230,18 @@ function assemble(visitsPerDay, countries, topTopics, feedbackRows, recent, down
   }
   const voted = feedback.up + feedback.down;
   const ratio = voted ? Math.round((feedback.up / voted) * 100) : null;
+  const usage = Object.fromEntries(
+    ["bot", "voice", "photo", "map"].map((topic) => [
+      topic,
+      (topTopics.find((row) => row.topic === topic) || { count: 0 }).count || 0,
+    ])
+  );
   return {
     storage: backend,
     visitsPerDay,
     countries,
     topTopics,
+    usage,
     feedback: { ...feedback, voted, ratio },
     recent: recent.map(shapeQuestion),
     downvoted: downvoted.map(shapeQuestion),

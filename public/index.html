@@ -6,13 +6,13 @@
   <title>Dubai</title>
   <style>
     :root {
-      --bg: #f3efe6;
-      --ink: #141414;
-      --muted: #6b6458;
-      --line: #e2d9cc;
-      --card: #fffcf7;
-      --gold: #b8954a;
-      --send: #141414;
+      --bg: #f6f1e8;
+      --ink: #1a1714;
+      --muted: #7a7268;
+      --line: #e6dccf;
+      --card: #fffdf9;
+      --gold: #b0893a;
+      --send: #1a1714;
       --red: #c8102e;
       --green: #007a3d;
     }
@@ -41,9 +41,9 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
-      padding: 14px 22px;
-      background: rgba(243, 239, 230, .88);
+      gap: 16px;
+      padding: 20px 32px;
+      background: rgba(246, 241, 232, .9);
       backdrop-filter: blur(16px);
       border-bottom: 1px solid transparent;
       flex-wrap: wrap;
@@ -52,29 +52,30 @@
     .brand {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       border: 0;
       background: none;
       color: inherit;
       padding: 0;
       cursor: pointer;
     }
-    .brand b { font-size: 15px; letter-spacing: .22em; font-weight: 650; }
-    .actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+    .brand b { font-size: 14px; letter-spacing: .32em; font-weight: 600; }
+    .actions { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; justify-content: flex-end; }
     .lang {
-      border: 1px solid var(--line);
-      background: var(--card);
-      border-radius: 999px;
-      padding: 7px 12px;
+      border: 0;
+      background: transparent;
+      border-radius: 0;
+      padding: 8px 0;
       font: inherit;
       font-size: 14px;
-      min-width: 118px;
+      min-width: 108px;
+      color: var(--ink);
     }
     .new {
       border: 1px solid var(--line);
-      background: var(--card);
+      background: transparent;
       border-radius: 999px;
-      padding: 8px 14px;
+      padding: 8px 16px;
       cursor: pointer;
       font: inherit;
     }
@@ -84,83 +85,98 @@
       overflow: auto;
     }
     .stage {
-      max-width: 760px;
+      max-width: 640px;
       margin: 0 auto;
-      padding: 12px 16px 8px;
+      padding: 12px 24px 8px;
     }
     #welcome {
-      min-height: calc(100dvh - 210px);
+      min-height: auto;
       display: flex;
       flex-direction: column;
-      justify-content: center;
+      justify-content: flex-start;
       align-items: center;
       text-align: center;
-      gap: 8px;
+      gap: 0;
+      padding: 48px 0 40px;
     }
     body.chatting #welcome { display: none; }
-    h1 { margin: 14px 0 0; font-size: 40px; font-weight: 600; letter-spacing: -.04em; }
-    .lead { margin: 8px 0 28px; color: var(--muted); font-size: 16.5px; line-height: 1.5; max-width: 36rem; }
+    h1 {
+      margin: 32px 0 0;
+      font-size: 44px;
+      font-weight: 500;
+      letter-spacing: -.03em;
+      line-height: 1.12;
+    }
+    .lead {
+      margin: 16px 0 48px;
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.7;
+      max-width: 26rem;
+    }
     .starters {
       width: 100%;
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
+      grid-template-columns: 1fr 1fr;
+      gap: 0 40px;
       text-align: left;
     }
+    .starters.extra { margin-top: 4px; }
     .starter, .svc {
-      border: 1px solid var(--line);
-      background: var(--card);
-      border-radius: 18px;
-      padding: 14px 15px;
+      border: 0;
+      background: transparent;
+      border-radius: 0;
+      padding: 18px 0;
       cursor: pointer;
       font: inherit;
       text-align: inherit;
       color: inherit;
-      transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease;
+      border-bottom: 1px solid var(--line);
+      transition: border-color .2s ease, color .2s ease;
     }
-    .starter { box-shadow: 0 1px 0 rgba(184, 149, 74, .12); }
-    .starter:hover, .svc:hover, .new:hover, .icon:hover {
+    .starter { box-shadow: none; }
+    .starter:hover, .svc:hover, .new:hover {
+      border-color: var(--gold);
+      color: #111;
+    }
+    .icon:hover {
       border-color: #d4c4a4;
-      box-shadow: 0 10px 24px rgba(40, 28, 8, .07);
-      transform: translateY(-1px);
+      box-shadow: 0 8px 20px rgba(40, 28, 8, .06);
     }
-    .bot-link:hover, .bot-card:hover { border-color: #d4c4a4; box-shadow: 0 10px 24px rgba(40, 28, 8, .07); }
     .bot-link {
-      border: 1px solid var(--gold);
-      background: #111;
-      color: #fff;
-      border-radius: 999px;
-      padding: 8px 14px;
+      border: 0;
+      background: none;
+      color: var(--ink);
+      border-radius: 0;
+      padding: 8px 0;
       font: inherit;
       font-size: 13px;
-      text-decoration: none;
+      letter-spacing: .06em;
+      text-decoration: underline;
+      text-decoration-color: var(--gold);
+      text-underline-offset: 5px;
       white-space: nowrap;
     }
+    .bot-link:hover { color: var(--gold); }
     .bot-card {
       width: 100%;
-      margin-top: 16px;
+      margin-top: 48px;
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 16px;
       text-decoration: none;
       color: inherit;
-      background: var(--card);
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 14px 16px 14px 20px;
+      background: transparent;
+      border: 0;
+      border-top: 1px solid var(--line);
+      border-radius: 0;
+      padding: 28px 0 8px;
       position: relative;
-      overflow: hidden;
+      overflow: visible;
       text-align: start;
     }
-    .bot-card::before {
-      content: "";
-      position: absolute;
-      inset-inline-start: 0;
-      top: 0;
-      bottom: 0;
-      width: 7px;
-      background: #ef3340;
-    }
+    .bot-card:hover { color: #111; }
+    .bot-card::before { content: none; }
     .bot-card-flag {
       flex: none;
       width: 44px;
@@ -188,23 +204,31 @@
     }
     .vote button[aria-pressed="true"] { border-color: var(--gold); background: #f4ead3; }
     .vote button:disabled { opacity: .55; cursor: default; }
-    .starter strong, .svc strong { display: block; font-size: 14px; }
-    .starter span, .svc span { display: block; margin-top: 3px; color: var(--muted); font-size: 13px; line-height: 1.35; }
-    .more { width: 100%; margin-top: 8px; text-align: start; }
+    .starter strong, .svc strong { display: block; font-size: 16px; font-weight: 500; }
+    .starter span { display: none; }
+    .svc span { display: none; }
+    .more { width: 100%; margin-top: 28px; text-align: start; }
     .more summary {
       list-style: none;
       cursor: pointer;
       color: var(--muted);
-      font-size: 14px;
-      padding: 8px 4px;
+      font-size: 13px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: 12px 0;
     }
     .more summary::-webkit-details-marker { display: none; }
-    .svcs { display: flex; flex-wrap: wrap; gap: 8px; }
-    .svc { border-radius: 999px; padding: 8px 12px; }
+    .svcs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+    .svc {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 8px 14px;
+      background: var(--card);
+    }
     .svc span { display: none; }
     #topic {
       display: none;
-      max-width: 760px;
+      max-width: 640px;
       margin: 0 auto 10px;
     }
     #topic .box {
@@ -258,11 +282,11 @@
     @keyframes blink { 0%, 80%, 100% { opacity: .25; } 40% { opacity: 1; } }
     form {
       flex: none;
-      padding: 8px 16px 14px;
+      padding: 12px 24px 20px;
       background: linear-gradient(to top, var(--bg) 70%, transparent);
     }
     .composer {
-      max-width: 760px;
+      max-width: 640px;
       margin: 0 auto;
       position: relative;
       background: var(--card);
@@ -414,32 +438,35 @@
     }
     .send:disabled { opacity: .28; cursor: default; }
     .fine {
-      max-width: 760px;
-      margin: 8px auto 0;
+      max-width: 640px;
+      margin: 12px auto 0;
       text-align: center;
       color: var(--muted);
       font-size: 12px;
     }
-    .privacy { margin-top: 4px; }
+    .privacy { margin-top: 6px; }
     .flag-scene {
       position: relative;
-      width: 320px;
-      height: 210px;
+      width: 240px;
+      height: 158px;
     }
-    .flag-scene.mini { width: 72px; height: 48px; }
+    .flag-scene.mini { width: 56px; height: 38px; }
     .flag-scene canvas { display: block; width: 100%; height: 100%; }
     html[dir="rtl"] .starters, html[dir="rtl"] .starter { text-align: right; }
     html[dir="rtl"] .composer { padding: 8px 12px 8px 8px; }
     @media (max-width: 760px) {
-      h1 { font-size: 30px; }
-      .starters { grid-template-columns: 1fr 1fr; }
+      header { padding: 16px 20px; }
+      h1 { font-size: 32px; margin-top: 24px; }
+      .lead { margin-bottom: 36px; }
+      .starters { grid-template-columns: 1fr 1fr; gap: 0 24px; }
       .msg { max-width: 92%; }
-      .flag-scene { width: 240px; height: 160px; }
+      .flag-scene { width: 200px; height: 132px; }
       .lang { max-width: 120px; }
-      .bot-link { padding: 8px 10px; }
+      #welcome { padding: 28px 0 32px; }
     }
     @media (max-width: 520px) {
       .starters { grid-template-columns: 1fr; }
+      .actions { gap: 10px; }
     }
     @media (prefers-reduced-motion: reduce) {
       .dots i, .icon.listening { animation: none; }
@@ -467,8 +494,12 @@
       <section id="welcome">
         <div class="flag-scene" id="flag-hero" aria-label="UAE flag"><canvas></canvas></div>
         <h1 id="headline">Ask about Dubai</h1>
-        <p class="lead" id="lead">Visas, trips, rent, schools, and daily life — tap a topic, type, add a photo, use Voice, or ask where a place is to see a map. Not a government website.</p>
+        <p class="lead" id="lead">Take your time. Ask in your language.</p>
         <div class="starters" id="topics"></div>
+        <details class="more" id="more-topics">
+          <summary id="more-label">More topics</summary>
+          <div class="starters extra" id="more-list"></div>
+        </details>
         <a class="bot-card" id="bot-card" href="https://x.ai/bot/pNVDukpGRUUOx_wtyRhiV" target="_blank" rel="noopener noreferrer">
           <span class="bot-card-flag" aria-hidden="true"></span>
           <span class="bot-card-copy">
@@ -609,6 +640,9 @@
     }
     loadHostedAnalytics();
     track("pageview");
+    function trackBot() { track("topic", "bot"); }
+    document.getElementById("bot-link").addEventListener("click", trackBot);
+    document.getElementById("bot-card").addEventListener("click", trackBot);
 
     function t() { return I18N[lang] || I18N.en; }
     function topicCopy(topic) {
@@ -618,6 +652,26 @@
         ask: (pack && pack.ask) || topic.ask,
         about: topic.about
       };
+    }
+    const featuredIds = new Set(["itinerary", "visa", "events", "cost"]);
+    function topicButton(topic) {
+      const copy = topicCopy(topic);
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "starter";
+      b.innerHTML = "<strong></strong>";
+      b.querySelector("strong").textContent = copy.name;
+      b.onclick = () => { track("topic", topic.id); showTopic(topic); send(copy.ask); };
+      return b;
+    }
+    function renderTopics() {
+      const box = document.getElementById("topics");
+      const extra = document.getElementById("more-list");
+      box.innerHTML = "";
+      extra.innerHTML = "";
+      for (const topic of topics) {
+        (featuredIds.has(topic.id) ? box : extra).appendChild(topicButton(topic));
+      }
     }
     function applyLang() {
       const copy = t();
@@ -634,6 +688,7 @@
       document.getElementById("bot-cta").textContent = copy.botCta || I18N.en.botCta;
       document.getElementById("bot-blurb").textContent = copy.botBlurb || I18N.en.botBlurb;
       document.getElementById("bot-link").textContent = copy.botCta || I18N.en.botCta;
+      document.getElementById("more-label").textContent = copy.moreTopics || I18N.en.moreTopics;
       q.placeholder = copy.placeholder;
       document.getElementById("photo-btn").setAttribute("aria-label", copy.photo);
       document.getElementById("photo-label").textContent = copy.photo;
@@ -717,6 +772,7 @@
         stopListening();
         return;
       }
+      track("topic", "voice");
       const rec = new SpeechRec();
       rec.lang = speechLang();
       rec.interimResults = true;
@@ -861,6 +917,7 @@
         window.alert(copy.noHere);
         return;
       }
+      track("topic", "map");
       locatingHere = true;
       hereBtn.classList.add("listening");
       hereLabel.textContent = copy.locating;
@@ -1064,21 +1121,6 @@
       clearHere();
       q.focus();
     }
-    function renderTopics() {
-      const box = document.getElementById("topics");
-      box.innerHTML = "";
-      for (const topic of topics) {
-        const copy = topicCopy(topic);
-        const b = document.createElement("button");
-        b.type = "button";
-        b.className = "starter";
-        b.innerHTML = "<strong></strong><span></span>";
-        b.querySelector("strong").textContent = copy.name;
-        b.querySelector("span").textContent = copy.ask;
-        b.onclick = () => { track("topic", topic.id); showTopic(topic); send(copy.ask); };
-        box.appendChild(b);
-      }
-    }
     const services = document.getElementById("services");
     for (const s of sectors) {
       const b = document.createElement("button");
@@ -1106,6 +1148,7 @@
       if (!file) return;
       try {
         photo = await readPhoto(file);
+        track("topic", "photo");
         document.getElementById("preview-img").src = photo;
         document.getElementById("preview").classList.add("on");
         grow();
