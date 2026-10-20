@@ -95,7 +95,7 @@ A Google Form is not created from the server, because that needs your Google acc
 
 `www.dubaiaiagent.ae` serves the guide itself (the same app). The domain does not resolve until it is added on Render as a custom domain and the DNS record points at that service. Until then, the guide is also at `/agent` on this server.
 
-Set `ABUDHABI_BOT_URL` to the Abu Dhabi bot link (an `https://x.ai/bot/...` address). Until that is set, the Aras Lab page says the public link is not added yet. The Dubai Bot link is `https://x.ai/bot/pNVDukpGRUUOx_wtyRhiV`.
+The Abu Dhabi Bot link is `https://x.ai/bot/uDcN3ZKoXAGUqcHC-7haq`. The Dubai Bot link is `https://x.ai/bot/pNVDukpGRUUOx_wtyRhiV`. Set `ABUDHABI_BOT_URL` only if that address should change.
 
 ## Dubai Bot
 

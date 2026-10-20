@@ -267,7 +267,8 @@ test("araslab home shows the agent and both bots", async () => {
   assert.match(html, /Dubai Bot/);
   assert.match(html, /Abu Dhabi Bot/);
   assert.match(html, /x\.ai\/bot\/pNVDukpGRUUOx_wtyRhiV/);
-  assert.match(html, /The public link is not added yet/);
+  assert.match(html, /x\.ai\/bot\/uDcN3ZKoXAGUqcHC-7haq/);
+  assert.doesNotMatch(html, /The public link is not added yet/);
 
   const guide = await origFetch(base + "/agent");
   assert.equal(guide.status, 200);

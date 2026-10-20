@@ -451,7 +451,7 @@ app.get("/lab-config.js", (_req, res) => {
   res.set("Cache-Control", "no-store");
   res.type("js").send(
     `window.LAB_CONFIG=${JSON.stringify({
-      abuDhabiBot: process.env.ABUDHABI_BOT_URL || "",
+      abuDhabiBot: process.env.ABUDHABI_BOT_URL || "https://x.ai/bot/uDcN3ZKoXAGUqcHC-7haq",
     })};`
   );
 });
