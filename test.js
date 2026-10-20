@@ -264,7 +264,8 @@ test("araslab home shows the agent and both bots", async () => {
   assert.match(html, /Aras Lab/);
   assert.match(html, /ARAS-LAB-wordmark\.mp4/);
   assert.match(html, /Dubai AI Agent/);
-  assert.match(html, /www\.dubaiaiagent\.ae/);
+  assert.match(html, /www\.dubaiaiagent\.ae\/directory/);
+  assert.match(html, /www\.dubaiaiagent\.ae\/join/);
   assert.match(html, /Dubai Bot/);
   assert.match(html, /Abu Dhabi Bot/);
   assert.match(html, /Final Path/);
@@ -278,6 +279,13 @@ test("araslab home shows the agent and both bots", async () => {
   assert.match(agentHtml, /Dubai AI Agent/);
   assert.match(agentHtml, /id="dock"/);
   assert.doesNotMatch(agentHtml, /<h1>Aras Lab<\/h1>/);
+
+  const moved = await origFetch(base + "/directory", {
+    headers: { "x-forwarded-host": "www.araslab.ae" },
+    redirect: "manual",
+  });
+  assert.equal(moved.status, 302);
+  assert.equal(moved.headers.get("location"), "https://www.dubaiaiagent.ae/directory");
 
   const guide = await origFetch(base + "/agent");
   assert.equal(guide.status, 200);

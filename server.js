@@ -153,11 +153,15 @@ app.get("/guides", (_req, res) => {
   res.json({ topics });
 });
 
-app.get("/directory", (_req, res) => {
+const AGENT_ORIGIN = "https://www.dubaiaiagent.ae";
+
+app.get("/directory", (req, res) => {
+  if (isArasLab(req)) return res.redirect(302, AGENT_ORIGIN + "/directory");
   res.sendFile(path.join(__dirname, "public", "directory.html"));
 });
 
-app.get("/join", (_req, res) => {
+app.get("/join", (req, res) => {
+  if (isArasLab(req)) return res.redirect(302, AGENT_ORIGIN + "/join");
   res.sendFile(path.join(__dirname, "public", "join.html"));
 });
 
@@ -460,7 +464,8 @@ app.get("/lab-config.js", (_req, res) => {
   );
 });
 
-app.get("/agent", (_req, res) => {
+app.get("/agent", (req, res) => {
+  if (isArasLab(req)) return res.redirect(302, AGENT_ORIGIN + "/");
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
