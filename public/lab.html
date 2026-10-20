@@ -26,8 +26,13 @@
     .uae-bar i:nth-child(2) { background: #007a3d; }
     .uae-bar i:nth-child(3) { background: #fff; }
     .uae-bar i:nth-child(4) { background: #111; }
-    header { padding: 28px 32px 0; }
-    header img { width: 92px; height: auto; }
+    header { padding: 36px 32px 0; }
+    .wordmark {
+      display: block;
+      width: min(420px, 100%);
+      height: auto;
+      background: transparent;
+    }
     main { max-width: 1040px; margin: 0 auto; padding: 28px 24px 72px; }
     h1 { margin: 28px 0 8px; font-size: 46px; font-weight: 500; letter-spacing: -.03em; }
     .lead { margin: 0 0 40px; color: var(--muted); font-size: 18px; line-height: 1.6; max-width: 36rem; }
@@ -64,7 +69,7 @@
 <body>
   <div class="uae-bar" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
   <header>
-    <img src="/emirates-mark.png" alt="The Emirates" />
+    <video class="wordmark" src="/ARAS-LAB-wordmark.mp4" autoplay muted loop playsinline aria-label="Aras Lab"></video>
   </header>
   <main>
     <h1>Aras Lab</h1>
