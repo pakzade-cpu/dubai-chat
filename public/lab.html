@@ -28,7 +28,7 @@
     .uae-bar i:nth-child(4) { background: #111; }
     header { padding: 28px 32px 0; }
     header img { width: 92px; height: auto; }
-    main { max-width: 980px; margin: 0 auto; padding: 28px 24px 72px; }
+    main { max-width: 1040px; margin: 0 auto; padding: 28px 24px 72px; }
     h1 { margin: 28px 0 8px; font-size: 46px; font-weight: 500; letter-spacing: -.03em; }
     .lead { margin: 0 0 40px; color: var(--muted); font-size: 18px; line-height: 1.6; max-width: 36rem; }
     .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
@@ -53,6 +53,7 @@
       padding-bottom: 2px;
     }
     [hidden] { display: none !important; }
+    .wait { color: var(--muted); font-size: 14px; }
     @media (max-width: 800px) {
       h1 { font-size: 34px; }
       .grid { grid-template-columns: 1fr; }
@@ -67,13 +68,25 @@
   </header>
   <main>
     <h1>Aras Lab</h1>
-    <p class="lead">The Dubai AI Agent we built, and the Dubai and Abu Dhabi bots.</p>
+    <p class="lead">Projects made at Aras Lab. The Dubai AI Agent lives on its own site.</p>
     <div class="grid">
       <article>
         <p class="place">www.dubaiaiagent.ae</p>
         <h2>Dubai AI Agent</h2>
         <p>Ask about Dubai in your language. Maps, voice, photos, and the business directory.</p>
         <p class="go"><a class="go-link" href="https://www.dubaiaiagent.ae">Open Dubai AI Agent</a></p>
+      </article>
+      <article>
+        <p class="place">Grok project</p>
+        <h2>Final Path</h2>
+        <p>Champions League 2026/27 desk. Kit, matchday card, group challenges, and the road to Madrid.</p>
+        <p class="go"><a class="go-link" href="https://github.com/pakzade-cpu/final-path">Open Final Path</a></p>
+      </article>
+      <article>
+        <p class="place">Grok project</p>
+        <h2>Stocks market</h2>
+        <p>The stock market platform built as a Grok project.</p>
+        <p class="go"><span class="wait">The public address is not in the repos yet.</span></p>
       </article>
       <article>
         <p class="place">Grok bot</p>
@@ -85,7 +98,7 @@
         <p class="place">Grok bot</p>
         <h2>Abu Dhabi Bot</h2>
         <p>A personal Abu Dhabi guide that answers in your language.</p>
-        <p class="go"><a class="go-link" id="abudhabi-link" href="https://x.ai/bot/uDcN3ZKoXAGUqcHC-7haq">Open Abu Dhabi Bot</a></p>
+        <p class="go"><a class="go-link" href="https://x.ai/bot/uDcN3ZKoXAGUqcHC-7haq">Open Abu Dhabi Bot</a></p>
       </article>
     </div>
   </main>

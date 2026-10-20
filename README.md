@@ -93,7 +93,9 @@ A Google Form is not created from the server, because that needs your Google acc
 
 `www.araslab.ae` is the Aras Lab page: Dubai AI Agent, Dubai Bot, and Abu Dhabi Bot.
 
-`www.dubaiaiagent.ae` serves the guide itself (the same app). The domain does not resolve until it is added on Render as a custom domain and the DNS record points at that service. Until then, the guide is also at `/agent` on this server.
+`www.dubaiaiagent.ae` serves the Dubai AI Agent chat. Add that hostname on Render as a custom domain and point its DNS at the service. Until the name resolves, the same chat is at `/agent`.
+
+The Aras Lab page lists Dubai AI Agent, Final Path, the stocks market platform, Dubai Bot, and Abu Dhabi Bot. Final Path links to its GitHub repo. The stocks platform does not have a public address in the repos yet.
 
 The Abu Dhabi Bot link is `https://x.ai/bot/uDcN3ZKoXAGUqcHC-7haq`. The Dubai Bot link is `https://x.ai/bot/pNVDukpGRUUOx_wtyRhiV`. Set `ABUDHABI_BOT_URL` only if that address should change.
 

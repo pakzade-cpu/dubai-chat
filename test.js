@@ -266,9 +266,17 @@ test("araslab home shows the agent and both bots", async () => {
   assert.match(html, /www\.dubaiaiagent\.ae/);
   assert.match(html, /Dubai Bot/);
   assert.match(html, /Abu Dhabi Bot/);
+  assert.match(html, /Final Path/);
+  assert.match(html, /Stocks market/);
+  assert.match(html, /github\.com\/pakzade-cpu\/final-path/);
   assert.match(html, /x\.ai\/bot\/pNVDukpGRUUOx_wtyRhiV/);
   assert.match(html, /x\.ai\/bot\/uDcN3ZKoXAGUqcHC-7haq/);
-  assert.doesNotMatch(html, /The public link is not added yet/);
+
+  const agentHost = await origFetch(base + "/", { headers: { "x-forwarded-host": "www.dubaiaiagent.ae" } });
+  const agentHtml = await agentHost.text();
+  assert.match(agentHtml, /Dubai AI Agent/);
+  assert.match(agentHtml, /id="dock"/);
+  assert.doesNotMatch(agentHtml, /<h1>Aras Lab<\/h1>/);
 
   const guide = await origFetch(base + "/agent");
   assert.equal(guide.status, 200);

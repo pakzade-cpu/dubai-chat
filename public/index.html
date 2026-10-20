@@ -60,6 +60,7 @@
       cursor: pointer;
     }
     .brand b { font-size: 14px; letter-spacing: .32em; font-weight: 600; }
+    .agent-name { font-size: 13px; letter-spacing: .04em; font-weight: 600; }
     .actions { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; justify-content: flex-end; }
     .lang {
       border: 0;
@@ -543,10 +544,12 @@
 <body>
   <div class="uae-bar" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
   <header>
-    <button class="brand" id="home" type="button" aria-label="Dubai">
+    <button class="brand" id="home" type="button" aria-label="Dubai AI Agent">
       <img class="mark mini" src="/emirates-mark.png" alt="" />
+      <span class="agent-name">Dubai AI Agent</span>
     </button>
     <div class="actions">
+      <a class="nav" href="https://www.araslab.ae">Aras Lab</a>
       <a class="nav" id="directory-link" href="/directory">Directory</a>
       <a class="nav" id="join-link" href="/join">List your business</a>
       <label>

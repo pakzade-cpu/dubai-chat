@@ -447,6 +447,10 @@ function isArasLab(req) {
   return siteHosts(req).some((host) => host === "araslab.ae" || host === "www.araslab.ae");
 }
 
+function isDubaiAgent(req) {
+  return siteHosts(req).some((host) => host === "dubaiaiagent.ae" || host === "www.dubaiaiagent.ae");
+}
+
 app.get("/lab-config.js", (_req, res) => {
   res.set("Cache-Control", "no-store");
   res.type("js").send(
@@ -465,6 +469,9 @@ app.get("/lab", (_req, res) => {
 });
 
 app.get("/", (req, res, next) => {
+  if (isDubaiAgent(req)) {
+    return res.sendFile(path.join(__dirname, "public", "index.html"));
+  }
   if (!isArasLab(req)) return next();
   res.sendFile(path.join(__dirname, "public", "lab.html"));
 });
