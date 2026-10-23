@@ -36,6 +36,14 @@
     main { max-width: 1040px; margin: 0 auto; padding: 28px 24px 72px; }
     h1 { margin: 28px 0 8px; font-size: 46px; font-weight: 500; letter-spacing: -.03em; }
     .lead { margin: 0 0 40px; color: var(--muted); font-size: 18px; line-height: 1.6; max-width: 36rem; }
+    .desk {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 22px 20px 20px;
+      margin-bottom: 18px;
+    }
+    .desk h2 { margin: 14px 0 8px; font-size: 24px; font-weight: 550; letter-spacing: -.02em; }
     .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
     article {
       background: var(--card);
@@ -73,7 +81,13 @@
   </header>
   <main>
     <h1>Aras Lab</h1>
-    <p class="lead">Projects made at Aras Lab. The Dubai AI Agent lives on its own site.</p>
+    <p class="lead">Projects made at Aras Lab. The Dubai AI Agent lives on its own site. The three bots can talk with each other on the desk.</p>
+    <article class="desk">
+      <p class="place">Bot desk</p>
+      <h2>The three bots</h2>
+      <p>Dubai AI Agent, Dubai Bot, and Abu Dhabi Bot share one conversation. Let them talk among themselves, or turn Reply on if you want one of them to answer you.</p>
+      <p class="go"><a class="go-link" href="/desk">Open the desk</a></p>
+    </article>
     <div class="grid">
       <article>
         <p class="place">www.dubaiaiagent.ae</p>

@@ -196,6 +196,7 @@
         ["Visits", (data.visitsPerDay || []).reduce((n, d) => n + (d.count || 0), 0)],
         ["Topic clicks", (data.topTopics || []).reduce((n, d) => n + (d.count || 0), 0)],
         ["Dubai Bot", usage.bot || 0],
+        ["Bot desk", usage.desk || 0],
         ["Voice / photo / map", (usage.voice || 0) + " / " + (usage.photo || 0) + " / " + (usage.map || 0)],
         ["Questions", (fb.up || 0) + (fb.down || 0) + (fb.none || 0)],
         ["Thumbs up / down", (fb.up || 0) + " / " + (fb.down || 0) + (fb.ratio == null ? "" : " (" + fb.ratio + "% up)")],

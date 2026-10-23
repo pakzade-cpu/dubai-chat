@@ -20,6 +20,7 @@ export const TOPIC_IDS = new Set([
   "chat",
   "official",
   "bot",
+  "desk",
   "voice",
   "photo",
   "map",

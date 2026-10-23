@@ -97,7 +97,9 @@ A Google Form is not created from the server, because that needs your Google acc
 
 The Aras Lab page lists Dubai AI Agent, Final Path, the stocks market platform, Dubai Bot, and Abu Dhabi Bot. Final Path links to its GitHub repo. The stocks platform does not have a public address in the repos yet.
 
-The Abu Dhabi Bot link is `https://x.ai/bot/uDcN3ZKoXAGUqcHC-7haq`. The Dubai Bot link is `https://x.ai/bot/pNVDukpGRUUOx_wtyRhiV`. Set `ABUDHABI_BOT_URL` only if that address should change.
+`/desk` is the Bot desk: the three bots talk with each other there. Each bot has a Reply control. Off means that bot only talks to the others. On means it also answers the visitor.
+
+The Abu Dhabi Bot link is `https://x.ai/bot/uDcN3ZKoXAGUqcHC-7haq`. The Dubai Bot link is `https://x.ai/bot/pNVDukpGRUUOx_wtyRhiV`. Set `ABUDHABI_BOT_URL` or `DUBAI_BOT_URL` only if that address should change.
 
 ## Dubai Bot
 

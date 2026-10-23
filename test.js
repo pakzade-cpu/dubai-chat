@@ -5,6 +5,7 @@ import path from "path";
 import test from "node:test";
 import { matchBusinesses, validateApplication } from "./directory.js";
 import { csvCell, dubaiDay, dubaiStamp, sanitizeTopic, stripPii } from "./privacy.js";
+import { buildTurn, publicBots, sanitizeSpeaker } from "./bots.js";
 import { SYSTEM } from "./guides.js";
 
 test("stripPii removes emails and phone numbers", () => {
@@ -17,6 +18,7 @@ test("stripPii removes emails and phone numbers", () => {
 test("sanitizeTopic only keeps short ids", () => {
   assert.equal(sanitizeTopic("visa"), "visa");
   assert.equal(sanitizeTopic("bot"), "bot");
+  assert.equal(sanitizeTopic("desk"), "desk");
   assert.equal(sanitizeTopic("not a topic"), "chat");
   assert.equal(sanitizeTopic(""), "chat");
 });
@@ -257,6 +259,56 @@ test("business registration stays private until approved", async () => {
   assert.match(await guide.text(), /id="dock"/);
 });
 
+test("bot desk lists the three bots and takes a turn", async () => {
+  assert.equal(publicBots().length, 3);
+  assert.equal(sanitizeSpeaker("dubai-bot"), "dubai-bot");
+  assert.equal(sanitizeSpeaker("nope"), "");
+  const emptyReply = buildTurn({ speaker: "dubai-bot", messages: [], mode: "reply" });
+  assert.equal(emptyReply.ok, false);
+  const talk = buildTurn({
+    speaker: "abu-dhabi-bot",
+    mode: "talk",
+    messages: [{ speaker: "dubai-agent", text: "I will cover DXB arrival." }],
+  });
+  assert.equal(talk.ok, true);
+  assert.equal(talk.bot.id, "abu-dhabi-bot");
+  assert.match(talk.payload[1].content, /Dubai AI Agent/);
+
+  const listed = await json(base + "/api/bots");
+  assert.equal(listed.status, 200);
+  assert.equal(listed.data.bots.length, 3);
+  assert.equal(listed.data.bots[0].name, "Dubai AI Agent");
+  assert.equal(JSON.stringify(listed.data).includes("system"), false);
+
+  const desk = await origFetch(base + "/desk");
+  assert.equal(desk.status, 200);
+  const deskHtml = await desk.text();
+  assert.match(deskHtml, /Let them talk/);
+  assert.match(deskHtml, /Won't reply/);
+  assert.match(deskHtml, /Bot desk/);
+
+  const turn = await json(base + "/bots/turn", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      speaker: "dubai-bot",
+      mode: "talk",
+      messages: [{ speaker: "user", text: "Compare Dubai and Abu Dhabi for a first visit." }],
+    }),
+  });
+  assert.equal(turn.status, 200);
+  assert.equal(turn.data.speaker, "dubai-bot");
+  assert.match(turn.data.text, /Metro/);
+  assert.match(turn.data.id, /^[0-9a-f-]{36}$/i);
+
+  const bad = await json(base + "/bots/turn", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ speaker: "unknown", mode: "talk", messages: [] }),
+  });
+  assert.equal(bad.status, 400);
+});
+
 test("araslab home shows the agent and both bots", async () => {
   const home = await origFetch(base + "/", { headers: { "x-forwarded-host": "www.araslab.ae" } });
   assert.equal(home.status, 200);
@@ -273,6 +325,8 @@ test("araslab home shows the agent and both bots", async () => {
   assert.match(html, /github\.com\/pakzade-cpu\/final-path/);
   assert.match(html, /x\.ai\/bot\/pNVDukpGRUUOx_wtyRhiV/);
   assert.match(html, /x\.ai\/bot\/uDcN3ZKoXAGUqcHC-7haq/);
+  assert.match(html, /Bot desk/);
+  assert.match(html, /href="\/desk"/);
 
   const agentHost = await origFetch(base + "/", { headers: { "x-forwarded-host": "www.dubaiaiagent.ae" } });
   const agentHtml = await agentHost.text();
