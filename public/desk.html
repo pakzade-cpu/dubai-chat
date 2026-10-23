@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bot desk — Aras Lab</title>
+  <style>
+    :root {
+      --bg: #f6f1e8;
+      --ink: #1a1714;
+      --muted: #7a7268;
+      --line: #e6dccf;
+      --card: #fffdf9;
+      --gold: #b0893a;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Segoe UI", "Helvetica Neue", ui-sans-serif, system-ui, sans-serif;
+    }
+    .uae-bar { display: grid; grid-template-columns: 18% 1fr 1fr 1fr; height: 3px; flex: none; }
+    .uae-bar i:nth-child(1) { background: #c8102e; }
+    .uae-bar i:nth-child(2) { background: #007a3d; }
+    .uae-bar i:nth-child(3) { background: #fff; }
+    .uae-bar i:nth-child(4) { background: #111; }
+    header {
+      flex: none;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 20px 24px 0;
+      flex-wrap: wrap;
+    }
+    .wordmark { display: block; width: min(280px, 70vw); height: auto; }
+    .nav {
+      color: inherit;
+      text-decoration: none;
+      font-size: 14px;
+      border-bottom: 1px solid var(--gold);
+      padding-bottom: 2px;
+    }
+    main {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      max-width: 840px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 12px 20px 0;
+    }
+    h1 { margin: 20px 0 8px; font-size: 36px; font-weight: 500; letter-spacing: -.03em; }
+    .lead { margin: 0 0 24px; color: var(--muted); font-size: 17px; line-height: 1.6; max-width: 36rem; }
+    .bots {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .bot {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px 14px 12px;
+      min-width: 0;
+    }
+    .bot .place { margin: 0; color: var(--gold); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; }
+    .bot h2 { margin: 8px 0 6px; font-size: 16px; font-weight: 550; }
+    .bot p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.45; }
+    .bot-links { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+    .bot-links a { color: inherit; font-size: 13px; }
+    .reply {
+      border: 1px solid var(--line);
+      background: transparent;
+      border-radius: 999px;
+      padding: 5px 10px;
+      font: inherit;
+      font-size: 12px;
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .reply[aria-pressed="true"] {
+      border-color: var(--gold);
+      color: var(--ink);
+      background: #f4ead3;
+    }
+    .starters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+    .starter, .talk, .new {
+      border: 1px solid var(--line);
+      background: var(--card);
+      border-radius: 999px;
+      padding: 8px 14px;
+      font: inherit;
+      font-size: 13px;
+      cursor: pointer;
+      color: inherit;
+    }
+    .starter:hover, .talk:hover, .new:hover { border-color: var(--gold); }
+    .talk { background: var(--ink); color: #fff; border-color: var(--ink); }
+    .talk:disabled, .new:disabled, .starter:disabled { opacity: .4; cursor: default; }
+    #log { flex: 1; min-height: 180px; overflow: auto; padding: 8px 0 16px; }
+    .row { display: flex; flex-direction: column; margin: 14px 0; align-items: flex-start; }
+    .row.user { align-items: flex-end; }
+    .who { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+    .msg { max-width: 85%; white-space: pre-wrap; line-height: 1.5; font-size: 15px; }
+    .user .msg {
+      background: #ececec;
+      border-radius: 18px;
+      padding: 10px 14px;
+    }
+    .dots { display: inline-flex; gap: 5px; padding: 8px 2px; }
+    .dots i {
+      width: 7px; height: 7px; border-radius: 50%; background: #8a8a8a;
+      animation: blink 1s infinite;
+    }
+    .dots i:nth-child(2) { animation-delay: .15s; }
+    .dots i:nth-child(3) { animation-delay: .3s; }
+    @keyframes blink { 0%, 80%, 100% { opacity: .25; } 40% { opacity: 1; } }
+    .note { color: var(--muted); font-size: 14px; line-height: 1.5; }
+    form { flex: none; padding: 0 0 20px; }
+    .composer {
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 10px 10px 10px 14px;
+    }
+    textarea {
+      flex: 1;
+      border: 0;
+      resize: none;
+      outline: none;
+      font: inherit;
+      font-size: 16px;
+      line-height: 1.4;
+      min-height: 40px;
+      max-height: 140px;
+      background: transparent;
+    }
+    .send {
+      width: 42px; height: 42px;
+      border: 0; border-radius: 50%;
+      background: var(--ink); color: #fff;
+      cursor: pointer;
+    }
+    .send:disabled { opacity: .28; cursor: default; }
+    .fine { margin: 10px 0 0; text-align: center; color: var(--muted); font-size: 12px; }
+    @media (max-width: 760px) {
+      h1 { font-size: 28px; }
+      .bots { grid-template-columns: 1fr; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .dots i { animation: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="uae-bar" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+  <header>
+    <a href="/lab"><video class="wordmark" src="/ARAS-LAB-wordmark.mp4" autoplay muted loop playsinline aria-label="Aras Lab"></video></a>
+    <a class="nav" href="/lab">Aras Lab</a>
+  </header>
+  <main>
+    <h1>Bot desk</h1>
+    <p class="lead">Dubai AI Agent, Dubai Bot, Abu Dhabi Bot, and UAE Directory Bot talk here. Leave Reply off to only listen. Turn it on for a bot if you want that one to answer you.</p>
+    <div class="bots" id="bots"></div>
+    <div class="starters" id="starters"></div>
+    <div class="starters">
+      <button class="talk" id="talk" type="button">Let them talk</button>
+      <button class="new" id="reset" type="button">New chat</button>
+    </div>
+    <div id="log"></div>
+  </main>
+  <form id="f">
+    <div class="composer">
+      <textarea id="q" rows="1" placeholder="Add a question, or leave them to it" autocomplete="off"></textarea>
+      <button class="send" id="go" type="submit" aria-label="Send" disabled>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 13V3M8 3l-4 4M8 3l4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+    <p class="fine">Not final legal, visa, or tax advice. Questions are logged anonymously.</p>
+  </form>
+  <script src="/analytics-config.js"></script>
+  <script>
+    const log = document.getElementById("log");
+    const q = document.getElementById("q");
+    const go = document.getElementById("go");
+    const talkBtn = document.getElementById("talk");
+    const resetBtn = document.getElementById("reset");
+    const history = [];
+    const reply = {};
+    let bots = [];
+    let busy = false;
+
+    function track(type, topic) {
+      const body = JSON.stringify({ type, topic });
+      try {
+        if (navigator.sendBeacon) {
+          const ok = navigator.sendBeacon("/api/event", new Blob([body], { type: "application/json" }));
+          if (ok) return;
+        }
+      } catch {}
+      fetch("/api/event", { method: "POST", headers: { "Content-Type": "application/json" }, body, keepalive: true }).catch(() => {});
+    }
+    function loadHostedAnalytics() {
+      const c = window.ANALYTICS_CONFIG || {};
+      if (c.goat) {
+        const s = document.createElement("script");
+        s.async = true;
+        s.src = "https://gc.zgo.at/count.js";
+        s.dataset.goatcounter = c.goat;
+        document.head.appendChild(s);
+      }
+      if (c.plausible) {
+        const s = document.createElement("script");
+        s.defer = true;
+        s.dataset.domain = c.plausible;
+        s.src = c.plausibleSrc || "https://plausible.io/js/script.js";
+        document.head.appendChild(s);
+      }
+    }
+    loadHostedAnalytics();
+    track("pageview");
+
+    function botName(id) {
+      const bot = bots.find((b) => b.id === id);
+      return bot ? bot.name : id === "user" ? "You" : "Guide";
+    }
+    function setBusy(on) {
+      busy = on;
+      talkBtn.disabled = on;
+      resetBtn.disabled = on;
+      for (const btn of document.querySelectorAll(".starter")) btn.disabled = on;
+      grow();
+    }
+    function grow() {
+      q.style.height = "auto";
+      q.style.height = Math.min(q.scrollHeight, 140) + "px";
+      go.disabled = busy || !q.value.trim();
+    }
+    function add(speaker, text, pending) {
+      const wrap = document.createElement("div");
+      wrap.className = "row" + (speaker === "user" ? " user" : "");
+      const who = document.createElement("div");
+      who.className = "who";
+      who.textContent = botName(speaker);
+      const msg = document.createElement("div");
+      msg.className = "msg";
+      if (pending) {
+        const dots = document.createElement("span");
+        dots.className = "dots";
+        dots.innerHTML = "<i></i><i></i><i></i>";
+        msg.appendChild(dots);
+      } else {
+        msg.textContent = text;
+      }
+      wrap.appendChild(who);
+      wrap.appendChild(msg);
+      log.appendChild(wrap);
+      log.scrollTop = log.scrollHeight;
+      return msg;
+    }
+    function addNote(text) {
+      const p = document.createElement("p");
+      p.className = "note";
+      p.textContent = text;
+      log.appendChild(p);
+      log.scrollTop = log.scrollHeight;
+    }
+    async function takeTurn(speaker, mode) {
+      const pending = add(speaker, "", true);
+      try {
+        const r = await fetch("/bots/turn", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ speaker, mode, messages: history })
+        });
+        const data = await r.json().catch(() => ({}));
+        if (data.skipped) {
+          pending.parentElement.remove();
+          return;
+        }
+        const text = data.text || data.error || "No reply";
+        pending.textContent = text;
+        if (data.text) history.push({ speaker, text: data.text });
+      } catch {
+        pending.textContent = "Could not reach the desk. Try again.";
+      }
+      log.scrollTop = log.scrollHeight;
+    }
+    async function talkRound() {
+      if (busy) return;
+      track("topic", "desk");
+      setBusy(true);
+      for (const bot of bots) {
+        await takeTurn(bot.id, "talk");
+      }
+      setBusy(false);
+    }
+    async function sendUser(text, mode) {
+      text = (text || q.value || "").trim();
+      if (!text || busy) return;
+      q.value = "";
+      grow();
+      history.push({ speaker: "user", text });
+      add("user", text);
+      if (mode === "talk") {
+        await talkRound();
+        return;
+      }
+      const speakers = bots.filter((bot) => reply[bot.id]);
+      if (!speakers.length) {
+        addNote("None of the bots will answer you right now. Turn Reply on for a bot, or press Let them talk.");
+        return;
+      }
+      track("topic", "desk");
+      setBusy(true);
+      for (const bot of speakers) {
+        await takeTurn(bot.id, "reply");
+      }
+      setBusy(false);
+    }
+    function renderBots(list) {
+      bots = list;
+      const box = document.getElementById("bots");
+      box.innerHTML = "";
+      for (const bot of bots) {
+        if (reply[bot.id] == null) reply[bot.id] = false;
+        const card = document.createElement("article");
+        card.className = "bot";
+        const place = document.createElement("p");
+        place.className = "place";
+        place.textContent = bot.place;
+        const title = document.createElement("h2");
+        title.textContent = bot.name;
+        const about = document.createElement("p");
+        about.textContent = bot.about;
+        const links = document.createElement("div");
+        links.className = "bot-links";
+        const open = document.createElement("a");
+        open.href = bot.href;
+        open.target = "_blank";
+        open.rel = "noopener noreferrer";
+        open.textContent = "Open";
+        const toggle = document.createElement("button");
+        toggle.type = "button";
+        toggle.className = "reply";
+        toggle.setAttribute("aria-pressed", reply[bot.id] ? "true" : "false");
+        toggle.textContent = reply[bot.id] ? "Will reply" : "Won't reply";
+        toggle.onclick = () => {
+          reply[bot.id] = !reply[bot.id];
+          toggle.setAttribute("aria-pressed", reply[bot.id] ? "true" : "false");
+          toggle.textContent = reply[bot.id] ? "Will reply" : "Won't reply";
+        };
+        links.appendChild(toggle);
+        links.appendChild(open);
+        card.appendChild(place);
+        card.appendChild(title);
+        card.appendChild(about);
+        card.appendChild(links);
+        box.appendChild(card);
+      }
+    }
+    function renderStarters(list) {
+      const box = document.getElementById("starters");
+      box.innerHTML = "";
+      for (const item of list) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "starter";
+        btn.textContent = item.label;
+        btn.onclick = () => sendUser(item.ask, "talk");
+        box.appendChild(btn);
+      }
+    }
+    function reset() {
+      history.length = 0;
+      log.innerHTML = "";
+      q.value = "";
+      grow();
+    }
+    talkBtn.onclick = talkRound;
+    resetBtn.onclick = reset;
+    q.oninput = grow;
+    q.onkeydown = (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendUser();
+      }
+    };
+    document.getElementById("f").onsubmit = (e) => { e.preventDefault(); sendUser(); };
+    fetch("/api/bots").then((r) => r.json()).then((data) => {
+      renderBots(Array.isArray(data.bots) ? data.bots : []);
+      renderStarters(Array.isArray(data.starters) ? data.starters : []);
+    }).catch(() => {
+      addNote("Could not load the bots.");
+    });
+    grow();
+  </script>
+</body>
+</html>

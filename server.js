@@ -12,6 +12,7 @@ import {
   publicBusiness,
   validateApplication,
 } from "./directory.js";
+import { STARTERS, buildTurn, publicBots } from "./bots.js";
 import { SYSTEM, topics } from "./guides.js";
 import { MAP_OFFLINE, readHere, resolveMaps, roundCoord, stripMapTags } from "./maps.js";
 import { countryOf, sanitizeTopic, stripPii, csvCell } from "./privacy.js";
@@ -460,8 +461,55 @@ app.get("/lab-config.js", (_req, res) => {
   res.type("js").send(
     `window.LAB_CONFIG=${JSON.stringify({
       abuDhabiBot: process.env.ABUDHABI_BOT_URL || "https://x.ai/bot/uDcN3ZKoXAGUqcHC-7haq",
+      dubaiBot: process.env.DUBAI_BOT_URL || "https://x.ai/bot/pNVDukpGRUUOx_wtyRhiV",
+      uaeDirectoryBot: process.env.UAE_DIRECTORY_BOT_URL || "https://x.ai/bot/x6_fe5ztdhaHfDPUdeuvb",
     })};`
   );
+});
+
+app.get("/api/bots", (_req, res) => {
+  res.json({
+    bots: publicBots({
+      "dubai-bot": process.env.DUBAI_BOT_URL,
+      "abu-dhabi-bot": process.env.ABUDHABI_BOT_URL,
+      "uae-directory-bot": process.env.UAE_DIRECTORY_BOT_URL,
+    }),
+    starters: STARTERS,
+  });
+});
+
+app.post("/bots/turn", async (req, res) => {
+  if (!rateOk(req, 30)) return res.status(429).json({ error: "Too many requests" });
+  const turn = buildTurn({
+    speaker: req.body?.speaker,
+    messages: req.body?.messages,
+    mode: req.body?.mode,
+    language: LANGS.has(req.body?.language) ? req.body.language : "en",
+  });
+  if (!turn.ok) return res.status(400).json({ error: turn.error });
+
+  const key = process.env.XAI_API_KEY;
+  if (!key) return res.status(500).json({ error: "Server is missing XAI_API_KEY" });
+
+  const r = await fetch("https://api.x.ai/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${key}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: pickModel(false),
+      messages: turn.payload,
+    }),
+  });
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) {
+    const detail = data.error?.message || data.error || "Model request failed";
+    return res.status(502).json({ error: String(detail) });
+  }
+  const text = String(data.choices?.[0]?.message?.content || "").trim();
+  if (!text) return res.status(502).json({ error: "Empty reply" });
+  await replyWithLog(res, { speaker: turn.bot.id, name: turn.bot.name, text }, turn.userText, "desk");
 });
 
 app.get("/agent", (req, res) => {
@@ -471,6 +519,10 @@ app.get("/agent", (req, res) => {
 
 app.get("/lab", (_req, res) => {
   res.sendFile(path.join(__dirname, "public", "lab.html"));
+});
+
+app.get("/desk", (_req, res) => {
+  res.sendFile(path.join(__dirname, "public", "desk.html"));
 });
 
 app.get("/", (req, res, next) => {
