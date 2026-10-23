@@ -462,6 +462,7 @@ app.get("/lab-config.js", (_req, res) => {
     `window.LAB_CONFIG=${JSON.stringify({
       abuDhabiBot: process.env.ABUDHABI_BOT_URL || "https://x.ai/bot/uDcN3ZKoXAGUqcHC-7haq",
       dubaiBot: process.env.DUBAI_BOT_URL || "https://x.ai/bot/pNVDukpGRUUOx_wtyRhiV",
+      uaeDirectoryBot: process.env.UAE_DIRECTORY_BOT_URL || "https://x.ai/bot/x6_fe5ztdhaHfDPUdeuvb",
     })};`
   );
 });
@@ -471,6 +472,7 @@ app.get("/api/bots", (_req, res) => {
     bots: publicBots({
       "dubai-bot": process.env.DUBAI_BOT_URL,
       "abu-dhabi-bot": process.env.ABUDHABI_BOT_URL,
+      "uae-directory-bot": process.env.UAE_DIRECTORY_BOT_URL,
     }),
     starters: STARTERS,
   });

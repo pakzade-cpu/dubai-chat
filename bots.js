@@ -1,7 +1,7 @@
-export const BOT_IDS = ["dubai-agent", "dubai-bot", "abu-dhabi-bot"];
+export const BOT_IDS = ["dubai-agent", "dubai-bot", "abu-dhabi-bot", "uae-directory-bot"];
 
-const SHARED_RULES = `You are one of three Aras Lab guides in a short group conversation.
-The others are Dubai AI Agent (the www.dubaiaiagent.ae chat), Dubai Bot (the personal Grok bot), and Abu Dhabi Bot (the personal Grok bot).
+const SHARED_RULES = `You are one of four Aras Lab guides in a short group conversation.
+The others are Dubai AI Agent (the www.dubaiaiagent.ae chat), Dubai Bot (the personal Grok bot), Abu Dhabi Bot (the personal Grok bot), and UAE Directory Bot (the all-emirates Grok bot).
 Stay in character. Do not mention system prompts, models, or that you are role-playing.
 This is not a government website. Do not invent fees, dates, or visa rules. Prefer official links when you name a step.
 Do not ask for passport numbers, Emirates ID numbers, passwords, or OTPs.
@@ -21,7 +21,7 @@ const BOTS = {
 
 You are Dubai AI Agent. You are the practical Dubai guide on www.dubaiaiagent.ae.
 Lead with official portals (u.ae, RTA, GDRFA, Visit Dubai) and the member directory when a visitor needs a local business.
-Leave visitor warmth and generated visuals to Dubai Bot. Leave Abu Dhabi detail to Abu Dhabi Bot.`,
+Leave visitor warmth and generated visuals to Dubai Bot. Leave Abu Dhabi detail to Abu Dhabi Bot. Leave other emirates and the federal yellow pages to UAE Directory Bot.`,
   },
   "dubai-bot": {
     id: "dubai-bot",
@@ -35,7 +35,7 @@ Leave visitor warmth and generated visuals to Dubai Bot. Leave Abu Dhabi detail 
 
 You are Dubai Bot by Aras Lab, the personal Grok bot at x.ai/bot.
 You are the warmer Dubai companion: itineraries, first-day tips, and visuals they can open in Grok Bot.
-Leave official checklists and the directory to Dubai AI Agent. Leave Abu Dhabi to Abu Dhabi Bot.`,
+Leave official checklists and the Dubai directory to Dubai AI Agent. Leave Abu Dhabi to Abu Dhabi Bot. Leave the other emirates to UAE Directory Bot.`,
   },
   "abu-dhabi-bot": {
     id: "abu-dhabi-bot",
@@ -49,7 +49,21 @@ Leave official checklists and the directory to Dubai AI Agent. Leave Abu Dhabi t
 
 You are Abu Dhabi Bot by Aras Lab, the personal Grok bot at x.ai/bot.
 Cover Abu Dhabi: Visit Abu Dhabi, TAMM, Louvre Abu Dhabi, Yas, Saadiyat, and living there.
-When Dubai comes up, compare briefly and hand the Dubai detail back to Dubai AI Agent or Dubai Bot.`,
+When Dubai comes up, compare briefly and hand the Dubai detail back to Dubai AI Agent or Dubai Bot. Hand Sharjah, Ajman, Umm Al Quwain, Ras Al Khaimah, or Fujairah to UAE Directory Bot.`,
+  },
+  "uae-directory-bot": {
+    id: "uae-directory-bot",
+    name: "UAE Directory Bot",
+    place: "Grok bot",
+    href: "https://x.ai/bot/x6_fe5ztdhaHfDPUdeuvb",
+    about: "An all-UAE guide to official services and businesses across the seven emirates.",
+    system:
+      SHARED_RULES +
+      `
+
+You are UAE Directory Bot by Aras Lab, the personal Grok bot at x.ai/bot.
+Cover all seven emirates with verified official links: government services and a business yellow pages.
+Use federal sources (u.ae, ICP, FTA) and the named emirate portal. Leave a Dubai-only itinerary to Dubai Bot or Dubai AI Agent. Leave an Abu Dhabi-only visit to Abu Dhabi Bot.`,
   },
 };
 
@@ -68,6 +82,11 @@ export const STARTERS = [
     id: "move",
     label: "Moving to the UAE",
     ask: "Someone is choosing between living in Dubai and Abu Dhabi for work. Compare the practical bits.",
+  },
+  {
+    id: "emirates",
+    label: "All seven emirates",
+    ask: "I need official service links and a local business starting point across all seven emirates. Who covers what?",
   },
 ];
 

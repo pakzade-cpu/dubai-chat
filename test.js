@@ -259,8 +259,9 @@ test("business registration stays private until approved", async () => {
   assert.match(await guide.text(), /id="dock"/);
 });
 
-test("bot desk lists the three bots and takes a turn", async () => {
-  assert.equal(publicBots().length, 3);
+test("bot desk lists the four bots and takes a turn", async () => {
+  assert.equal(publicBots().length, 4);
+  assert.equal(sanitizeSpeaker("uae-directory-bot"), "uae-directory-bot");
   assert.equal(sanitizeSpeaker("dubai-bot"), "dubai-bot");
   assert.equal(sanitizeSpeaker("nope"), "");
   const emptyReply = buildTurn({ speaker: "dubai-bot", messages: [], mode: "reply" });
@@ -276,8 +277,10 @@ test("bot desk lists the three bots and takes a turn", async () => {
 
   const listed = await json(base + "/api/bots");
   assert.equal(listed.status, 200);
-  assert.equal(listed.data.bots.length, 3);
+  assert.equal(listed.data.bots.length, 4);
   assert.equal(listed.data.bots[0].name, "Dubai AI Agent");
+  assert.equal(listed.data.bots[3].name, "UAE Directory Bot");
+  assert.equal(listed.data.bots[3].href, "https://x.ai/bot/x6_fe5ztdhaHfDPUdeuvb");
   assert.equal(JSON.stringify(listed.data).includes("system"), false);
 
   const desk = await origFetch(base + "/desk");
@@ -325,6 +328,8 @@ test("araslab home shows the agent and both bots", async () => {
   assert.match(html, /github\.com\/pakzade-cpu\/final-path/);
   assert.match(html, /x\.ai\/bot\/pNVDukpGRUUOx_wtyRhiV/);
   assert.match(html, /x\.ai\/bot\/uDcN3ZKoXAGUqcHC-7haq/);
+  assert.match(html, /UAE Directory Bot/);
+  assert.match(html, /x\.ai\/bot\/x6_fe5ztdhaHfDPUdeuvb/);
   assert.match(html, /Bot desk/);
   assert.match(html, /href="\/desk"/);
 
