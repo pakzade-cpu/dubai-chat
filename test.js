@@ -292,6 +292,7 @@ test("bot desk lists the four bots and takes a turn", async () => {
   assert.match(deskHtml, /setChatting/);
   assert.match(deskHtml, /body\.chatting/);
   assert.match(deskHtml, /overflow: hidden/);
+  assert.match(deskHtml, /reply\[bot\.id\] = bot\.id === "dubai-agent"/);
 
   const turn = await json(base + "/bots/turn", {
     method: "POST",

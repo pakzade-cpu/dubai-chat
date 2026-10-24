@@ -192,7 +192,7 @@
   <main>
     <div class="welcome">
       <h1>Bot desk</h1>
-      <p class="lead">Four guides. One thread. Leave Reply off to listen.</p>
+      <p class="lead">Four guides. One thread. Dubai AI Agent answers you; turn Reply on for the others.</p>
     </div>
     <div class="bots" id="bots"></div>
     <div class="starters topics" id="starters"></div>
@@ -344,10 +344,20 @@
         await talkRound();
         return;
       }
-      const speakers = bots.filter((bot) => reply[bot.id]);
+      let speakers = bots.filter((bot) => reply[bot.id]);
       if (!speakers.length) {
-        addNote("None of the bots will answer you right now. Turn Reply on for a bot, or press Let them talk.");
-        return;
+        const fallback = bots.find((bot) => bot.id === "dubai-agent") || bots[0];
+        if (!fallback) {
+          addNote("None of the bots will answer you right now. Turn Reply on for a bot, or press Let them talk.");
+          return;
+        }
+        reply[fallback.id] = true;
+        speakers = [fallback];
+        const toggle = document.querySelector('[data-bot="' + fallback.id + '"] .reply');
+        if (toggle) {
+          toggle.setAttribute("aria-pressed", "true");
+          toggle.textContent = "Will reply";
+        }
       }
       track("topic", "desk");
       setBusy(true);
@@ -361,9 +371,10 @@
       const box = document.getElementById("bots");
       box.innerHTML = "";
       for (const bot of bots) {
-        if (reply[bot.id] == null) reply[bot.id] = false;
+        if (reply[bot.id] == null) reply[bot.id] = bot.id === "dubai-agent";
         const card = document.createElement("article");
         card.className = "bot";
+        card.dataset.bot = bot.id;
         const place = document.createElement("p");
         place.className = "place";
         place.textContent = bot.place;
