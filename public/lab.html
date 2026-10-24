@@ -29,9 +29,13 @@
     header { padding: 36px 32px 0; }
     .wordmark {
       display: block;
-      width: min(420px, 100%);
-      height: auto;
-      background: transparent;
+      width: max-content;
+      color: inherit;
+      text-decoration: none;
+      font-size: clamp(42px, 7vw, 72px);
+      font-weight: 400;
+      letter-spacing: 0.46em;
+      line-height: 1;
     }
     main { max-width: 1040px; margin: 0 auto; padding: 28px 24px 72px; }
     h1 { margin: 28px 0 8px; font-size: 46px; font-weight: 500; letter-spacing: -.03em; }
@@ -67,6 +71,34 @@
     }
     [hidden] { display: none !important; }
     .wait { color: var(--muted); font-size: 14px; }
+    .intro {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: grid;
+      place-items: center;
+      background: var(--bg);
+    }
+    .intro video {
+      display: block;
+      width: min(1280px, 94vw);
+      height: auto;
+      max-height: 88vh;
+      object-fit: contain;
+      background: transparent;
+    }
+    .intro-skip {
+      position: absolute;
+      top: 24px;
+      inset-inline-end: 24px;
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      font: inherit;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    body.intro-on { overflow: hidden; }
     @media (max-width: 800px) {
       h1 { font-size: 34px; }
       .grid { grid-template-columns: 1fr; }
@@ -74,10 +106,14 @@
     }
   </style>
 </head>
-<body>
+<body class="intro-on">
+  <div id="intro" class="intro">
+    <button class="intro-skip" id="intro-skip" type="button">Skip</button>
+    <video src="/ARAS-LAB-wordmark.mp4" muted playsinline autoplay aria-label="Aras Lab"></video>
+  </div>
   <div class="uae-bar" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
   <header>
-    <video class="wordmark" src="/ARAS-LAB-wordmark.mp4" autoplay muted loop playsinline aria-label="Aras Lab"></video>
+    <a class="wordmark" href="/lab" aria-label="Aras Lab">ARAS</a>
   </header>
   <main>
     <h1>Aras Lab</h1>
@@ -131,5 +167,7 @@
       </article>
     </div>
   </main>
+  <script src="/intro.js"></script>
+  <script>startArasIntro();</script>
 </body>
 </html>
