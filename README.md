@@ -91,7 +91,7 @@ A Google Form is not created from the server, because that needs your Google acc
 
 ## Domains
 
-`www.araslab.ae` is the Aras Lab page: Dubai AI Agent, Dubai Bot, Abu Dhabi Bot, and UAE Directory Bot.
+`www.araslab.ae` is the Aras Lab page: Dubai AI Agent, Dubai Bot, Abu Dhabi Bot, and UAE Directory Bot. The Aras Lab wordmark video plays first, then the main page.
 
 `www.dubaiaiagent.ae` is the Dubai AI Agent: the chat at `/`, the directory at `/directory`, and the membership form at `/join`. On `www.araslab.ae`, those three addresses redirect to that site.
 
