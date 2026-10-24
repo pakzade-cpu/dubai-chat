@@ -38,7 +38,16 @@
       gap: 16px;
       padding: 14px 22px 0;
     }
-    .wordmark { display: block; width: 168px; height: auto; }
+    .wordmark {
+      display: block;
+      width: max-content;
+      color: inherit;
+      text-decoration: none;
+      font-size: 28px;
+      font-weight: 400;
+      letter-spacing: 0.42em;
+      line-height: 1;
+    }
     .nav {
       color: var(--muted);
       text-decoration: none;
@@ -171,8 +180,36 @@
     body.chatting .welcome,
     body.chatting .starters.topics { display: none; }
     body.chatting header { padding: 10px 18px 0; }
-    body.chatting .wordmark { width: 88px; }
+    body.chatting .wordmark { font-size: 22px; }
     body.chatting .bots { margin: 6px 0 8px; }
+    .intro {
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      display: grid;
+      place-items: center;
+      background: var(--bg);
+    }
+    .intro video {
+      display: block;
+      width: min(1280px, 94vw);
+      height: auto;
+      max-height: 88vh;
+      object-fit: contain;
+      background: transparent;
+    }
+    .intro-skip {
+      position: absolute;
+      top: 24px;
+      inset-inline-end: 24px;
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      font: inherit;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    body.intro-on { overflow: hidden; }
     body.chatting .bot h2 { font-size: 12px; }
     @media (max-width: 760px) {
       h1 { font-size: 20px; }
@@ -183,10 +220,14 @@
     }
   </style>
 </head>
-<body>
+<body class="intro-on">
+  <div id="intro" class="intro">
+    <button class="intro-skip" id="intro-skip" type="button">Skip</button>
+    <video src="/ARAS-LAB-wordmark.mp4" muted playsinline autoplay aria-label="Aras Lab"></video>
+  </div>
   <div class="uae-bar" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
   <header>
-    <a href="/lab"><video class="wordmark" src="/ARAS-LAB-wordmark.mp4" autoplay muted loop playsinline aria-label="Aras Lab"></video></a>
+    <a class="wordmark" href="/lab" aria-label="Aras Lab">ARAS</a>
     <a class="nav" href="/lab">Aras Lab</a>
   </header>
   <main>
@@ -444,5 +485,7 @@
     });
     grow();
   </script>
+  <script src="/intro.js"></script>
+  <script>startArasIntro();</script>
 </body>
 </html>
