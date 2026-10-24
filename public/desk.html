@@ -14,10 +14,10 @@
       --gold: #b0893a;
     }
     * { box-sizing: border-box; }
-    html, body { height: 100%; }
+    html, body { height: 100%; overflow: hidden; }
     body {
       margin: 0;
-      min-height: 100vh;
+      min-height: 100%;
       display: flex;
       flex-direction: column;
       background: var(--bg);
@@ -49,6 +49,7 @@
     main {
       flex: 1;
       min-height: 0;
+      overflow: hidden;
       display: flex;
       flex-direction: column;
       max-width: 840px;
@@ -105,16 +106,17 @@
     .starter:hover, .talk:hover, .new:hover { border-color: var(--gold); }
     .talk { background: var(--ink); color: #fff; border-color: var(--ink); }
     .talk:disabled, .new:disabled, .starter:disabled { opacity: .4; cursor: default; }
-    #log { flex: 1; min-height: 180px; overflow: auto; padding: 8px 0 16px; }
+    #log { flex: 1; min-height: 0; overflow: auto; padding: 8px 0 16px; }
     .row { display: flex; flex-direction: column; margin: 14px 0; align-items: flex-start; }
     .row.user { align-items: flex-end; }
     .who { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
-    .msg { max-width: 85%; white-space: pre-wrap; line-height: 1.5; font-size: 15px; }
+    .msg { max-width: 85%; white-space: pre-wrap; line-height: 1.55; font-size: 15.5px; }
     .user .msg {
       background: #ececec;
       border-radius: 18px;
       padding: 10px 14px;
     }
+    .row:not(.user) .msg { padding: 2px 4px; }
     .dots { display: inline-flex; gap: 5px; padding: 8px 2px; }
     .dots i {
       width: 7px; height: 7px; border-radius: 50%; background: #8a8a8a;
@@ -124,7 +126,13 @@
     .dots i:nth-child(3) { animation-delay: .3s; }
     @keyframes blink { 0%, 80%, 100% { opacity: .25; } 40% { opacity: 1; } }
     .note { color: var(--muted); font-size: 14px; line-height: 1.5; }
-    form { flex: none; padding: 0 0 20px; }
+    form {
+      flex: none;
+      width: 100%;
+      max-width: 840px;
+      margin: 0 auto;
+      padding: 8px 20px 20px;
+    }
     .composer {
       display: flex;
       gap: 10px;
@@ -154,6 +162,28 @@
     }
     .send:disabled { opacity: .28; cursor: default; }
     .fine { margin: 10px 0 0; text-align: center; color: var(--muted); font-size: 12px; }
+    body.chatting .welcome,
+    body.chatting .starters.topics { display: none; }
+    body.chatting header { padding: 12px 20px 0; }
+    body.chatting .wordmark { width: 86px; }
+    body.chatting h1 { display: none; }
+    body.chatting .lead { display: none; }
+    body.chatting .bots {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    body.chatting .bot {
+      padding: 8px 10px;
+      min-height: 0;
+      flex: 1 1 140px;
+    }
+    body.chatting .bot .place,
+    body.chatting .bot p,
+    body.chatting .bot-links a { display: none; }
+    body.chatting .bot h2 { margin: 0 0 6px; font-size: 13px; }
+    body.chatting .bot-links { margin-top: 0; }
     @media (max-width: 760px) {
       h1 { font-size: 28px; }
       .bots { grid-template-columns: 1fr; }
@@ -170,10 +200,12 @@
     <a class="nav" href="/lab">Aras Lab</a>
   </header>
   <main>
-    <h1>Bot desk</h1>
-    <p class="lead">Dubai AI Agent, Dubai Bot, Abu Dhabi Bot, and UAE Directory Bot talk here. Leave Reply off to only listen. Turn it on for a bot if you want that one to answer you.</p>
+    <div class="welcome">
+      <h1>Bot desk</h1>
+      <p class="lead">Dubai AI Agent, Dubai Bot, Abu Dhabi Bot, and UAE Directory Bot talk here. Leave Reply off to only listen. Turn it on for a bot if you want that one to answer you.</p>
+    </div>
     <div class="bots" id="bots"></div>
-    <div class="starters" id="starters"></div>
+    <div class="starters topics" id="starters"></div>
     <div class="starters">
       <button class="talk" id="talk" type="button">Let them talk</button>
       <button class="new" id="reset" type="button">New chat</button>
@@ -234,6 +266,9 @@
     function botName(id) {
       const bot = bots.find((b) => b.id === id);
       return bot ? bot.name : id === "user" ? "You" : "Guide";
+    }
+    function setChatting(on) {
+      document.body.classList.toggle("chatting", on);
     }
     function setBusy(on) {
       busy = on;
@@ -300,6 +335,7 @@
     async function talkRound() {
       if (busy) return;
       track("topic", "desk");
+      setChatting(true);
       setBusy(true);
       for (const bot of bots) {
         await takeTurn(bot.id, "talk");
@@ -312,6 +348,7 @@
       q.value = "";
       grow();
       history.push({ speaker: "user", text });
+      setChatting(true);
       add("user", text);
       if (mode === "talk") {
         await talkRound();
@@ -386,6 +423,7 @@
       history.length = 0;
       log.innerHTML = "";
       q.value = "";
+      setChatting(false);
       grow();
     }
     talkBtn.onclick = talkRound;
