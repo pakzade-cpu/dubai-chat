@@ -289,6 +289,8 @@ test("bot desk lists the four bots and takes a turn", async () => {
   assert.match(deskHtml, /Let them talk/);
   assert.match(deskHtml, /Won't reply/);
   assert.match(deskHtml, /Bot desk/);
+  assert.match(deskHtml, /id="intro"/);
+  assert.match(deskHtml, /startArasIntro\(\{ next: "\/lab" \}\)/);
 
   const turn = await json(base + "/bots/turn", {
     method: "POST",
@@ -318,6 +320,8 @@ test("araslab home shows the agent and both bots", async () => {
   const html = await home.text();
   assert.match(html, /Aras Lab/);
   assert.match(html, /ARAS-LAB-wordmark\.mp4/);
+  assert.match(html, /id="intro"/);
+  assert.match(html, /startArasIntro/);
   assert.match(html, /Dubai AI Agent/);
   assert.match(html, /www\.dubaiaiagent\.ae\/directory/);
   assert.match(html, /www\.dubaiaiagent\.ae\/join/);

@@ -154,16 +154,47 @@
     }
     .send:disabled { opacity: .28; cursor: default; }
     .fine { margin: 10px 0 0; text-align: center; color: var(--muted); font-size: 12px; }
+    [hidden] { display: none !important; }
     @media (max-width: 760px) {
       h1 { font-size: 28px; }
       .bots { grid-template-columns: 1fr; }
     }
+    .intro {
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      display: grid;
+      place-items: center;
+      background: var(--bg);
+    }
+    .intro video {
+      display: block;
+      width: min(720px, 88vw);
+      height: auto;
+      background: transparent;
+    }
+    .intro-skip {
+      position: absolute;
+      top: 24px;
+      inset-inline-end: 24px;
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      font: inherit;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    body.intro-on { overflow: hidden; }
     @media (prefers-reduced-motion: reduce) {
       .dots i { animation: none; }
     }
   </style>
 </head>
-<body>
+<body class="intro-on">
+  <div id="intro" class="intro">
+    <button class="intro-skip" id="intro-skip" type="button">Skip</button>
+    <video src="/ARAS-LAB-wordmark.mp4" muted playsinline autoplay aria-label="Aras Lab"></video>
+  </div>
   <div class="uae-bar" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
   <header>
     <a href="/lab"><video class="wordmark" src="/ARAS-LAB-wordmark.mp4" autoplay muted loop playsinline aria-label="Aras Lab"></video></a>
@@ -189,6 +220,8 @@
     </div>
     <p class="fine">Not final legal, visa, or tax advice. Questions are logged anonymously.</p>
   </form>
+  <script src="/intro.js"></script>
+  <script>startArasIntro({ next: "/lab" });</script>
   <script src="/analytics-config.js"></script>
   <script>
     const log = document.getElementById("log");
