@@ -13,6 +13,7 @@
     <nav>
       <a href="https://www.dubaiaiagent.ae/">Guide</a>
       <a href="https://www.dubaiaiagent.ae/directory">Directory</a>
+      <a href="https://www.dubaiaiagent.ae/directory/dashboard">Your activity</a>
       <a class="solid" href="https://www.dubaiaiagent.ae/join">List your business</a>
     </nav>
   </header>
@@ -48,10 +49,19 @@
       if (text != null) node.textContent = text;
       return node;
     }
-    function showDetail(biz) {
+    function touch(id, kind) {
+      fetch("/api/directory/touch", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ businessId: id, kind }),
+        keepalive: true,
+      }).catch(() => {});
+    }
+    function showDetail(biz, track) {
       const box = document.getElementById("detail");
       document.getElementById("dock-empty").hidden = true;
       box.innerHTML = "";
+      if (track) touch(biz.id, "view");
       const head = el("div", null, "detail");
       if (biz.logo) {
         const img = document.createElement("img");
@@ -69,21 +79,25 @@
       head.appendChild(extra);
       const loc = el("p", biz.location);
       head.appendChild(loc);
-      const phone = el("p");
-      phone.appendChild(document.createTextNode("Phone " + biz.phone + " · Mobile " + biz.mobile));
-      head.appendChild(phone);
+      const phone = document.createElement("a");
+      phone.href = "tel:" + String(biz.phone || "").replace(/[^\d+]/g, "");
+      phone.textContent = "Phone " + biz.phone;
+      phone.onclick = () => touch(biz.id, "phone");
+      head.appendChild(el("p")).appendChild(phone);
       const wa = document.createElement("a");
       const digits = String(biz.whatsapp || "").replace(/\D/g, "");
       wa.href = digits ? "https://wa.me/" + digits : "#";
       wa.target = "_blank";
       wa.rel = "noopener noreferrer";
       wa.textContent = "WhatsApp " + biz.whatsapp;
+      wa.onclick = () => touch(biz.id, "whatsapp");
       head.appendChild(el("p")).appendChild(wa);
       const site = document.createElement("a");
       site.href = biz.website;
       site.target = "_blank";
       site.rel = "noopener noreferrer";
       site.textContent = biz.website;
+      site.onclick = () => touch(biz.id, "website");
       head.appendChild(el("p")).appendChild(site);
       box.appendChild(head);
     }
@@ -106,7 +120,7 @@
         copy.appendChild(document.createElement("br"));
         copy.appendChild(document.createTextNode(biz.categoryName + " · " + biz.location));
         b.appendChild(copy);
-        b.onclick = () => showDetail(biz);
+        b.onclick = () => showDetail(biz, true);
         list.appendChild(b);
       }
       if (rows[0]) showDetail(rows[0]);

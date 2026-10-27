@@ -199,6 +199,58 @@ export function matchBusinesses(rows, query, limit = 4) {
     .map((row) => row.pub);
 }
 
+export const TOUCH_KINDS = ["view", "phone", "whatsapp", "website", "chat"];
+
+export function emptyTouchCounts() {
+  return { view: 0, phone: 0, whatsapp: 0, website: 0, chat: 0, total: 0 };
+}
+
+export function countTouches(rows) {
+  const counts = emptyTouchCounts();
+  const byDay = new Map();
+  for (const row of Array.isArray(rows) ? rows : []) {
+    if (!TOUCH_KINDS.includes(row && row.kind)) continue;
+    counts[row.kind] += 1;
+    counts.total += 1;
+    const day = String(row.day || "");
+    if (day) byDay.set(day, (byDay.get(day) || 0) + 1);
+  }
+  return {
+    counts,
+    byDay: [...byDay.entries()]
+      .sort((a, b) => b[0].localeCompare(a[0]))
+      .map(([day, count]) => ({ day, count })),
+  };
+}
+
+export function rollupTouches(businesses, touches) {
+  const rows = (Array.isArray(businesses) ? businesses : []).map((business) => ({
+    id: business.id,
+    companyName: business.companyName || "Listing",
+    status: business.status || "",
+    ...emptyTouchCounts(),
+  }));
+  const byId = new Map(rows.map((row) => [row.id, row]));
+  for (const touch of Array.isArray(touches) ? touches : []) {
+    if (!TOUCH_KINDS.includes(touch && touch.kind)) continue;
+    let row = byId.get(touch.businessId);
+    if (!row) {
+      row = {
+        id: touch.businessId,
+        companyName: "Removed listing",
+        status: "",
+        ...emptyTouchCounts(),
+      };
+      byId.set(touch.businessId, row);
+      rows.push(row);
+    }
+    row[touch.kind] += 1;
+    row.total += 1;
+  }
+  rows.sort((a, b) => b.total - a.total || a.companyName.localeCompare(b.companyName));
+  return { counts: countTouches(touches).counts, businesses: rows };
+}
+
 export function businessPrompt(list) {
   const lines = list.map(
     (b) =>

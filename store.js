@@ -14,7 +14,7 @@ let state = emptyState();
 let chain = Promise.resolve();
 
 function emptyState() {
-  return { visits: [], clicks: [], questions: [], businesses: [] };
+  return { visits: [], clicks: [], questions: [], businesses: [], touches: [] };
 }
 
 function withLock(fn) {
@@ -92,6 +92,16 @@ export async function initStore() {
         );
         CREATE INDEX IF NOT EXISTS businesses_status_idx ON businesses (status);
         CREATE INDEX IF NOT EXISTS businesses_category_idx ON businesses (category);
+        CREATE TABLE IF NOT EXISTS directory_touches (
+          id TEXT PRIMARY KEY,
+          ts TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          day TEXT NOT NULL,
+          dubai_time TEXT NOT NULL,
+          business_id TEXT NOT NULL,
+          kind TEXT NOT NULL,
+          country TEXT NOT NULL DEFAULT 'unknown'
+        );
+        CREATE INDEX IF NOT EXISTS directory_touches_business_idx ON directory_touches (business_id, ts DESC);
       `);
       backend = "postgres";
       return backend;
@@ -110,6 +120,7 @@ export async function initStore() {
       clicks: Array.isArray(parsed.clicks) ? parsed.clicks : [],
       questions: Array.isArray(parsed.questions) ? parsed.questions : [],
       businesses: Array.isArray(parsed.businesses) ? parsed.businesses : [],
+      touches: Array.isArray(parsed.touches) ? parsed.touches : [],
     };
   } catch {
     state = emptyState();
@@ -450,6 +461,60 @@ export async function listBusinesses(status) {
     logo: row.logo,
     codeHash: "",
   }));
+}
+
+const MAX_TOUCHES = 20000;
+
+function touchFromDb(row) {
+  return {
+    id: row.id,
+    businessId: row.business_id,
+    kind: row.kind,
+    day: row.day,
+    dubaiTime: row.dubai_time,
+    country: row.country || "unknown",
+    ts: row.ts,
+  };
+}
+
+export async function recordTouch({ businessId, kind, country }) {
+  const row = {
+    id: newId(),
+    ts: new Date().toISOString(),
+    day: dubaiDay(),
+    dubaiTime: dubaiStamp(),
+    businessId,
+    kind,
+    country: String(country || "unknown").slice(0, 40) || "unknown",
+  };
+  if (backend === "postgres") {
+    await pool.query(
+      `INSERT INTO directory_touches (id, ts, day, dubai_time, business_id, kind, country)
+       VALUES ($1,$2,$3,$4,$5,$6,$7)`,
+      [row.id, row.ts, row.day, row.dubaiTime, row.businessId, row.kind, row.country]
+    );
+    return row;
+  }
+  await withLock(async () => {
+    state.touches.push(row);
+    if (state.touches.length > MAX_TOUCHES) state.touches = state.touches.slice(-MAX_TOUCHES);
+    await persistJson();
+  });
+  return row;
+}
+
+export async function listTouches(businessId) {
+  if (backend === "postgres") {
+    const result = businessId
+      ? await pool.query(
+          "SELECT * FROM directory_touches WHERE business_id = $1 ORDER BY ts DESC LIMIT 5000",
+          [businessId]
+        )
+      : await pool.query("SELECT * FROM directory_touches ORDER BY ts DESC LIMIT 20000");
+    return result.rows.map(touchFromDb);
+  }
+  const rows = businessId ? state.touches.filter((row) => row.businessId === businessId) : state.touches;
+  return [...rows].reverse();
 }
 
 export async function closeStore() {

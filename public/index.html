@@ -1197,6 +1197,15 @@
       p.textContent = text;
       parent.appendChild(p);
     }
+    function noteTouch(id, kind) {
+      if (!id) return;
+      fetch("/api/directory/touch", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ businessId: id, kind }),
+        keepalive: true,
+      }).catch(() => {});
+    }
     function openDock(businesses) {
       const copy = t();
       const dock = document.getElementById("dock");
@@ -1230,7 +1239,13 @@
         bizLine(copyBox, (biz.categoryName || "") + (biz.businessType ? " · " + biz.businessType : ""));
         if (biz.services) bizLine(copyBox, biz.services);
         if (biz.location) bizLine(copyBox, biz.location);
-        if (biz.phone) bizLine(copyBox, biz.phone);
+        if (biz.phone) {
+          const a = document.createElement("a");
+          a.href = "tel:" + String(biz.phone).replace(/[^\d+]/g, "");
+          a.textContent = biz.phone;
+          a.onclick = () => noteTouch(biz.id, "phone");
+          copyBox.appendChild(a);
+        }
         if (biz.whatsapp) {
           const a = document.createElement("a");
           const digits = String(biz.whatsapp).replace(/\D/g, "");
@@ -1238,6 +1253,7 @@
           a.target = "_blank";
           a.rel = "noopener noreferrer";
           a.textContent = "WhatsApp " + biz.whatsapp;
+          a.onclick = () => noteTouch(biz.id, "whatsapp");
           copyBox.appendChild(a);
         }
         if (biz.website) {
@@ -1246,6 +1262,7 @@
           a.target = "_blank";
           a.rel = "noopener noreferrer";
           a.textContent = biz.website;
+          a.onclick = () => noteTouch(biz.id, "website");
           const p = document.createElement("p");
           p.appendChild(a);
           copyBox.appendChild(p);

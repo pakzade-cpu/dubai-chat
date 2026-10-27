@@ -4,12 +4,16 @@ import path from "path";
 import { fileURLToPath } from "url";
 import {
   CATEGORIES,
+  categoryName,
   adminBusiness,
   businessPrompt,
   hashUpdateCode,
+  countTouches,
   matchBusinesses,
   newUpdateCode,
   publicBusiness,
+  rollupTouches,
+  TOUCH_KINDS,
   validateApplication,
 } from "./directory.js";
 import { STARTERS, buildTurn, publicBots } from "./bots.js";
@@ -25,7 +29,9 @@ import {
   findBusinessByCode,
   getBusiness,
   listBusinesses,
+  listTouches,
   recordTopicClick,
+  recordTouch,
   recordVisit,
   saveQuestion,
   setBusinessStatus,
@@ -156,6 +162,11 @@ app.get("/guides", (_req, res) => {
 
 const AGENT_ORIGIN = "https://www.dubaiaiagent.ae";
 
+app.get("/directory/dashboard", (req, res) => {
+  if (isArasLab(req)) return res.redirect(302, AGENT_ORIGIN + "/directory/dashboard");
+  res.sendFile(path.join(__dirname, "public", "directory-dashboard.html"));
+});
+
 app.get("/directory", (req, res) => {
   if (isArasLab(req)) return res.redirect(302, AGENT_ORIGIN + "/directory");
   res.sendFile(path.join(__dirname, "public", "directory.html"));
@@ -219,6 +230,88 @@ app.post("/api/businesses", async (req, res) => {
   } catch (err) {
     console.error("business save failed:", err.message);
     return res.status(500).json({ error: "Could not save the business" });
+  }
+});
+
+const PUBLIC_TOUCH = new Set(TOUCH_KINDS.filter((kind) => kind !== "chat"));
+
+app.post("/api/directory/touch", async (req, res) => {
+  if (!rateOk(req, 40)) return res.status(429).json({ error: "Too many requests" });
+  const kind = typeof req.body?.kind === "string" ? req.body.kind : "";
+  const businessId = typeof req.body?.businessId === "string" ? req.body.businessId : "";
+  if (!PUBLIC_TOUCH.has(kind)) return res.status(400).json({ error: "Unknown activity" });
+  try {
+    const row = await getBusiness(businessId);
+    if (!row || row.status !== "active") return res.status(404).json({ error: "Not found" });
+    await recordTouch({ businessId: row.id, kind, country: countryOf(req) });
+    res.json({ ok: true });
+  } catch (err) {
+    console.error("directory touch failed:", err.message);
+    res.status(500).json({ error: "Could not record activity" });
+  }
+});
+
+app.post("/api/directory/dashboard", async (req, res) => {
+  if (!rateOk(req, 12)) return res.status(429).json({ error: "Too many requests" });
+  const updateCode = typeof req.body?.updateCode === "string" ? req.body.updateCode.trim() : "";
+  if (!/^[a-f0-9]{16}$/.test(updateCode)) return res.status(400).json({ error: "Enter the update code from your listing" });
+  try {
+    const row = await findBusinessByCode(hashUpdateCode(updateCode));
+    if (!row) return res.status(404).json({ error: "Update code was not recognised" });
+    const touches = await listTouches(row.id);
+    const summary = countTouches(touches);
+    res.json({
+      companyName: row.companyName,
+      status: row.status,
+      categoryName: categoryName(row.category),
+      counts: summary.counts,
+      byDay: summary.byDay.slice(0, 30),
+      recent: touches.slice(0, 40).map((touch) => ({
+        dubaiTime: touch.dubaiTime,
+        kind: touch.kind,
+        country: touch.country,
+      })),
+    });
+  } catch (err) {
+    console.error("directory dashboard failed:", err.message);
+    res.status(500).json({ error: "Could not load activity" });
+  }
+});
+
+app.get("/admin/directory-activity", requireAdmin, async (_req, res) => {
+  try {
+    const [businesses, touches] = await Promise.all([listBusinesses(), listTouches()]);
+    res.json(rollupTouches(businesses, touches));
+  } catch (err) {
+    console.error("directory activity failed:", err.message);
+    res.status(500).json({ error: "Could not load directory activity" });
+  }
+});
+
+app.get("/admin/directory-activity.csv", requireAdmin, async (_req, res) => {
+  try {
+    const [businesses, touches] = await Promise.all([listBusinesses(), listTouches()]);
+    const names = new Map(businesses.map((row) => [row.id, row.companyName]));
+    const header = ["dubai_time", "company", "kind", "country"];
+    const lines = [header.join(",")];
+    for (const touch of touches) {
+      lines.push(
+        [
+          csvCell(touch.dubaiTime),
+          csvCell(names.get(touch.businessId) || "Removed listing"),
+          csvCell(touch.kind),
+          csvCell(touch.country),
+        ].join(",")
+      );
+    }
+    res.set({
+      "Content-Type": "text/csv; charset=utf-8",
+      "Content-Disposition": 'attachment; filename="directory-activity.csv"',
+    });
+    res.send("\uFEFF" + lines.join("\n"));
+  } catch (err) {
+    console.error("directory export failed:", err.message);
+    res.status(500).json({ error: "Could not export directory activity" });
   }
 });
 
@@ -358,6 +451,11 @@ app.post("/chat", async (req, res) => {
   try {
     const listed = await listBusinesses("active");
     businesses = matchBusinesses(listed, userText, 4);
+    await Promise.all(
+      businesses.map((biz) =>
+        recordTouch({ businessId: biz.id, kind: "chat", country: countryOf(req) })
+      )
+    );
   } catch (err) {
     console.error("business match failed:", err.message);
   }
