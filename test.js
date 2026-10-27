@@ -3,7 +3,7 @@ import { mkdtemp, rm } from "fs/promises";
 import os from "os";
 import path from "path";
 import test from "node:test";
-import { matchBusinesses, validateApplication } from "./directory.js";
+import { countTouches, matchBusinesses, rollupTouches, validateApplication } from "./directory.js";
 import { csvCell, dubaiDay, dubaiStamp, sanitizeTopic, stripPii } from "./privacy.js";
 import { buildTurn, publicBots, sanitizeSpeaker } from "./bots.js";
 import { SYSTEM } from "./guides.js";
@@ -252,6 +252,54 @@ test("business registration stays private until approved", async () => {
   assert.equal(chat.data.businesses[0].companyName, "Marina Dental");
   assert.equal(JSON.stringify(chat.data.businesses).includes("DED-100"), false);
 
+  const dash = await json(base + "/api/directory/dashboard", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ updateCode: created.data.updateCode }),
+  });
+  assert.equal(dash.status, 200);
+  assert.equal(dash.data.companyName, "Marina Dental");
+  assert.equal(dash.data.counts.chat, 1);
+  assert.equal(JSON.stringify(dash.data).includes("DED-100"), false);
+
+  const touch = await json(base + "/api/directory/touch", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ businessId: created.data.id, kind: "whatsapp" }),
+  });
+  assert.equal(touch.status, 200);
+  const blocked = await json(base + "/api/directory/touch", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ businessId: created.data.id, kind: "chat" }),
+  });
+  assert.equal(blocked.status, 400);
+
+  const again = await json(base + "/api/directory/dashboard", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ updateCode: created.data.updateCode }),
+  });
+  assert.equal(again.data.counts.whatsapp, 1);
+  assert.equal(again.data.counts.total, 2);
+  assert.equal(countTouches(again.data.recent).counts.total, 2);
+
+  const activity = await json(base + "/admin/directory-activity", {
+    headers: { Authorization: "Bearer test-pass" },
+  });
+  assert.equal(activity.status, 200);
+  assert.equal(activity.data.counts.total, 2);
+  assert.equal(rollupTouches(activity.data.businesses, []).businesses[0].companyName, "Marina Dental");
+  const activityCsv = await origFetch(base + "/admin/directory-activity.csv", {
+    headers: { Authorization: "Bearer test-pass" },
+  });
+  assert.equal(activityCsv.status, 200);
+  assert.match(await activityCsv.text(), /Marina Dental,whatsapp/);
+
+  const memberPage = await origFetch(base + "/directory/dashboard");
+  assert.equal(memberPage.status, 200);
+  assert.match(await memberPage.text(), /Update code/);
+
   const home = await origFetch(base + "/directory");
   assert.equal(home.status, 200);
   assert.match(await home.text(), /Find a business in Dubai/);
@@ -331,11 +379,11 @@ test("araslab home shows the agent and both bots", async () => {
   assert.match(html, /Dubai AI Agent/);
   assert.match(html, /www\.dubaiaiagent\.ae\/directory/);
   assert.match(html, /www\.dubaiaiagent\.ae\/join/);
+  assert.match(html, /www\.dubaiaiagent\.ae\/directory\/dashboard/);
   assert.match(html, /Dubai Bot/);
   assert.match(html, /Abu Dhabi Bot/);
-  assert.match(html, /Final Path/);
-  assert.match(html, /Stocks market/);
-  assert.match(html, /github\.com\/pakzade-cpu\/final-path/);
+  assert.doesNotMatch(html, /Final Path/);
+  assert.doesNotMatch(html, /Stocks market/);
   assert.match(html, /x\.ai\/bot\/pNVDukpGRUUOx_wtyRhiV/);
   assert.match(html, /x\.ai\/bot\/uDcN3ZKoXAGUqcHC-7haq/);
   assert.match(html, /UAE Directory Bot/);

@@ -114,7 +114,8 @@
       </div>
     </div>
     <div class="actions" id="toolbar" hidden>
-      <a class="btn secondary" id="csv" href="#">Download CSV</a>
+      <a class="btn secondary" id="csv" href="#">Questions CSV</a>
+      <a class="btn secondary" id="activity-csv" href="#">Activity CSV</a>
       <button class="secondary" id="out" type="button">Lock</button>
     </div>
   </header>
@@ -141,6 +142,9 @@
       <div class="card"><table><thead><tr><th>When</th><th>Topic</th><th>Question</th><th>Vote</th></tr></thead><tbody id="recent"></tbody></table></div>
       <h2>Answers with a thumbs down</h2>
       <div class="card"><table><thead><tr><th>When</th><th>Topic</th><th>Question</th><th>Answer</th></tr></thead><tbody id="down"></tbody></table></div>
+      <h2>Directory activity</h2>
+      <p class="muted">The same in-touch record each member sees for their own listing. Kept for the official membership file. It stores the kind of contact and country, not a visitor’s name or message.</p>
+      <div class="card"><table><thead><tr><th>Company</th><th>Status</th><th>In touch</th><th>Views</th><th>Phone</th><th>WhatsApp</th><th>Website</th><th>Guide</th></tr></thead><tbody id="touches"></tbody></table></div>
       <h2>Business memberships</h2>
       <div class="card"><table><thead><tr><th>Status</th><th>Company</th><th>Category</th><th>Licence / VAT</th><th></th></tr></thead><tbody id="businesses"></tbody></table></div>
     </div>
@@ -245,6 +249,26 @@
         tr.appendChild(cell(row.feedback || "—"));
         return tr;
       }), 4);
+      const activity = await fetch("/admin/directory-activity", { headers: authHeaders() });
+      const activityData = activity.ok ? await activity.json() : { businesses: [] };
+      const touchCounts = activityData.counts || {};
+      stats.appendChild(Object.assign(document.createElement("div"), { className: "stat" }));
+      const touchCard = stats.lastElementChild;
+      touchCard.innerHTML = "<span class='muted'></span><b></b>";
+      touchCard.querySelector("span").textContent = "Directory in touch";
+      touchCard.querySelector("b").textContent = touchCounts.total || 0;
+      fillTable("touches", (activityData.businesses || []).map((row) => {
+        const tr = document.createElement("tr");
+        tr.appendChild(cell(row.companyName));
+        tr.appendChild(cell(row.status));
+        tr.appendChild(cell(row.total));
+        tr.appendChild(cell(row.view));
+        tr.appendChild(cell(row.phone));
+        tr.appendChild(cell(row.whatsapp));
+        tr.appendChild(cell(row.website));
+        tr.appendChild(cell(row.chat));
+        return tr;
+      }), 8);
       const members = await fetch("/admin/businesses", { headers: authHeaders() });
       const memberData = members.ok ? await members.json() : { businesses: [] };
       fillTable("businesses", (memberData.businesses || []).map((row) => {
@@ -301,6 +325,18 @@
       const a = document.createElement("a");
       a.href = url;
       a.download = "dubai-questions.csv";
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+    document.getElementById("activity-csv").onclick = async (e) => {
+      e.preventDefault();
+      const r = await fetch("/admin/directory-activity.csv", { headers: authHeaders() });
+      if (!r.ok) return;
+      const blob = await r.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "directory-activity.csv";
       a.click();
       URL.revokeObjectURL(url);
     };

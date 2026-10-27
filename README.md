@@ -87,6 +87,8 @@ New listings stay **pending** until you approve them on `/admin`. Only approved 
 
 Set `DATABASE_URL` so memberships survive a redeploy. Optional `MEMBERSHIP_FEE` (for example `AED 99 / year`) is shown on the form. The site does not take payment itself.
 
+`/directory/dashboard` is the member activity page. The update code from `/join` opens it. It shows how many people viewed the listing, tapped the phone, opened WhatsApp, opened the website, or were matched by the guide. `/admin` shows the same totals for every listing, and **Activity CSV** downloads that record. The record keeps the kind of contact and the country when the host provides it. It does not store the visitor’s name, email, or message.
+
 A Google Form is not created from the server, because that needs your Google account. The form on `/join` writes straight into the same database the assistant searches.
 
 ## Domains
@@ -95,7 +97,7 @@ A Google Form is not created from the server, because that needs your Google acc
 
 `www.dubaiaiagent.ae` is the Dubai AI Agent: the chat at `/`, the directory at `/directory`, and the membership form at `/join`. On `www.araslab.ae`, those three addresses redirect to that site.
 
-The Aras Lab page lists Dubai AI Agent, Final Path, the stocks market platform, Dubai Bot, Abu Dhabi Bot, and UAE Directory Bot. Final Path links to its GitHub repo. The stocks platform does not have a public address in the repos yet.
+The Aras Lab page lists Dubai AI Agent, Dubai Bot, Abu Dhabi Bot, and UAE Directory Bot.
 
 `/desk` is the Bot desk: the four bots talk with each other there. Each bot has a Reply control. Off means that bot only talks to the others. On means it also answers the visitor.
 

@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Directory activity</title>
+  <link rel="stylesheet" href="/directory.css" />
+</head>
+<body>
+  <div class="uae-bar" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+  <header>
+    <a class="brand" href="https://www.dubaiaiagent.ae/"><img src="/emirates-mark.png" alt="The Emirates" /></a>
+    <nav>
+      <a href="https://www.dubaiaiagent.ae/">Guide</a>
+      <a href="https://www.dubaiaiagent.ae/directory">Directory</a>
+      <a href="https://www.dubaiaiagent.ae/directory/dashboard">Your activity</a>
+      <a class="solid" href="https://www.dubaiaiagent.ae/join">List your business</a>
+    </nav>
+  </header>
+  <main>
+    <h1>Your activity</h1>
+    <p class="lead">How many people have been in touch with your listing: a profile view, a phone tap, WhatsApp, your website, or a match from the guide. This is the same record the site admin keeps. It does not store a visitor’s name, email, or message.</p>
+    <form class="panel" id="gate">
+      <label>Update code
+        <input id="code" name="updateCode" maxlength="40" autocomplete="off" placeholder="The code from your listing" />
+      </label>
+      <button type="submit" style="margin-top:12px;">Open dashboard</button>
+      <p class="note" id="error" hidden></p>
+    </form>
+    <div id="board" hidden>
+      <p class="lead" id="who"></p>
+      <div class="stats" id="stats"></div>
+      <h2>By day</h2>
+      <table>
+        <thead><tr><th>Day</th><th>People in touch</th></tr></thead>
+        <tbody id="days"></tbody>
+      </table>
+      <h2>Recent activity</h2>
+      <table>
+        <thead><tr><th>When</th><th>Kind</th><th>Country</th></tr></thead>
+        <tbody id="recent"></tbody>
+      </table>
+      <p><button class="text-btn" id="lock" type="button">Lock this dashboard</button></p>
+    </div>
+  </main>
+  <script>
+    const gate = document.getElementById("gate");
+    const board = document.getElementById("board");
+    const code = document.getElementById("code");
+    const error = document.getElementById("error");
+    const labels = {
+      total: "In touch",
+      view: "Profile views",
+      phone: "Phone",
+      whatsapp: "WhatsApp",
+      website: "Website",
+      chat: "Guide matches",
+    };
+
+    function showError(message) {
+      error.hidden = false;
+      error.textContent = message;
+    }
+    function stat(label, value) {
+      const div = document.createElement("div");
+      div.className = "stat";
+      const span = document.createElement("span");
+      span.textContent = label;
+      const b = document.createElement("b");
+      b.textContent = String(value || 0);
+      div.appendChild(span);
+      div.appendChild(b);
+      return div;
+    }
+    function row(values) {
+      const tr = document.createElement("tr");
+      for (const value of values) {
+        const td = document.createElement("td");
+        td.textContent = value || "—";
+        tr.appendChild(td);
+      }
+      return tr;
+    }
+    function fill(id, rows, empty) {
+      const body = document.getElementById(id);
+      body.replaceChildren();
+      if (!rows.length) body.appendChild(row([empty]));
+      else for (const item of rows) body.appendChild(item);
+    }
+    async function openDashboard(updateCode) {
+      error.hidden = true;
+      const r = await fetch("/api/directory/dashboard", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ updateCode }),
+      });
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(data.error || "Could not open the dashboard");
+      sessionStorage.setItem("directory-code", updateCode);
+      gate.hidden = true;
+      board.hidden = false;
+      document.getElementById("who").textContent = data.companyName + " · " + (data.categoryName || "") + " · " + (data.status || "");
+      const stats = document.getElementById("stats");
+      stats.replaceChildren();
+      const counts = data.counts || {};
+      for (const key of ["total", "view", "phone", "whatsapp", "website", "chat"]) {
+        stats.appendChild(stat(labels[key], counts[key]));
+      }
+      fill("days", (data.byDay || []).map((item) => row([item.day, item.count])), "No activity yet");
+      fill("recent", (data.recent || []).map((item) => row([item.dubaiTime, labels[item.kind] || item.kind, item.country])), "No activity yet");
+    }
+    gate.onsubmit = async (e) => {
+      e.preventDefault();
+      try {
+        await openDashboard(code.value.trim());
+      } catch (err) {
+        showError(err.message);
+      }
+    };
+    document.getElementById("lock").onclick = () => {
+      sessionStorage.removeItem("directory-code");
+      location.reload();
+    };
+    const saved = sessionStorage.getItem("directory-code");
+    if (saved) openDashboard(saved).catch(() => sessionStorage.removeItem("directory-code"));
+  </script>
+</body>
+</html>
