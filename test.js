@@ -372,7 +372,7 @@ test("araslab home shows the agent and both bots", async () => {
   assert.equal(home.status, 200);
   const html = await home.text();
   assert.match(html, /Aras Lab/);
-  assert.match(html, /ARAS-LAB-wordmark\.mp4/);
+  assert.match(html, /araslab_silent_promo\.mp4/);
   assert.match(html, /id="intro"/);
   assert.match(html, /startArasIntro/);
   assert.match(html, /<a class="wordmark" href="\/lab"/);

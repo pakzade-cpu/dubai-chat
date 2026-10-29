@@ -1,8 +1,9 @@
-function startArasIntro() {
+function startArasIntro(options) {
   const root = document.getElementById("intro");
   const video = root && root.querySelector("video");
   const skip = document.getElementById("intro-skip");
   const key = "aras-lab-intro";
+  const wait = options && options.wait ? Number(options.wait) : 14000;
 
   function hide() {
     if (video) {
@@ -46,5 +47,5 @@ function startArasIntro() {
   video.addEventListener("error", done);
   const play = video.play();
   if (play && typeof play.catch === "function") play.catch(done);
-  window.setTimeout(done, 14000);
+  window.setTimeout(done, wait);
 }
