@@ -71,7 +71,7 @@ test("public pages and analytics events", async () => {
   assert.match(html, /x\.ai\/bot\/pNVDukpGRUUOx_wtyRhiV/);
   assert.match(html, /logged anonymously/);
   assert.match(html, /id="here-btn"/);
-  assert.match(html, /id="voice-btn"/);
+  assert.doesNotMatch(html, /id="voice-btn"/);
   assert.match(html, /id="tools-menu"/);
   assert.match(html, /emirates-mark\.png/);
   assert.match(html, /id="more-topics"/);

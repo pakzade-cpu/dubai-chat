@@ -12,17 +12,12 @@
       --line: #d8cfc2;
       --gold: #9a7340;
       --water: #6f9aab;
-      --paper: #f7f3eb;
     }
     * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
     body {
       margin: 0;
       min-height: 100vh;
-      background:
-        radial-gradient(80vw 42vh at 110% -8%, rgba(111, 154, 171, .34), transparent 62%),
-        radial-gradient(60vw 36vh at -12% 108%, rgba(154, 115, 64, .18), transparent 58%),
-        var(--bg);
+      background: var(--bg);
       color: var(--ink);
       font-family: "Segoe UI", "Helvetica Neue", ui-sans-serif, system-ui, sans-serif;
     }
@@ -38,107 +33,61 @@
     .spine i:nth-child(2) { background: #007a3d; }
     .spine i:nth-child(3) { background: #fff; }
     .spine i:nth-child(4) { background: #111; }
-    .sheet {
+    .app {
       margin-left: 7px;
-      padding: clamp(28px, 6vh, 72px) clamp(20px, 6vw, 88px) 80px;
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr);
+    }
+    .rail {
+      border-right: 1px solid var(--line);
+      padding: 28px 22px 32px;
+      display: flex;
+      flex-direction: column;
+    }
+    .rail p {
+      margin: 22px 0 8px;
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+    .rail a {
+      color: inherit;
+      text-decoration: none;
+      padding: 9px 0;
+      border-top: 1px solid var(--line);
+      font-size: 15px;
+    }
+    .rail a:hover { color: var(--gold); }
+    .rail .sub {
+      display: flex;
+      flex-direction: column;
+      padding: 0 0 8px 14px;
+      border-top: 0;
+    }
+    .rail .sub a {
+      border: 0;
+      padding: 5px 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .stage {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
     }
     h1 { margin: 0; font-weight: 400; }
     .wordmark {
-      display: inline-block;
       color: inherit;
       text-decoration: none;
       font-family: Palatino, "Palatino Linotype", "Iowan Old Style", Georgia, serif;
-      font-size: clamp(76px, 15vw, 176px);
-      font-weight: 400;
-      letter-spacing: .12em;
-      line-height: .82;
+      font-size: clamp(72px, 12vw, 160px);
+      letter-spacing: .14em;
+      line-height: .9;
     }
     .wordmark:hover { color: var(--gold); }
-    .mark {
-      margin: 10px 0 0;
-      font-family: Palatino, "Palatino Linotype", Georgia, serif;
-      font-style: italic;
-      letter-spacing: .22em;
-      text-transform: lowercase;
-      color: var(--muted);
-      font-size: 15px;
-    }
-    .lede {
-      max-width: 34rem;
-      margin: clamp(28px, 5vh, 56px) 0 48px;
-      font-size: clamp(18px, 2vw, 22px);
-      line-height: 1.45;
-    }
-    .index { list-style: none; margin: 0; padding: 0; }
-    .index > li { border-top: 1px solid var(--line); }
-    .index > li:last-child { border-bottom: 1px solid var(--line); }
-    .row {
-      display: grid;
-      grid-template-columns: 52px minmax(0, 1fr) auto;
-      gap: 12px 20px;
-      align-items: end;
-      padding: 26px 0 22px;
-    }
-    .num {
-      font-variant-numeric: tabular-nums;
-      color: var(--water);
-      letter-spacing: .12em;
-      font-size: 12px;
-      padding-bottom: 8px;
-    }
-    h2 {
-      margin: 0;
-      font-family: Palatino, "Palatino Linotype", "Iowan Old Style", Georgia, serif;
-      font-weight: 400;
-      font-size: clamp(32px, 4.4vw, 52px);
-      letter-spacing: -.03em;
-      line-height: .95;
-    }
-    h2 a { color: inherit; text-decoration: none; }
-    h2 a:hover { color: var(--gold); }
-    .blurb { margin: 8px 0 0; color: var(--muted); font-size: 15px; line-height: 1.5; max-width: 36rem; }
-    .links { display: flex; flex-wrap: wrap; gap: 8px 16px; margin: 12px 0 0; }
-    .links a, .enter {
-      color: inherit;
-      text-decoration: none;
-      font-size: 13px;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-    }
-    .enter { padding-bottom: 8px; position: relative; }
-    .enter::after, .links a::after {
-      content: "";
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: 2px;
-      height: 1px;
-      background: currentColor;
-      transform: scaleX(0);
-      transform-origin: left;
-      transition: transform .25s ease;
-    }
-    .links a { position: relative; }
-    .row:hover .enter::after, .enter:focus-visible::after,
-    .links a:hover::after, .links a:focus-visible::after { transform: scaleX(1); }
-    .feature {
-      margin: 10px calc(clamp(20px, 6vw, 88px) * -1) 10px;
-      background: var(--ink);
-      color: var(--paper);
-      border: 0;
-    }
-    .feature + li, .index > li.feature { border: 0; }
-    .feature .row { padding: 42px clamp(20px, 6vw, 88px) 36px; }
-    .feature .num { color: #e2c27a; }
-    .feature .blurb { color: #c9bfb2; }
-    .feature h2 a:hover, .feature .enter:hover { color: #e2c27a; }
-    .foot {
-      margin: 48px 0 0;
-      color: var(--muted);
-      font-size: 12px;
-      letter-spacing: .04em;
-    }
-    a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+    a:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
     [hidden] { display: none !important; }
     .intro {
       position: fixed;
@@ -146,15 +95,15 @@
       z-index: 50;
       display: grid;
       place-items: center;
-      background: var(--bg);
+      background: #d6d5d8;
     }
     .intro video {
       display: block;
-      width: min(1280px, 94vw);
-      height: auto;
-      max-height: 88vh;
-      object-fit: contain;
-      background: transparent;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 42%;
+      background: #d6d5d8;
     }
     .intro-skip {
       position: absolute;
@@ -162,7 +111,7 @@
       inset-inline-end: 24px;
       border: 0;
       background: transparent;
-      color: var(--muted);
+      color: #5c5a60;
       font: inherit;
       font-size: 14px;
       letter-spacing: .14em;
@@ -170,15 +119,10 @@
       cursor: pointer;
     }
     body.intro-on { overflow: hidden; }
-    @media (max-width: 720px) {
-      .row { grid-template-columns: 36px minmax(0, 1fr); }
-      .enter { grid-column: 2; padding-bottom: 0; }
-      .wordmark { letter-spacing: .08em; }
-      .feature .row { padding-block: 32px; }
-    }
-    @media (prefers-reduced-motion: reduce) {
-      html { scroll-behavior: auto; }
-      .enter::after, .links a::after { transition: none; }
+    @media (max-width: 800px) {
+      .app { grid-template-columns: 1fr; }
+      .rail { border-right: 0; border-bottom: 1px solid var(--line); }
+      .stage { min-height: 46vh; }
     }
   </style>
 </head>
@@ -188,73 +132,23 @@
     <video src="/ARAS-LAB-wordmark.mp4" muted playsinline autoplay aria-label="Aras Lab"></video>
   </div>
   <div class="spine" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
-  <div class="sheet">
-    <header>
-      <h1>
-        <a class="wordmark" href="/lab" aria-label="Aras Lab">ARAS</a>
-      </h1>
-      <p class="mark">lab</p>
-    </header>
-    <main>
-      <p class="lede">Guides for Dubai, Abu Dhabi, and the seven emirates. They share one desk. The directory keeps the businesses.</p>
-      <ol class="index">
-        <li class="feature">
-          <div class="row">
-            <span class="num">01</span>
-            <div>
-              <h2><a href="/desk">Bot desk</a></h2>
-              <p class="blurb">Dubai AI Agent, Dubai Bot, Abu Dhabi Bot, and UAE Directory Bot in one thread. Listen, or let one answer you.</p>
-            </div>
-            <a class="enter" href="/desk">Enter</a>
-          </div>
-        </li>
-        <li>
-          <div class="row">
-            <span class="num">02</span>
-            <div>
-              <h2><a href="https://www.dubaiaiagent.ae">Dubai AI Agent</a></h2>
-              <p class="blurb">The chat, the business directory, and the membership form.</p>
-              <p class="links">
-                <a href="https://www.dubaiaiagent.ae/directory">Directory</a>
-                <a href="https://www.dubaiaiagent.ae/join">List your business</a>
-                <a href="https://www.dubaiaiagent.ae/directory/dashboard">Your activity</a>
-              </p>
-            </div>
-            <a class="enter" href="https://www.dubaiaiagent.ae">Open</a>
-          </div>
-        </li>
-        <li>
-          <div class="row">
-            <span class="num">03</span>
-            <div>
-              <h2><a href="https://x.ai/bot/pNVDukpGRUUOx_wtyRhiV">Dubai Bot</a></h2>
-              <p class="blurb">A personal Dubai guide that answers in your language.</p>
-            </div>
-            <a class="enter" href="https://x.ai/bot/pNVDukpGRUUOx_wtyRhiV">Open</a>
-          </div>
-        </li>
-        <li>
-          <div class="row">
-            <span class="num">04</span>
-            <div>
-              <h2><a href="https://x.ai/bot/uDcN3ZKoXAGUqcHC-7haq">Abu Dhabi Bot</a></h2>
-              <p class="blurb">A personal Abu Dhabi guide that answers in your language.</p>
-            </div>
-            <a class="enter" href="https://x.ai/bot/uDcN3ZKoXAGUqcHC-7haq">Open</a>
-          </div>
-        </li>
-        <li>
-          <div class="row">
-            <span class="num">05</span>
-            <div>
-              <h2><a href="https://x.ai/bot/x6_fe5ztdhaHfDPUdeuvb">UAE Directory Bot</a></h2>
-              <p class="blurb">Official services and a business yellow pages across all seven emirates.</p>
-            </div>
-            <a class="enter" href="https://x.ai/bot/x6_fe5ztdhaHfDPUdeuvb">Open</a>
-          </div>
-        </li>
-      </ol>
-      <p class="foot">Not a government website.</p>
+  <div class="app">
+    <nav class="rail">
+      <p>Desk</p>
+      <a href="/desk">Bot desk</a>
+      <p>Guides</p>
+      <a href="https://www.dubaiaiagent.ae">Dubai AI Agent</a>
+      <div class="sub">
+        <a href="https://www.dubaiaiagent.ae/directory">Directory</a>
+        <a href="https://www.dubaiaiagent.ae/join">List your business</a>
+        <a href="https://www.dubaiaiagent.ae/directory/dashboard">Your activity</a>
+      </div>
+      <a href="https://x.ai/bot/pNVDukpGRUUOx_wtyRhiV">Dubai Bot</a>
+      <a href="https://x.ai/bot/uDcN3ZKoXAGUqcHC-7haq">Abu Dhabi Bot</a>
+      <a href="https://x.ai/bot/x6_fe5ztdhaHfDPUdeuvb">UAE Directory Bot</a>
+    </nav>
+    <main class="stage">
+      <h1><a class="wordmark" href="/lab" aria-label="Aras Lab">ARAS</a></h1>
     </main>
   </div>
   <script src="/intro.js"></script>
