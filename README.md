@@ -1,6 +1,6 @@
 # Dubai guide (araslab.ae)
 
-A small Express app that powers [www.araslab.ae](https://www.araslab.ae): a multilingual Dubai chat with topic starters, photo questions, voice input, shareable maps, and official-source links. It calls the xAI API from `server.js` and is meant to auto-deploy from `main` (for example on Render).
+A small Express app that powers [www.araslab.ae](https://www.araslab.ae): a multilingual Dubai chat with topic starters, photo questions, and shareable maps. Answers stay on the page. An official site is named only when the visitor must sign in, pay, or file. It calls the xAI API from `server.js` and is meant to auto-deploy from `main` (for example on Render).
 
 ## Run locally
 

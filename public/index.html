@@ -609,10 +609,6 @@
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7.5A2.5 2.5 0 0 1 6.5 5h2.2l.7-1.2A1.5 1.5 0 0 1 10.7 3h2.6a1.5 1.5 0 0 1 1.3.8L15.3 5h2.2A2.5 2.5 0 0 1 20 7.5v9A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5v-9Z" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12.5" r="3.2" stroke="currentColor" stroke-width="1.7"/></svg>
             <span id="photo-label">Photo</span>
           </button>
-          <button class="tool" id="voice-btn" type="button" role="menuitem" aria-label="Voice" aria-pressed="false">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" stroke="currentColor" stroke-width="1.7"/><path d="M6.5 11.5a5.5 5.5 0 0 0 11 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M12 17v3.5M9 20.5h6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
-            <span id="voice-label">Voice</span>
-          </button>
           <button class="tool" id="here-btn" type="button" role="menuitem" aria-label="Map" aria-pressed="false">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 21s7-5.4 7-11a7 7 0 1 0-14 0c0 5.6 7 11 7 11Z" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="10" r="2.3" stroke="currentColor" stroke-width="1.7"/></svg>
             <span id="here-label">Map</span>
@@ -662,12 +658,6 @@
     let locatingHere = false;
     let lang = "en";
     let currentTopic = "chat";
-    let listening = false;
-    let voiceAsked = false;
-    let recognition = null;
-    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const voiceBtn = document.getElementById("voice-btn");
-    const voiceLabel = document.getElementById("voice-label");
     const hereBtn = document.getElementById("here-btn");
     const hereLabel = document.getElementById("here-label");
     const toolsBtn = document.getElementById("tools-btn");
@@ -757,12 +747,6 @@
       q.placeholder = copy.placeholder;
       document.getElementById("photo-btn").setAttribute("aria-label", copy.photo);
       document.getElementById("photo-label").textContent = copy.photo;
-      const voiceText = listening ? copy.listening : copy.voice;
-      voiceBtn.setAttribute("aria-label", voiceText);
-      voiceLabel.textContent = voiceText;
-      if (listening && recognition) {
-        try { recognition.lang = speechLang(); } catch (_) {}
-      }
       hereBtn.setAttribute("aria-label", copy.map);
       hereLabel.textContent = locatingHere ? copy.locating : copy.map;
       document.getElementById("here-chip-label").textContent = copy.here;
@@ -784,93 +768,6 @@
     setLang(localStorage.getItem("dubai-lang") || (I18N[guess] ? guess : "en"));
     langSel.onchange = () => setLang(langSel.value);
 
-    function speechLang() {
-      const meta = LANGS.find((x) => x.id === lang) || LANGS[0];
-      return meta.speech || "en-AE";
-    }
-    function stopTalking() {
-      if (window.speechSynthesis) speechSynthesis.cancel();
-    }
-    function pickVoice(locale) {
-      if (!window.speechSynthesis) return null;
-      const voices = speechSynthesis.getVoices();
-      if (!voices.length) return null;
-      const wanted = String(locale || "").replace("_", "-");
-      const exact = voices.find((v) => (v.lang || "").replace("_", "-") === wanted);
-      if (exact) return exact;
-      const prefix = wanted.slice(0, 2).toLowerCase();
-      return voices.find((v) => (v.lang || "").toLowerCase().startsWith(prefix)) || null;
-    }
-    function speakReply(text) {
-      if (!window.speechSynthesis || !text) return;
-      stopTalking();
-      const u = new SpeechSynthesisUtterance(String(text).slice(0, 1200));
-      u.lang = speechLang();
-      const voice = pickVoice(u.lang);
-      if (voice) u.voice = voice;
-      speechSynthesis.speak(u);
-    }
-    function setListening(on) {
-      listening = on;
-      voiceBtn.classList.toggle("listening", on);
-      voiceBtn.setAttribute("aria-pressed", on ? "true" : "false");
-      const copy = t();
-      const label = on ? copy.listening : copy.voice;
-      voiceBtn.setAttribute("aria-label", label);
-      voiceLabel.textContent = label;
-    }
-    function stopListening() {
-      if (recognition) {
-        try { recognition.onend = null; recognition.stop(); } catch (_) {}
-      }
-      recognition = null;
-      setListening(false);
-    }
-    function startListening() {
-      const copy = t();
-      if (!SpeechRec) {
-        window.alert(copy.noVoice);
-        return;
-      }
-      stopTalking();
-      if (listening) {
-        stopListening();
-        return;
-      }
-      track("topic", "voice");
-      const rec = new SpeechRec();
-      rec.lang = speechLang();
-      rec.interimResults = true;
-      rec.continuous = false;
-      rec.maxAlternatives = 1;
-      rec.onstart = () => setListening(true);
-      rec.onresult = (e) => {
-        let finalText = "";
-        let interim = "";
-        for (let i = e.resultIndex; i < e.results.length; i++) {
-          const said = e.results[i][0].transcript;
-          if (e.results[i].isFinal) finalText += said;
-          else interim += said;
-        }
-        const shown = (finalText || interim).trim();
-        if (shown) {
-          q.value = shown;
-          grow();
-        }
-        if (finalText.trim()) {
-          voiceAsked = true;
-          stopListening();
-          send(finalText.trim());
-        }
-      };
-      rec.onerror = () => stopListening();
-      rec.onend = () => {
-        if (listening) setListening(false);
-        recognition = null;
-      };
-      recognition = rec;
-      try { rec.start(); } catch (_) { stopListening(); }
-    }
     function grow() {
       q.style.height = "auto";
       q.style.height = Math.min(q.scrollHeight, 160) + "px";
@@ -1120,10 +1017,6 @@
       image = image === undefined ? photo : image;
       if ((!text && !image && !here) || String(text).startsWith("/") || busy) return;
       if (!text) text = image ? copy.photoAsk : copy.hereAsk;
-      const fromVoice = voiceAsked;
-      voiceAsked = false;
-      stopListening();
-      stopTalking();
       document.body.classList.add("chatting");
       q.value = ""; menu.style.display = "none";
       const payload = userPayload(text, image);
@@ -1150,7 +1043,6 @@
             messages: history,
             language: lang,
             search: true,
-            voice: fromVoice,
             here: here || undefined,
             topic: currentTopic
           })
@@ -1165,10 +1057,8 @@
           addVotes(pendingWrap, data.id);
         }
         if (r.ok) openDock(Array.isArray(data.businesses) ? data.businesses : []);
-        if (fromVoice) speakReply(reply);
       } catch {
         pending.textContent = copy.reach;
-        if (fromVoice) speakReply(copy.reach);
       }
       busy = false; grow();
       main.scrollTop = main.scrollHeight;
@@ -1180,9 +1070,6 @@
       document.body.classList.remove("chatting");
       document.getElementById("topic").style.display = "none";
       q.value = "";
-      voiceAsked = false;
-      stopListening();
-      stopTalking();
       clearPhoto();
       clearHere();
       closeDock();
@@ -1293,10 +1180,8 @@
       }
     }).catch(() => {});
     document.getElementById("photo-btn").onclick = () => { setTools(false); document.getElementById("file").click(); };
-    voiceBtn.onclick = () => { setTools(false); startListening(); };
     hereBtn.onclick = () => { setTools(false); shareHere(); };
     document.getElementById("clear-here").onclick = clearHere;
-    if (window.speechSynthesis) speechSynthesis.onvoiceschanged = () => {};
     document.getElementById("file").onchange = async (e) => {
       const file = e.target.files && e.target.files[0];
       if (!file) return;
@@ -1312,7 +1197,6 @@
     };
     document.getElementById("clear-photo").onclick = clearPhoto;
     q.oninput = () => {
-      stopTalking();
       grow();
       if (!q.value.startsWith("/")) { menu.style.display = "none"; return; }
       const f = q.value.slice(1).toLowerCase();
